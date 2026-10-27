@@ -123,6 +123,8 @@ interface BattleMiscChoice {
 	choiceType: 'shift' | 'testfight';
 }
 type BattleChoice = BattleMoveChoice | BattleSwitchChoice | BattleMiscChoice;
+type MoveSpecial = 'mega' | 'megax' | 'megay' | 'ultra' | 'z' | 'max' | 'tera';
+const MOVE_SPECIALS: MoveSpecial[] = ['mega', 'megax', 'megay', 'ultra', 'z', 'max', 'tera'];
 
 /**
  * Tracks a partial choice, allowing you to build it up one step at a time,
@@ -190,7 +192,7 @@ export class BattleChoiceBuilder {
 				const lastChoice = this.parseChoice(lastChoiceString, choices.length);
 				if (lastChoice?.choiceType === 'move' && lastChoice.targetLoc) {
 					lastChoice.targetLoc = 0;
-					partialChoice = this.stringChoice(lastChoice);
+					partialChoice = this.stringChoice(lastChoice, choices.length);
 				}
 			}
 		}
@@ -385,6 +387,36 @@ export class BattleChoiceBuilder {
 		return this.currentMoveList(index, choice)?.[moveIndex] || null;
 	}
 
+	/** Selecting a mechanic never consumes it; the latest server request remains authoritative. */
+	selectMoveSpecial(special: string, selected = true) {
+		if (!MOVE_SPECIALS.includes(special as MoveSpecial)) throw new Error(`Unknown move mechanic: ${special}`);
+		const current = { ...this.current };
+		for (const option of MOVE_SPECIALS) current[option] = selected && option === special;
+		this.validateMoveSpecial(current);
+		this.current = current;
+	}
+
+	validateMoveSpecial(choice: BattleMoveChoice, index = this.index(), allowDynamaxContinuation = false) {
+		if (MOVE_SPECIALS.filter(special => choice[special]).length > 1) {
+			throw new Error(`Only one special mechanic can be selected for a Pokémon's action`);
+		}
+		const request = this.currentMoveRequest(index);
+		const available = {
+			mega: request?.canMegaEvo,
+			megax: request?.canMegaEvoX,
+			megay: request?.canMegaEvoY,
+			ultra: request?.canUltraBurst,
+			z: choice.move ? request?.zMoves?.[choice.move - 1] : request?.zMoves?.some(move => move),
+			max: request?.canDynamax || (allowDynamaxContinuation && request?.maxMoves),
+			tera: request?.canTerastallize,
+		};
+		for (const special of MOVE_SPECIALS) {
+			if (choice[special] && !available[special]) {
+				throw new Error(`The ${special} mechanic is not available for this Pokémon`);
+			}
+		}
+	}
+
 	currentMoveList(
 		index = this.index(), current: { max?: boolean, z?: boolean } = this.current
 	): ({ name: string, id: ID, target: Dex.MoveTarget, disabled?: boolean } | null)[] | null {
@@ -416,7 +448,8 @@ export class BattleChoiceBuilder {
 			if (request.requestType !== 'move') {
 				throw new Error(`You must switch in a Pokémon, not move.`);
 			}
-			const moveRequest = request.active[index]!;
+			const moveRequest = request.active[index];
+			if (!moveRequest) throw new Error(`This Pokémon cannot choose a move`);
 			choice = choice.slice(5);
 			let current: BattleMoveChoice = {
 				choiceType: 'move',
@@ -483,9 +516,6 @@ export class BattleChoiceBuilder {
 				for (let i = 0; i < moveRequest.moves.length; i++) {
 					if (moveid === moveRequest.moves[i].id) {
 						current.move = i + 1;
-						if (moveRequest.moves[i].disabled) {
-							throw new Error(`Move "${moveRequest.moves[i].name}" is disabled`);
-						}
 						break;
 					}
 				}
@@ -512,6 +542,9 @@ export class BattleChoiceBuilder {
 					}
 				}
 			}
+			// Check before normalizing a continuing Max Move, so another flag cannot
+			// conceal a conflicting Max activation (including one inferred by name).
+			this.validateMoveSpecial(current, index, true);
 			if (current.max && !moveRequest.canDynamax) current.max = false;
 			const move = this.currentMove(current, index);
 			if (!move || move.disabled) {
@@ -587,12 +620,12 @@ export class BattleChoiceBuilder {
 	/**
 	 * Converts a choice from `BattleChoice` into string form
 	 */
-	stringChoice(choice: BattleChoice | null) {
+	stringChoice(choice: BattleChoice | null, index = this.index()) {
 		if (!choice) return `pass`;
 		switch (choice.choiceType) {
 		case 'move':
 			const target = choice.targetLoc ? ` ${choice.targetLoc > 0 ? '+' : ''}${choice.targetLoc}` : ``;
-			return `move ${choice.move}${this.moveSpecial(choice)}${target}`;
+			return `move ${choice.move}${this.moveSpecial(choice, index)}${target}`;
 		case 'switch':
 		case 'team':
 			return `${choice.choiceType} ${choice.targetPokemon}`;
@@ -601,7 +634,8 @@ export class BattleChoiceBuilder {
 			return choice.choiceType;
 		}
 	}
-	moveSpecial(choice: BattleMoveChoice) {
+	moveSpecial(choice: BattleMoveChoice, index = this.index()) {
+		this.validateMoveSpecial(choice, index);
 		return (choice.max ? ' max' : '') +
 			(choice.mega ? ' mega' : '') +
 			(choice.megax ? ' megax' : '') +

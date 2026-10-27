@@ -555,31 +555,7 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 		const checkbox = e.currentTarget as HTMLInputElement;
 		const choices = this.props.room.choices;
 		if (!choices) return; // shouldn't happen
-		switch (checkbox.name) {
-		case 'mega':
-			choices.current.mega = checkbox.checked;
-			break;
-		case 'megax':
-			choices.current.megax = checkbox.checked;
-			choices.current.megay = false;
-			break;
-		case 'megay':
-			choices.current.megay = checkbox.checked;
-			choices.current.megax = false;
-			break;
-		case 'ultra':
-			choices.current.ultra = checkbox.checked;
-			break;
-		case 'z':
-			choices.current.z = checkbox.checked;
-			break;
-		case 'max':
-			choices.current.max = checkbox.checked;
-			break;
-		case 'tera':
-			choices.current.tera = checkbox.checked;
-			break;
-		}
+		choices.selectMoveSpecial(checkbox.name, checkbox.checked);
 		this.props.room.update(null);
 	};
 	override componentDidMount() {
@@ -767,7 +743,7 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 		const canMegaEvoY = moveRequest.canMegaEvoY && !alreadyMega;
 		const canZMove = moveRequest.zMoves && !choices.alreadyZ;
 		const canUltraBurst = moveRequest.canUltraBurst;
-		const canTerastallize = moveRequest.canTerastallize;
+		const canTerastallize = choices.alreadyTera ? undefined : moveRequest.canTerastallize;
 
 		const maybeDisabled = moveRequest.maybeDisabled;
 		const maybeLocked = moveRequest.maybeLocked;
@@ -791,11 +767,11 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 					<input type="checkbox" name="mega" checked={choices.current.mega} onChange={this.toggleBoostedMove} /> {}
 					{TL`Mega Evolution`}
 				</label>}
-				{canMegaEvoX && <label class={`megaevo${choices.current.mega ? ' cur' : ''}`}>
+				{canMegaEvoX && <label class={`megaevo${choices.current.megax ? ' cur' : ''}`}>
 					<input type="checkbox" name="megax" checked={choices.current.megax} onChange={this.toggleBoostedMove} /> {}
 					{TL`Mega Evolution`} X
 				</label>}
-				{canMegaEvoY && <label class={`megaevo${choices.current.mega ? ' cur' : ''}`}>
+				{canMegaEvoY && <label class={`megaevo${choices.current.megay ? ' cur' : ''}`}>
 					<input type="checkbox" name="megay" checked={choices.current.megay} onChange={this.toggleBoostedMove} /> {}
 					{TL`Mega Evolution`} Y
 				</label>}

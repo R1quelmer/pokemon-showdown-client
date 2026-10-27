@@ -53,10 +53,7 @@
 		},
 		events: {
 			'click .replayDownloadButton': 'clickReplayDownloadButton',
-			'change input[name=megaevox]': 'uncheckMegaEvoY',
-			'change input[name=megaevoy]': 'uncheckMegaEvoX',
-			'change input[name=zmove]': 'updateZMove',
-			'change input[name=dynamax]': 'updateMaxMove'
+			'change .megaevo-box input': 'updateMechanic'
 		},
 		battleEnded: false,
 		join: function () {
@@ -513,31 +510,64 @@
 			}
 			return '<button name="openTimer" class="button timerbutton' + timerTicking + '"><i class="fa fa-hourglass-start"></i> ' + time + '</button>';
 		},
-		uncheckMegaEvoX: function () {
-			this.$('input[name=megaevox]').prop('checked', false);
-		},
-		uncheckMegaEvoY: function () {
-			this.$('input[name=megaevoy]').prop('checked', false);
-		},
-		updateMaxMove: function () {
-			var dynaChecked = this.$('input[name=dynamax]')[0].checked;
-			if (dynaChecked) {
-				this.$('.movebuttons-nomax').hide();
-				this.$('.movebuttons-max').show();
-			} else {
-				this.$('.movebuttons-nomax').show();
-				this.$('.movebuttons-max').hide();
+		updateMechanic: function (e) {
+			var selected = e.currentTarget;
+			if (selected.checked) {
+				this.$('.megaevo-box input').each(function () {
+					if (this !== selected) this.checked = false;
+				});
 			}
+			var z = this.$('input[name=zmove]')[0];
+			var max = this.$('input[name=dynamax]')[0];
+			this.$('.movebuttons-base, .movebuttons-z, .movebuttons-max').hide();
+			this.$(z && z.checked ? '.movebuttons-z' : max && max.checked ? '.movebuttons-max' : '.movebuttons-base').show();
 		},
-		updateZMove: function () {
-			var zChecked = this.$('input[name=zmove]')[0].checked;
-			if (zChecked) {
-				this.$('.movebuttons-noz').hide();
-				this.$('.movebuttons-z').show();
-			} else {
-				this.$('.movebuttons-noz').show();
-				this.$('.movebuttons-z').hide();
+		getMoveRequestOptions: function (pos) {
+			var active = this.request && this.request.active && this.request.active[pos] || {};
+			var pokemon = this.request && this.request.side && this.request.side.pokemon[pos] || {};
+			var fields = ['canMegaEvo', 'canMegaEvoX', 'canMegaEvoY', 'canUltraBurst', 'canZMove', 'canDynamax', 'maxMoves', 'canTerastallize'];
+			var options = {};
+			for (var i = 0; i < fields.length; i++) {
+				var field = fields[i];
+				options[field] = field in active ? active[field] : pokemon[field];
 			}
+			// Choices for other active Pokémon reserve only their own mechanic.
+			var choices = this.choice && this.choice.choices || [];
+			var allowMultipleMegas = this.battle.format && this.battle.format.allowMultipleMegas;
+			for (var i = 0; i < pos && i < choices.length; i++) {
+				var choice = choices[i] || '';
+				if (!allowMultipleMegas && /\bmega(?:x|y)?\b/.test(choice)) {
+					options.canMegaEvo = options.canMegaEvoX = options.canMegaEvoY = false;
+				}
+				if (/\bultra\b/.test(choice)) options.canUltraBurst = false;
+				if (/\bzmove\b/.test(choice)) options.canZMove = null;
+				if (/\bdynamax\b/.test(choice) && options.canDynamax) {
+					options.canDynamax = false;
+					options.maxMoves = null;
+				}
+				if (/\bterastallize\b/.test(choice)) options.canTerastallize = null;
+			}
+			return options;
+		},
+		getMoveChoiceError: function (choice, pos) {
+			var parts = choice.split(' ');
+			if (parts[0] !== 'move') return '';
+			var fields = { mega: 'canMegaEvo', megax: 'canMegaEvoX', megay: 'canMegaEvoY', ultra: 'canUltraBurst', zmove: 'canZMove', dynamax: 'canDynamax', max: 'canDynamax', gigantamax: 'canDynamax', terastallize: 'canTerastallize', tera: 'canTerastallize' };
+			var options = this.getMoveRequestOptions(pos);
+			var count = 0;
+			for (var i = 2; i < parts.length; i++) {
+				var field = fields[parts[i]];
+				if (!field) {
+					if (/^[+-]?[1-3]$/.test(parts[i])) continue;
+					return 'Invalid move choice.';
+				}
+				if (++count > 1) return 'Choose at most one special mechanic for this Pokémon.';
+				if (!options[field]) return 'That special mechanic is no longer available. Please choose again.';
+				if (parts[i] === 'zmove' && !options.canZMove[Number(parts[1]) - 1]) {
+					return 'That move cannot be used as a Z-Move.';
+				}
+			}
+			return '';
 		},
 		updateTimer: function () {
 			this.$('.timerbutton').replaceWith(this.getTimerHTML());
@@ -567,15 +597,16 @@
 			var curActive = this.request && this.request.active && this.request.active[pos];
 			if (!curActive) return;
 			var trapped = curActive.trapped;
-			var canMegaEvo = curActive.canMegaEvo || switchables[pos].canMegaEvo;
-			var canMegaEvoX = curActive.canMegaEvoX || switchables[pos].canMegaEvoX;
-			var canMegaEvoY = curActive.canMegaEvoY || switchables[pos].canMegaEvoY;
-			var canZMove = curActive.canZMove || switchables[pos].canZMove;
-			var canUltraBurst = curActive.canUltraBurst || switchables[pos].canUltraBurst;
-			var canDynamax = curActive.canDynamax || switchables[pos].canDynamax;
-			var maxMoves = curActive.maxMoves || switchables[pos].maxMoves;
-			var gigantamax = curActive.maxMoves && curActive.maxMoves.gigantamax;
-			var canTerastallize = curActive.canTerastallize || switchables[pos].canTerastallize;
+			var options = this.getMoveRequestOptions(pos);
+			var canMegaEvo = options.canMegaEvo;
+			var canMegaEvoX = options.canMegaEvoX;
+			var canMegaEvoY = options.canMegaEvoY;
+			var canZMove = options.canZMove;
+			var canUltraBurst = options.canUltraBurst;
+			var canDynamax = options.canDynamax;
+			var maxMoves = options.maxMoves;
+			var gigantamax = maxMoves && maxMoves.gigantamax;
+			var canTerastallize = options.canTerastallize;
 			if (canZMove && typeof canZMove[0] === 'string') {
 				canZMove = _.map(canZMove, function (move) {
 					return { move: move, target: Dex.moves.get(move).target };
@@ -693,45 +724,44 @@
 					movebuttons += name + '<br /><small class="type">' + (moveType ? Dex.types.get(moveType).name : "Unknown") + ' <span class="effectiveness-icon">' + moveEffectiveness + '</span></small> <small class="pp">' + pp + '</small>&nbsp;</button> ';
 				}
 				if (!hasMoves) {
-					moveMenu += '<button class="movebutton" name="chooseMove" value="0" data-move="Struggle" data-target="randomNormal">Struggle<br /><small class="type">Normal</small> <small class="pp">&ndash;</small>&nbsp;</button> ';
-				} else {
-					if (canZMove || canDynamax || currentlyDynamaxed) {
-						var classType = canZMove ? 'z' : 'max';
-						if (currentlyDynamaxed) {
-							movebuttons = '';
-						} else {
-							movebuttons = '<div class="movebuttons-no' + classType + '">' + movebuttons + '</div><div class="movebuttons-' + classType + '" style="display:none">';
-						}
-						var specialMoves = canZMove ? canZMove : maxMoves.maxMoves;
-						for (var i = 0; i < curActive.moves.length; i++) {
-							if (specialMoves[i]) {
-								// when possible, use Z move to decide type, for cases like Z-Hidden Power
-								var baseMove = this.battle.dex.moves.get(curActive.moves[i].move);
-								// might not exist, such as for Z status moves - fall back on base move to determine type then
-								var specialMove = this.battle.dex.moves.get(specialMoves[i].move);
-								var moveType = this.tooltips.getMoveType(specialMove.exists && !specialMove.isMax ? specialMove : baseMove, typeValueTracker, specialMove.isMax ? gigantamax || true : undefined)[0];
-								if (specialMove.isMax && specialMove.name !== 'Max Guard') {
-									specialMove = this.tooltips.getMaxMoveFromType(moveType, gigantamax);
-								}
-								var tooltipArgs = classType + 'move|' + baseMove.id + '|' + pos;
-								if (specialMove.id.startsWith('gmax')) tooltipArgs += '|' + specialMove.id;
-								var isDisabled = specialMoves[i].disabled ? 'disabled="disabled"' : '';
-								movebuttons += '<button ' + isDisabled + ' class="movebutton type-' + moveType + ' has-tooltip" name="chooseMove" value="' + (i + 1) + '" data-move="' + BattleLog.escapeHTML(specialMoves[i].move) + '" data-target="' + BattleLog.escapeHTML(specialMoves[i].target) + '" data-tooltip="' + BattleLog.escapeHTML(tooltipArgs) + '">';
-								var pp = curActive.moves[i].pp + '/' + curActive.moves[i].maxpp;
-								if (canZMove) {
-									pp = '1/1';
-								} else if (!curActive.moves[i].maxpp) {
-									pp = '&ndash;';
-								}
-								movebuttons += specialMove.name + '<br /><small class="type">' + (moveType ? Dex.types.get(moveType).name : "Unknown") + '</small> <small class="pp">' + pp + '</small>&nbsp;</button> ';
-							} else {
-								movebuttons += '<button class="movebutton" disabled>&nbsp;</button>';
-							}
-						}
-						if (!currentlyDynamaxed) movebuttons += '</div>';
-					}
-					moveMenu += movebuttons;
+					movebuttons = '<button class="movebutton" name="chooseMove" value="0" data-move="Struggle" data-target="randomNormal">Struggle<br /><small class="type">Normal</small> <small class="pp">&ndash;</small>&nbsp;</button> ';
 				}
+				movebuttons = '<div class="movebuttons-base"' + (currentlyDynamaxed ? ' style="display:none"' : '') + '>' + movebuttons + '</div>';
+				var specialMenus = [];
+				if (canZMove && !currentlyDynamaxed) specialMenus.push({ type: 'z', moves: canZMove });
+				if (maxMoves) specialMenus.push({ type: 'max', moves: maxMoves.maxMoves });
+				for (var menuIndex = 0; menuIndex < specialMenus.length; menuIndex++) {
+					var classType = specialMenus[menuIndex].type;
+					var specialMoves = specialMenus[menuIndex].moves;
+					movebuttons += '<div class="movebuttons-' + classType + '"' + (currentlyDynamaxed && classType === 'max' ? '' : ' style="display:none"') + '>';
+					for (var i = 0; i < curActive.moves.length; i++) {
+						if (specialMoves[i]) {
+							// when possible, use Z move to decide type, for cases like Z-Hidden Power
+							var baseMove = this.battle.dex.moves.get(curActive.moves[i].move);
+							// might not exist, such as for Z status moves - fall back on base move to determine type then
+							var specialMove = this.battle.dex.moves.get(specialMoves[i].move);
+							var moveType = this.tooltips.getMoveType(specialMove.exists && !specialMove.isMax ? specialMove : baseMove, typeValueTracker, specialMove.isMax ? gigantamax || true : undefined)[0];
+							if (specialMove.isMax && specialMove.name !== 'Max Guard') {
+								specialMove = this.tooltips.getMaxMoveFromType(moveType, gigantamax);
+							}
+							var tooltipArgs = classType + 'move|' + baseMove.id + '|' + pos;
+							if (specialMove.id.startsWith('gmax')) tooltipArgs += '|' + specialMove.id;
+							var isDisabled = specialMoves[i].disabled ? 'disabled="disabled"' : '';
+							movebuttons += '<button ' + isDisabled + ' class="movebutton type-' + moveType + ' has-tooltip" name="chooseMove" value="' + (i + 1) + '" data-move="' + BattleLog.escapeHTML(specialMoves[i].move) + '" data-target="' + BattleLog.escapeHTML(specialMoves[i].target) + '" data-tooltip="' + BattleLog.escapeHTML(tooltipArgs) + '">';
+							var pp = curActive.moves[i].pp + '/' + curActive.moves[i].maxpp;
+							if (classType === 'z') {
+								pp = '1/1';
+							} else if (!curActive.moves[i].maxpp) {
+								pp = '&ndash;';
+							}
+							movebuttons += specialMove.name + '<br /><small class="type">' + (moveType ? Dex.types.get(moveType).name : "Unknown") + '</small> <small class="pp">' + pp + '</small>&nbsp;</button> ';
+						} else {
+							movebuttons += '<button class="movebutton" disabled>&nbsp;</button>';
+						}
+					}
+					movebuttons += '</div>';
+				}
+				moveMenu += movebuttons;
 				var checkboxes = [];
 				if (canMegaEvo) {
 					checkboxes.push('<label class="megaevo"><input type="checkbox" name="megaevo" />&nbsp;Mega&nbsp;Evolution</label>');
@@ -749,7 +779,7 @@
 					checkboxes.push('<label class="megaevo"><input type="checkbox" name="ultraburst" />&nbsp;Ultra Burst</label>');
 				}
 				if (canDynamax) {
-					checkboxes.push('<label class="megaevo"><input type="checkbox" name="dynamax" />&nbsp;Dynamax</label>');
+					checkboxes.push('<label class="megaevo"><input type="checkbox" name="dynamax" />&nbsp;' + (gigantamax ? 'Gigantamax' : 'Dynamax') + '</label>');
 				}
 				if (canTerastallize) {
 					checkboxes.push('<label class="megaevo"><input type="checkbox" name="terastallize" />&nbsp;Terastallize<br />' + Dex.getTypeIcon(canTerastallize) + '</label>');
@@ -1036,7 +1066,7 @@
 							}
 							if (targetPos === 'dynamax') {
 								move = this.request.active[i].maxMoves.maxMoves[parseInt(parts[1], 10) - 1].move;
-								buf += 'Dynamax, then ';
+								buf += this.request.active[i].maxMoves.gigantamax ? 'Gigantamax, then ' : 'Dynamax, then ';
 								targetPos = parts[3];
 							}
 							if (targetPos === 'terastallize') {
@@ -1093,7 +1123,15 @@
 		 * (The rqid helps verify that the decision is sent in response to the
 		 * correct request.)
 		 */
-		sendDecision: function (message) {
+		sendDecision: function (message, pos) {
+			var choices = $.isArray(message) ? message : message.split(',');
+			for (var i = 0; i < choices.length; i++) {
+				var error = this.getMoveChoiceError((choices[i] || '').trim(), $.isArray(message) ? i : (pos || 0) + i);
+				if (error) {
+					app.addPopupMessage(error);
+					return false;
+				}
+			}
 			if (!$.isArray(message)) return this.send('/' + message + '|' + this.request.rqid);
 			var buf = '/choose ';
 			for (var i = 0; i < message.length; i++) {
@@ -1296,7 +1334,13 @@
 				var choosableTargets = { normal: 1, any: 1, adjacentAlly: 1, adjacentAllyOrSelf: 1, adjacentFoe: 1 };
 				if (this.battle.gameType === 'freeforall') delete choosableTargets['adjacentAllyOrSelf'];
 
-				this.choice.choices.push('move ' + pos + (isMega ? ' mega' : '') + (isMegaX ? ' megax' : isMegaY ? ' megay' : '') + (isZMove ? ' zmove' : '') + (isUltraBurst ? ' ultra' : '') + (isDynamax ? ' dynamax' : '') + (isTerastal ? ' terastallize' : ''));
+				var choice = 'move ' + pos + (isMega ? ' mega' : '') + (isMegaX ? ' megax' : '') + (isMegaY ? ' megay' : '') + (isZMove ? ' zmove' : '') + (isUltraBurst ? ' ultra' : '') + (isDynamax ? ' dynamax' : '') + (isTerastal ? ' terastallize' : '');
+				var error = this.getMoveChoiceError(choice, this.choice.choices.length);
+				if (error) {
+					app.addPopupMessage(error);
+					return false;
+				}
+				this.choice.choices.push(choice);
 				if (nearActive.length > 1 && target in choosableTargets) {
 					this.choice.type = 'movetarget';
 					this.choice.moveTarget = target;
@@ -1419,7 +1463,7 @@
 				this.endTurn();
 			} else if (this.request.partial) {
 				for (var i = choiceIndex; i < this.choice.choices.length; i++) {
-					this.sendDecision(this.choice.choices[i]);
+					if (this.sendDecision(this.choice.choices[i], i) === false) return;
 				}
 			}
 		},
@@ -1472,7 +1516,7 @@
 				}
 
 				if (this.choice.choices.length >= (this.choice.count || this.battle.pokemonControlled || this.request.active.length)) {
-					this.sendDecision(this.choice.choices);
+					if (this.sendDecision(this.choice.choices) === false) return;
 				}
 
 				if (!this.finalDecision) {
