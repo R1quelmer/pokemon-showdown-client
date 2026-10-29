@@ -151,3 +151,43 @@ um aviso EPIPE ao cliente antigo. Esse problema operacional não foi corrigido
 nesta tarefa de interface; a aprovação dos controles usou os logs/requests
 conhecidos do simulador e a aceitação independente dos comandos, conforme
 descrito acima.
+
+## Replays próprios — Etapa 1
+
+A página `/replay.html?id=<id>` usa o motor Battle local e consulta somente
+`https://copa-rinha-showdown.onrender.com/copa-rinha/replays/<id>`.
+Não armazena replays no serviço oficial. Sprites e áudio seguem os recursos
+padrão do motor Showdown; a reprodução começa sem áudio.
+
+No Render, mantenha a branch `feat/copa-rinha-gimmick-ui`, publique
+`play.pokemonshowdown.com` como raiz e gere os dados e scripts no build:
+
+```sh
+npm ci
+# Na primeira configuração, preparar o cache na branch do servidor:
+git clone --branch feat/copa-rinha-national-dex-za --single-branch https://github.com/R1quelmer/pokemon-showdown.git caches/pokemon-showdown
+npm ci --prefix caches/pokemon-showdown
+node build full --no-update
+```
+
+Em builds seguintes, reutilize o cache ou recrie-o; se persistido, atualize-o
+para o commit desejado antes do build. Garanta que `/replay.html` seja servido
+como arquivo, preservando a query string, sem redirect para o testclient.
+Nenhuma credencial R2 pertence ao cliente.
+
+Teste real: depois dos dois deploys, abra duas sessões do cliente, termine uma
+batalha `gen9coparinhanationaldexza` e espere “Replay da Copa Rinha salvo”.
+Use “Assistir replay” e “Copiar link”; abra o endereço em outra sessão e no
+celular. Confira jogadores, vencedor, data, turnos e controles de reprodução.
+Use as quatro mecânicas na partida para conferir as respectivas animações.
+Teste também forfeit e empate; outro formato não deve gerar esse anúncio.
+Confira que o JSON privado `replays/<id>.json` existe no painel R2 e que a API
+retorna os mesmos metadados, sem mensagens humanas de chat.
+
+Validação local: `node build full --no-update` e `npm test` (TypeScript de cliente
+e build-tools, ESLint, testes unitários e full). Os testes de carregamento usam
+API e DOM mockados. Chromium móvel também foi executado com API interceptada e
+motor Battle real, sem erro JavaScript e sem overflow horizontal. A rede deste
+ambiente bloqueou sprites/áudio da CDN; a aparência completa precisa de QA no
+site. O aviso de PHP ausente no build afeta apenas atualização opcional de notícias.
+R2 real não foi testado neste ambiente.

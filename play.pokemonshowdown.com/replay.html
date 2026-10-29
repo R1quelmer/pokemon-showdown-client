@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="pt-BR">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Replay da Copa Rinha</title>
+<link rel="stylesheet" href="style/battle.css">
+<link rel="stylesheet" href="style/replay.css">
+<link rel="stylesheet" href="style/utilichart.css">
+<style>
+[hidden]{display:none!important}body{margin:0;padding:12px;background:#eef1f5;color:#222;font:16px system-ui}main{max-width:1000px;margin:auto}button,select{font:inherit;padding:10px;margin:4px}#arena{position:relative;width:640px;height:360px;transform-origin:top left}.battle{position:absolute;top:0;left:0}.battle-log{position:relative;top:auto;left:auto;right:auto;height:240px;width:auto;margin:12px 0;overflow:auto;background:white}#viewport{overflow:hidden}#status{padding:12px}#controls{display:flex;flex-wrap:wrap}h1{font-size:1.5rem}
+</style>
+<main>
+<h1>Replay da Copa Rinha</h1>
+<p id="status" role="status">Carregando replay…</p>
+<p id="metadata"></p>
+<div id="viewport"><div id="arena"><div class="battle"></div></div></div>
+<div id="controls" hidden>
+<button id="play">Reproduzir</button><button id="pause">Pausar</button>
+<button id="restart">Reiniciar</button><button id="next">Próximo turno</button>
+<label>Velocidade <select id="speed"><option value="1">Normal</option><option value="2">2×</option><option value="4">4×</option></select></label>
+<button id="copy">Copiar link</button>
+</div>
+<div class="battle-log"></div>
+</main>
+<script>window.exports = window; window.Config = {routes: {client: 'play.pokemonshowdown.com'}, testclient: true};</script>
+<script src="js/lib/jquery-2.2.4.min.js"></script>
+<script src="js/lib/html-css-sanitizer-minified.js"></script>
+<script src="js/battle-sound.js"></script>
+<script src="js/battledata.js"></script>
+<script src="data/pokedex.js"></script>
+<script src="data/moves.js"></script>
+<script src="data/items.js"></script>
+<script src="data/abilities.js"></script>
+<script src="data/graphics.js"></script>
+<script src="js/battle.js"></script>
+<script src="js/battle-tooltips.js"></script>
+<script src="js/copa-replay.js"></script>
+</html>
