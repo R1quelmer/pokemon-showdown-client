@@ -24,10 +24,14 @@
 				if (location.search !== '') {
 					var m = /\?~~(([^:\/]*)(:[0-9]*)?)/.exec(location.search);
 					if (m) {
+						var port = (m[3] && parseInt(m[3].substr(1))) || 8000;
 						Config.server = {
 							id: m[1],
 							host: m[2],
-							port: (m[3] && parseInt(m[3].substr(1))) || 8000
+							port: port,
+							httpport: port,
+							protocol: port === 443 ? 'https' : 'http',
+							prefix: '/showdown'
 						};
 					} else {
 						alert('Unrecognised query string syntax: ' + location.search);

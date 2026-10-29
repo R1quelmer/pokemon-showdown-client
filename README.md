@@ -82,11 +82,25 @@ You can connect to an arbitrary server by navigating to
 `testclient-new.html?~~host:port`. For example, to connect to a server running
 locally on port 8000, you can navigate to `testclient-new.html?~~localhost:8000`.
 
+Port 443 selects HTTPS/WSS; other ports use HTTP/WS. The same syntax works
+with `testclient-old.html`.
+
 **NOTE**: Certain browsers will convert `'?'` to `'%3F'` when reading files off
 of the local filesystem. As a workaround, try using a different browser or
 serving the files locally first (ie. run `npx http-server` from the
 directory this README is in, then navigate in your browser to
 `http://localhost:8080/testclient-new.html?~~localhost:8000`).
+
+### Copa Rinha
+
+On the Copa Rinha Static Site, open
+<https://copa-rinha-client.onrender.com/copa-rinha.html>.
+This shortcut opens the modern test client on the same site, connecting to
+`copa-rinha-showdown.onrender.com` over HTTPS/WSS on port 443 with the
+`/showdown` prefix. It does not change the default server of the other pages.
+
+For the legacy client, use
+<https://copa-rinha-client.onrender.com/testclient-old.html?~~copa-rinha-showdown.onrender.com:443>.
 
 ### Limitations
 

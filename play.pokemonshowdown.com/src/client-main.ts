@@ -869,7 +869,9 @@ class PSServer {
 	altport = Config.defaultserver.altport;
 	registered = Config.defaultserver.registered;
 	prefix = '/showdown';
-	protocol: 'http' | 'https' = Config.defaultserver.httpport ? 'https' : 'http';
+	protocol: 'http' | 'https' =
+		Config.defaultserver.protocol === 'http' || Config.defaultserver.protocol === 'https' ?
+			Config.defaultserver.protocol : Config.defaultserver.httpport ? 'https' : 'http';
 	groups: { [symbol: string]: PSGroup } = {
 		'#': {
 			name: "Room Owner (#)",
