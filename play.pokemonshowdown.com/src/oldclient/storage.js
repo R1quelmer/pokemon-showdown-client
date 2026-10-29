@@ -584,7 +584,10 @@ Storage.loadTeams = function () {
 	this.teams = [];
 	try {
 		if (window.localStorage) {
-			Storage.loadPackedTeams(localStorage.getItem('showdown_teams'));
+			var saved = localStorage.getItem('showdown_teams');
+			var migrated = saved === null ? null : Dex.migrateTeamFormats(saved);
+			Storage.loadPackedTeams(migrated);
+			if (migrated !== saved && migrated !== null) localStorage.setItem('showdown_teams', migrated);
 		}
 	} catch (e) {}
 };
@@ -729,6 +732,7 @@ Storage.unpackAllTeams = function (buffer) {
 				format = format.slice(0, -4);
 				capacity = 24;
 			}
+			format = Dex.normalizeTeamFormat(format);
 			return {
 				name: oldTeam.name || '',
 				format: format,
@@ -756,6 +760,7 @@ Storage.unpackLine = function (line) {
 	var slashIndex = line.lastIndexOf('/', pipeIndex);
 	if (slashIndex < 0) slashIndex = bracketIndex; // line.slice(slashIndex + 1, pipeIndex) will be ''
 	var format = bracketIndex > 0 ? line.slice((leftBracketIndex ? leftBracketIndex + 1 : 0), isBox ? bracketIndex - 4 : bracketIndex) : 'gen9';
+	format = Dex.normalizeTeamFormat(format);
 	if (format && format.slice(0, 3) !== 'gen') format = 'gen6' + format;
 	return {
 		teamid: leftBracketIndex > 0 ? Number(line.slice(0, leftBracketIndex)) : undefined,
@@ -1223,6 +1228,7 @@ Storage.importTeam = function (buffer, teams) {
 					format = format.slice(0, -4);
 					capacity = 24;
 				}
+				format = Dex.normalizeTeamFormat(format);
 				line = $.trim(line.substr(bracketIndex + 1));
 			}
 			if (teams.length && typeof teams[teams.length - 1].team !== 'string') {
@@ -1675,6 +1681,7 @@ Storage.nwLoadTeamFile = function (filename, localApp) {
 			format = format.slice(0, -4);
 			capacity = 24;
 		}
+		format = Dex.normalizeTeamFormat(format);
 		line = $.trim(line.slice(bracketIndex + 1));
 	}
 	fs.readFile(this.dir + 'Teams/' + filename, function (err, data) {

@@ -10,6 +10,7 @@
  */
 
 import { PSConnection, PSLoginServer } from './client-connection';
+import { CopaRinhaLocalNames } from './copa-rinha';
 import { PSModel, PSStreamModel } from './client-core';
 import type { PSRoomPanel, PSRouter } from './panels';
 import { ChatRoom } from './panel-chat';
@@ -59,6 +60,7 @@ export interface PSConfig {
 	translationCachebuster?: string;
 	whitelist?: string[];
 	testclient?: boolean;
+	copaRinhaLocalNames?: boolean;
 }
 export declare const Config: PSConfig;
 
@@ -408,13 +410,16 @@ class PSTeams extends PSStreamModel<'team' | 'format'> {
 	constructor() {
 		super();
 		try {
-			this.unpackAll(localStorage.getItem('showdown_teams'));
+			const saved = localStorage.getItem('showdown_teams');
+			const migrated = saved === null ? null : Dex.migrateTeamFormats(saved);
+			this.unpackAll(migrated);
+			if (migrated !== saved && migrated !== null) localStorage.setItem('showdown_teams', migrated);
 		} catch {}
 	}
 	teambuilderFormat(format: string): ID {
 		const ruleSepIndex = format.indexOf('@@@');
 		if (ruleSepIndex >= 0) format = format.slice(0, ruleSepIndex);
-		const formatid = toID(format);
+		const formatid = Dex.normalizeTeamFormat(toID(format));
 		if (!window.BattleFormats) return formatid;
 		const formatEntry = BattleFormats[formatid];
 		return formatEntry?.teambuilderFormat || formatid;
@@ -510,6 +515,7 @@ class PSTeams extends PSStreamModel<'team' | 'format'> {
 		let format = bracketIndex > 0 ? line.slice(
 			(leftBracketIndex ? leftBracketIndex + 1 : 0), isBox ? bracketIndex - 4 : bracketIndex
 		) : 'gen9';
+		format = Dex.normalizeTeamFormat(format);
 		if (!format.startsWith('gen')) format = 'gen6' + format;
 		const name = line.slice(slashIndex + 1, pipeIndex);
 		const teamid = leftBracketIndex > 0 ? Number(line.slice(0, leftBracketIndex)) : undefined;
@@ -724,6 +730,10 @@ class PSUser extends PSStreamModel<PSLoginState | null> {
 		return name.trim();
 	}
 	changeName(name: string) {
+		if (Config.copaRinhaLocalNames) {
+			CopaRinhaLocalNames.choose(name);
+			return;
+		}
 		name = this.validateName(name);
 		const userid = toID(name);
 		if (!userid) {
@@ -817,6 +827,7 @@ class PSUser extends PSStreamModel<PSLoginState | null> {
 		}
 	}
 	logOut() {
+		if (Config.copaRinhaLocalNames) CopaRinhaLocalNames.forget();
 		PSLoginServer.query(
 			'logout', { userid: this.userid }
 		);
@@ -2420,6 +2431,10 @@ export const PS = new class extends PSModel {
 				this.update();
 				continue;
 			} case 'nametaken': {
+				if (Config.copaRinhaLocalNames) {
+					CopaRinhaLocalNames.reject(args[2] || 'Este nome já está em uso. Escolha outro nickname.');
+					break;
+				}
 				PS.join('login' as RoomID, { args: { error: `Someone is already using the name ${args[1]}.` } });
 				break;
 			} case 'chat': case 'c': {

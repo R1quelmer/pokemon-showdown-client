@@ -7,7 +7,7 @@
 
 import { PS, PSRoom, type RoomOptions, type Team } from "./client-main";
 import { PSPanelWrapper, PSRoomPanel } from "./panels";
-import { TL, toID, type ID } from "./battle-dex";
+import { Dex, TL, toID, type ID } from "./battle-dex";
 import { BattleLog } from "./battle-log";
 import { TeamEditor, type TeamEditorState } from "./battle-team-editor";
 import { Net, PSLoginServer } from "./client-connection";
@@ -54,7 +54,7 @@ class TeamRoom extends PSRoom {
 	}
 	setFormat(format: string) {
 		const team = this.team;
-		team.format = toID(format);
+		team.format = Dex.normalizeTeamFormat(toID(format));
 	}
 	load() {
 		const uploaded = this.team?.uploaded;

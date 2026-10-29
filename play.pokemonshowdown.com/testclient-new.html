@@ -103,15 +103,20 @@
 				}
 			}
 		})();
+		Config.copaRinhaLocalNames = /(?:^|[?&])copa-rinha=1(?:&|$)/.test(location.search) &&
+			Config.defaultserver.host === 'copa-rinha-showdown.onrender.com' && Config.defaultserver.port === 443;
 	</script>
 	<script nomodule src="/js/lib/ps-polyfill.js"></script>
-	<script src="../config/testclient-key.js"></script>
+	<script>
+		if (!Config.copaRinhaLocalNames) document.write('<script src="../config/testclient-key.js"><' + '/script>');
+	</script>
 	<script src="js/client-core.js" onerror="alert('You must build the client with `node build` before using testclient.html')"></script>
 
 	<script src="js/battle-dex-data.js"></script>
 	<script src="js/battle-dex.js"></script>
 	<script src="js/battle-teams.js"></script>
 	<script src="js/battle-text-parser.js"></script>
+	<script src="js/copa-rinha.js"></script>
 	<script src="js/client-main.js"></script>
 	<script nomodule src="js/lib/sockjs-1.4.0-nwjsfix.min.js"></script>
 	<script src="js/client-connection.js"></script>

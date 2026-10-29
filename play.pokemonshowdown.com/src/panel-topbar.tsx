@@ -234,7 +234,7 @@ export class PSHeader extends preact.Component {
 			return <button class="button" disabled><em>{TL`Connecting...`}</em></button>;
 		}
 		if (!PS.user.named) {
-			return <a class="button" href="login">{TL`[Choose name]`}</a>;
+			return <a class="button" href="login">{Config.copaRinhaLocalNames ? 'Escolher nome' : TL`[Choose name]`}</a>;
 		}
 		const userColor = window.BattleLog && `color:${PS.user.away ? '#888' : BattleLog.usernameColor(PS.user.userid)}`;
 		return <span class="username" style={userColor}>

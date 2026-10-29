@@ -140,9 +140,9 @@ describe('Test client connection URLs', () => {
 		const destination = new URL(target, 'https://copa-rinha-client.onrender.com/copa-rinha.html');
 		assert.equal(destination.origin, 'https://copa-rinha-client.onrender.com');
 		assert.equal(destination.pathname, '/testclient-new.html');
-		assert.equal(destination.search, '?~~copa-rinha-showdown.onrender.com:443');
+		assert.equal(destination.search, '?~~copa-rinha-showdown.onrender.com:443&copa-rinha=1');
 		assert.equal(destination.hash, '#battle-example');
-		assert.ok(html.includes('href="testclient-new.html?~~copa-rinha-showdown.onrender.com:443"'));
+		assert.ok(html.includes('href="testclient-new.html?~~copa-rinha-showdown.onrender.com:443&amp;copa-rinha=1"'));
 		assert.equal(modernServer(configure('new', destination.search).server).protocol, 'https');
 	});
 });

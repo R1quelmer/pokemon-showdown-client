@@ -514,6 +514,18 @@ export const Dex = new class implements ModdedDex {
 		if (!gen) return this;
 		return this.mod(`gen${gen}` as ID);
 	}
+	/** Upgrade the former Copa Rinha IDs without changing legacy IDs for other formats. */
+	normalizeTeamFormat(format: string): ID {
+		return (format === 'coparinhanationaldexza' || format === 'gen6coparinhanationaldexza' ?
+			'gen9coparinhanationaldexza' : format) as ID;
+	}
+	/** Change only saved format prefixes; preserve every other byte of the team backup. */
+	migrateTeamFormats(buffer: string): string {
+		return buffer.replace(
+			/(^|\n)([0-9]+\[)?(?:gen6)?coparinhanationaldexza(?=(?:-box)?\])/g,
+			'$1$2gen9coparinhanationaldexza'
+		);
+	}
 	formats = {
 		cache: Object.create(null) as { [id: string]: BattleFormat },
 		get(name: string): BattleFormat {
@@ -535,10 +547,10 @@ export const Dex = new class implements ModdedDex {
 		},
 	};
 	formatGen(format: string) {
-		return this.formats.get(format).gen;
+		return this.formats.get(this.normalizeTeamFormat(format)).gen;
 	}
 	forFormat(format: string) {
-		return this.mod(this.formats.get(format).mod);
+		return this.mod(this.formats.get(this.normalizeTeamFormat(format)).mod);
 	}
 
 	resolveAvatar(avatar: string): string {

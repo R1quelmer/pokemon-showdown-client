@@ -694,6 +694,8 @@ abstract class BattleTypedSearch<T extends SearchType> {
 
 	constructor(searchType: T, format = '' as ID, speciesOrSet: ID | Dex.PokemonSet = '' as ID) {
 		this.searchType = searchType;
+		// Use the unrestricted National Dex search tables; the server owns Copa Rinha's rules.
+		if (Dex.normalizeTeamFormat(format) === 'gen9coparinhanationaldexza') format = 'gen9nationaldexag' as ID;
 
 		this.baseResults = null;
 		this.baseIllegalResults = null;

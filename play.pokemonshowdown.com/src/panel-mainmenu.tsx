@@ -7,6 +7,7 @@
 
 import preact from "../js/lib/preact";
 import { PSLoginServer } from "./client-connection";
+import { CopaRinhaLocalNames } from "./copa-rinha";
 import { PSBackground } from "./client-core";
 import {
 	Config, PS, PSRoom, type PSRoomFocusOptions, type RoomID, type Team,
@@ -119,6 +120,10 @@ export class MainMenuRoom extends PSRoom {
 		case 'challstr': {
 			const [, challstr] = args;
 			PS.user.challstr = challstr;
+			if (Config.copaRinhaLocalNames) {
+				CopaRinhaLocalNames.connect();
+				return true;
+			}
 			PSLoginServer.query(
 				'upkeep', { challstr }
 			).then(res => {
@@ -146,7 +151,8 @@ export class MainMenuRoom extends PSRoom {
 			}
 			void Dex.loadTextData().then(() => PS.updateTranslatedText());
 			PS.user.setName(fullName, named, avatar);
-			PS.teams.loadRemoteTeams();
+			if (Config.copaRinhaLocalNames) CopaRinhaLocalNames.confirm();
+			else PS.teams.loadRemoteTeams();
 			return true;
 		} case 'updatechallenges': {
 			const [, challengesBuf] = args;

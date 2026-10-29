@@ -449,6 +449,8 @@ PSConnection.connect();
 
 export const PSLoginServer = new class {
 	rawQuery(act: string, data: PostData): Promise<string | null> {
+		// This entry uses unverified server-local names and never sends account credentials.
+		if (Config.copaRinhaLocalNames) return Promise.resolve(null);
 		// commenting out because for some reason this is working in Chrome????
 		// if (location.protocol === 'file:') {
 		// 	alert("Sorry, login server queries don't work in the testclient. To log in, see README.md to set up testclient-key.js");

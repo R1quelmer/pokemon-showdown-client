@@ -85,7 +85,7 @@ export class TeamEditorState extends PSModel {
 		this.readonly = readonly;
 	}
 	setFormat(format: string) {
-		this.format = Dex.formats.get(format);
+		this.format = Dex.formats.get(Dex.normalizeTeamFormat(toID(format)));
 		this.team.format = this.format.id;
 		this.dex = Dex.mod(this.format.mod);
 		this.gen = this.dex.gen;
@@ -4028,7 +4028,8 @@ class DetailsForm extends preact.Component<{
 					)}
 				</>
 				)}
-				{editor.gen === 8 && !editor.format.isBDSP && !species.cannotDynamax && (
+				{((editor.gen === 8 && !editor.format.isBDSP) || editor.format.id === 'gen9coparinhanationaldexza') &&
+					!species.cannotDynamax && (
 					<p>
 						<label class="label" style="display:inline">{TL.label(TL`Dynamax Level`)}<input
 							name="dynamaxlevel" value={set.dynamaxLevel ?? ''} placeholder="10"

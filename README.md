@@ -99,6 +99,26 @@ This shortcut opens the modern test client on the same site, connecting to
 `copa-rinha-showdown.onrender.com` over HTTPS/WSS on port 443 with the
 `/showdown` prefix. It does not change the default server of the other pages.
 
+This entry offers **Escolher nome / Entrar** with only a nickname. The matching
+Copa Rinha Render server enables `noguestsecurity`, so the client sends
+`/trn NAME` without an assertion. Only a server-confirmed nickname is saved
+locally and retried after reconnecting. No password is requested or stored;
+this mode skips the test-client SID key and official account/login requests.
+**Local nicknames are not secure authentication: someone who knows the
+server can use a name when it is available.** If a name is in use, choose another.
+
+The canonical format is `[Gen 9] [Copa Rinha] National Dex ZA`, ID
+`gen9coparinhanationaldexza`. Existing locally saved teams using
+`coparinhanationaldexza` or `gen6coparinhanationaldexza` are migrated to that
+ID while keeping their names, folders and Pokemon data. The editor uses
+unrestricted Gen 9 National Dex search tables; team legality and the four
+mechanic limits remain the custom server's responsibility. This does not
+make Copa Rinha inherit any official format's battle rules.
+
+Redeploy both the server's `feat/copa-rinha-national-dex-za` branch and the
+client's `feat/copa-rinha-gimmick-ui` branch, server first. The public entry
+URL above stays the same. Other client pages retain their normal login flow.
+
 For the legacy client, use
 <https://copa-rinha-client.onrender.com/testclient-old.html?~~copa-rinha-showdown.onrender.com:443>.
 

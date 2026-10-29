@@ -731,7 +731,7 @@ class OptionsPanel extends PSRoomPanel {
 				<button class="button" data-href="avatars">{TL`[Avatar...]`}</button>
 			</p>
 
-			{PS.user.named && (PS.user.registered?.userid === PS.user.userid ?
+			{PS.user.named && !Config.copaRinhaLocalNames && (PS.user.registered?.userid === PS.user.userid ?
 				<button className="button" data-href="changepassword">{TL`[Password...]`}</button> :
 				<button className="button" data-href="register">{TL`[Register]`}</button>)}
 
@@ -979,6 +979,28 @@ class LoginPanel extends PSRoomPanel {
 	override render() {
 		const room = this.props.room;
 		const loginState = room.args as PSLoginState;
+		if (Config.copaRinhaLocalNames) {
+			return <PSPanelWrapper room={room} width={320}><div class="pad">
+				<h3>Escolher nome</h3>
+				<p>Nomes locais não têm autenticação segura. Outra pessoa que conheça o servidor pode usar este nome.</p>
+				<form onSubmit={this.handleSubmit}>
+					{loginState?.error && <p class="error">{loginState.error}</p>}
+					<p><label class="label">
+						<span>Nickname</span>
+						<input
+							class="textbox" type="text" name="username" maxLength={18} autocomplete="off"
+							onInput={this.update} onChange={this.update} value={this.getUsername()} disabled={!!PS.user.loggingIn}
+						/>
+					</label></p>
+					<p class="buttonbar">
+						<button type="submit" class="button" disabled={!!PS.user.loggingIn}>
+							{PS.user.loggingIn ? 'Entrando...' : 'Entrar'}
+						</button> {}
+						<button type="button" name="closeRoom" class="button">Cancelar</button>
+					</p>
+				</form>
+			</div></PSPanelWrapper>;
+		}
 		return <PSPanelWrapper room={room} width={280}><div class="pad">
 			<h3>{TL`[Log in]`}</h3>
 			<form onSubmit={this.handleSubmit}>
