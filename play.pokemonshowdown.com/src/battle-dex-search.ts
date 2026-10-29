@@ -676,6 +676,8 @@ abstract class BattleTypedSearch<T extends SearchType> {
 		'nfe' | 'ssdlc1' | 'ssdlc1doubles' | 'predlc' | 'predlcdoubles' | 'svdlc1' | 'svdlc1doubles' | 'stadium' | 'lc' |
 		'champions' | 'natdexchampions' | null = null;
 	isDoubles = false;
+	protected copaRinhaSpecies: { [id: string]: true } | null = null;
+	protected copaRinhaItems: { [id: string]: true } | null = null;
 
 	/**
 	 * Cached copy of what the results list would be with only base filters
@@ -695,7 +697,24 @@ abstract class BattleTypedSearch<T extends SearchType> {
 	constructor(searchType: T, format = '' as ID, speciesOrSet: ID | Dex.PokemonSet = '' as ID) {
 		this.searchType = searchType;
 		// Use the unrestricted National Dex search tables; the server owns Copa Rinha's rules.
-		if (Dex.normalizeTeamFormat(format) === 'gen9coparinhanationaldexza') format = 'gen9nationaldexag' as ID;
+		if (Dex.normalizeTeamFormat(format) === 'gen9coparinhanationaldexza') {
+			format = 'gen9nationaldexag' as ID;
+			this.copaRinhaSpecies = {};
+			this.copaRinhaItems = {};
+			// Upstream marks Z-A Megas and their stones as Future. Copa Rinha
+			// permits these exact forme/item links, without permitting other Future data.
+			for (const itemid in BattleItems) {
+				const item = Dex.items.get(itemid);
+				if (item.gen !== 9 || !item.megaStone) continue;
+				for (const [base, forme] of Object.entries(item.megaStone)) {
+					const mega = Dex.species.get(forme);
+					if (!mega.isMega || mega.gen !== 9) continue;
+					this.copaRinhaSpecies[mega.id] = true;
+					this.copaRinhaSpecies[toID(base)] = true;
+					this.copaRinhaItems[item.id] = true;
+				}
+			}
+		}
 
 		this.baseResults = null;
 		this.baseIllegalResults = null;
@@ -830,6 +849,19 @@ abstract class BattleTypedSearch<T extends SearchType> {
 			this.species = toID(this.set.species);
 		}
 		// if (!searchType || !this.set) return;
+	}
+	protected includeCopaRinhaResults(results: SearchRow[], type: 'pokemon' | 'item'): SearchRow[] {
+		const allowed = type === 'pokemon' ? this.copaRinhaSpecies : this.copaRinhaItems;
+		if (!allowed) return results;
+		const present: { [id: string]: true } = {};
+		for (const row of results) {
+			if (row[0] === type) present[row[1]] = true;
+		}
+		const added: SearchRow[] = [];
+		for (const id in allowed) {
+			if (!present[id]) added.push([type, id as ID]);
+		}
+		return added.length ? [...results, ['header', 'Legends: Z-A'], ...added] : results;
 	}
 	getResults(filters?: SearchFilter[] | null, sortCol?: string | null, reverseSort?: boolean): SearchRow[] {
 		if (sortCol === 'type') {
@@ -1002,6 +1034,8 @@ abstract class BattleTypedSearch<T extends SearchType> {
 		return false;
 	}
 	getTier(pokemon: Dex.Species) {
+		if (this.copaRinhaSpecies?.[pokemon.id] &&
+			(pokemon.isNonstandard === 'Future' || pokemon.tier === 'Illegal')) return String(pokemon.num);
 		if (this.formatType === 'metronome') {
 			return pokemon.num >= 0 ? String(pokemon.num) : pokemon.tier;
 		}
@@ -1341,7 +1375,7 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 			});
 		}
 
-		return tierSet;
+		return this.includeCopaRinhaResults(tierSet, 'pokemon');
 	}
 	filter(row: SearchRow, filters: string[][]) {
 		if (!filters) return true;
@@ -1421,7 +1455,9 @@ class BattleAbilitySearch extends BattleTypedSearch<'ability'> {
 
 		if (species.isMega) {
 			abilitySet.unshift(['html', `Will be <strong>${species.abilities['0']}</strong> after Mega Evolving.`]);
-			species = dex.species.get(species.baseSpecies);
+			const base = this.copaRinhaSpecies?.[species.id] && typeof species.battleOnly === 'string' ?
+				species.battleOnly : species.baseSpecies;
+			species = dex.species.get(base);
 		}
 		abilitySet.push(['ability', toID(species.abilities['0'])]);
 		if (species.abilities['1']) {
@@ -1522,7 +1558,7 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 			});
 			table.items = null;
 		}
-		return table.itemSet;
+		return this.includeCopaRinhaResults(table.itemSet, 'item');
 	}
 	getBaseResults(): SearchRow[] {
 		if (!this.species) return this.getDefaultResults();

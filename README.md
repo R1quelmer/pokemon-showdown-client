@@ -115,6 +115,16 @@ unrestricted Gen 9 National Dex search tables; team legality and the four
 mechanic limits remain the custom server's responsibility. This does not
 make Copa Rinha inherit any official format's battle rules.
 
+The Copa Rinha selectors also offer the 49 implemented Legends: Z-A Mega
+formes and their 45 distinct Mega Stones. Their data already matches upstream
+`ccfaa20f32af363569cd21a9d501b2bc1ded26b1`; the Copa-only search overlay exposes
+these entries despite their upstream Future status, including required base
+formes such as Floette-Eternal. Official format searches remain unchanged.
+Names, stats, types, abilities, icons and existing sprite fallbacks reuse the
+normal Showdown data. The server's `data/mods/coparinha/ZA.md` records the full
+inventory and source comparison. Multiple stones in a team do not permit
+more than one actual Mega Evolution per player.
+
 Redeploy both the server's `feat/copa-rinha-national-dex-za` branch and the
 client's `feat/copa-rinha-gimmick-ui` branch, server first. The public entry
 URL above stays the same. Other client pages retain their normal login flow.
