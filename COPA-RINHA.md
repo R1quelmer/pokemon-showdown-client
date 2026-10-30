@@ -297,3 +297,14 @@ Chromium com motor nativo, API mockada e fontes locais aprovou 1440, 1000, 390 e
 forfeit, nomes longos, toast visível dentro da tela e desaparecimento automático.
 Sprites/áudio da CDN são bloqueados nesse teste; as capturas validam layout e
 estado do motor, sem atestar carregamento desses recursos externos em produção.
+
+## Logo oficial no cabeçalho do replay
+
+`assets/copa-rinha/logo.png` é o PNG oficial fornecido pelo usuário, copiado sem
+alteração (3344 × 1882). O original já contém canal alpha e fundo externo
+transparente; o preto da prévia não é um retângulo opaco no arquivo. Por isso,
+não foi necessário remover fundo, redesenhar, recortar ou processar a arte.
+O cabeçalho usa 112 px de largura no desktop e 92 px no celular, com altura
+automática, mantendo todo o canvas e a proporção original. “REPLAY” permanece
+ao lado. A QA Chromium verifica carregamento, dimensões naturais, proporção e
+largura exibida em 1440, 1000, 390 e 320 px, além dos controles existentes.

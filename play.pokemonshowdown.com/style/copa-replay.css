@@ -80,3 +80,7 @@ h1{font-size:36px;font-weight:700;letter-spacing:0;margin-bottom:7px}
 footer{font-size:12px;letter-spacing:1px}
 .copy-feedback{position:absolute;right:0;top:calc(100% - 6px);z-index:10;max-width:min(360px,100%);box-sizing:border-box;padding:8px 12px;background:#163342;color:#d6f6fd;border:1px solid #2e6073;border-radius:5px;font-size:12px;overflow-wrap:anywhere;box-shadow:0 3px 10px #0003}
 @media(max-width:600px){h1{font-size:30px}.wordmark{font-size:21px}#controls .icon-button{min-height:44px;width:36px;padding:7px}#controls .primary{min-height:44px;min-width:116px;font-size:11px;padding:8px}#controls{padding:8px;gap:8px}#controls #viewpoint{min-height:40px}#speed{min-height:40px}#turn{min-height:40px}#controls .go-button{min-height:40px}.copy-feedback{right:2px;max-width:calc(100% - 4px)}}
+
+/* Original transparent logo: preserve its full canvas and native aspect ratio. */
+.wordmark .brand-logo{display:block;width:112px;height:auto;object-fit:contain;flex-shrink:0}
+@media(max-width:600px){.wordmark{gap:12px}.wordmark .brand-logo{width:92px}.wordmark span{padding-left:12px}}

@@ -30,7 +30,7 @@ const replay = {
 		if (!file.startsWith(root + path.sep)) { res.writeHead(403).end(); return; }
 		try {
 			const body = await fs.readFile(file);
-			const type = {'.js': 'text/javascript', '.html': 'text/html', '.css': 'text/css', '.woff2': 'font/woff2'}[path.extname(file)];
+			const type = {'.js': 'text/javascript', '.html': 'text/html', '.css': 'text/css', '.woff2': 'font/woff2', '.png': 'image/png'}[path.extname(file)];
 			res.writeHead(200, {'Content-Type': type || 'application/octet-stream'}).end(body);
 		} catch { res.writeHead(404).end(); }
 	});
@@ -69,6 +69,16 @@ const replay = {
 				assert.equal(await page.locator('#turn').inputValue(), String(await page.evaluate(() => Math.max(0, testBattle.turn))));
 			};
 			await assertCounter();
+			const brand = page.locator('.brand-logo');
+			await brand.evaluate(image => image.decode());
+			const logo = await brand.evaluate(image => ({
+				width: image.getBoundingClientRect().width, height: image.getBoundingClientRect().height,
+				naturalWidth: image.naturalWidth, naturalHeight: image.naturalHeight,
+			}));
+			assert.equal(logo.naturalWidth, 3344); assert.equal(logo.naturalHeight, 1882);
+			assert(Math.abs(logo.width / logo.height - 3344 / 1882) < 0.01);
+			assert.equal(logo.width, width <= 600 ? 92 : 112);
+			assert.equal(await page.locator('.wordmark span').textContent(), 'REPLAY');
 			const metadata = await page.locator('#metadata').textContent();
 			assert(metadata.includes('Alice × Bob')); assert(!metadata.includes('gen9coparinhanationaldexza')); assert(metadata.includes('Forfeit'));
 			await page.locator('#turn').fill('3'); await page.locator('#turn-form button').click();
