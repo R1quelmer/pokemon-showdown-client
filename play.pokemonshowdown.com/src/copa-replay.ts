@@ -27,7 +27,7 @@ async function loadCopaReplay() {
 			replay.players.map((p: { name: string }) => p.name).join(' × ');
 		const endLabels: Record<string, string> = { normal: 'Vitória', forfeit: 'Forfeit', tie: 'Empate', forced: 'Encerrada' };
 		document.getElementById('match-details')!.textContent =
-			`National Dex ZA · ${new Date(replay.createdAt).toLocaleString('pt-BR')} · ` +
+			`Copa Rinha II · ${new Date(replay.createdAt).toLocaleString('pt-BR')} · ` +
 			`${replay.turns} ${replay.turns === 1 ? 'turno' : 'turnos'} · ${endLabels[replay.endType] || 'Encerrada'}`;
 		document.getElementById('match-winner')!.textContent = replay.winner ? `Vencedor: ${replay.winner}` : 'Empate';
 		document.getElementById('turn-total')!.textContent = `/ ${replay.turns}`;

@@ -133,7 +133,7 @@ test('uses every official speed timing and updates native scene acceleration', a
 });
 test('forfeit replay preserves all metadata, log, perspective and controls', async () => {
 	const {element, options, battle} = await load({endType: 'forfeit'});
-	for (const text of ['<Alice> × Bob', 'National Dex ZA', '29/10/2026', 'Vencedor: <Alice>', '7 turnos', 'Forfeit']) {
+	for (const text of ['<Alice> × Bob', 'Copa Rinha II', '29/10/2026', 'Vencedor: <Alice>', '7 turnos', 'Forfeit']) {
 		assert(element('metadata').textContent.includes(text));
 	}
 	element('viewpoint').onclick(); element('end').onclick();

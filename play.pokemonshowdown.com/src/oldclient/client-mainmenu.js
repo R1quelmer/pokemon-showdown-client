@@ -1130,6 +1130,7 @@
 
 		curFormat: '',
 		renderFormats: function (formatid, noChoice) {
+			if (Dex.isCopaRinha()) formatid = 'gen9coparinhanationaldexza';
 			if (!window.BattleFormats) {
 				return '<button class="select formatselect" name="format" disabled value="' + BattleLog.escapeHTML(formatid) + '"><em>Loading...</em></button>';
 			}

@@ -851,7 +851,7 @@
 			if (orig) {
 				newTeam = {
 					name: 'Copy of ' + orig.name,
-					format: orig.format,
+					format: Dex.isCopaRinha() ? 'gen9coparinhanationaldexza' : orig.format,
 					team: orig.team,
 					capacity: orig.capacity,
 					folder: orig.folder,
@@ -864,6 +864,7 @@
 					folder = format.slice(0, -1);
 					format = 'gen9';
 				}
+				if (Dex.isCopaRinha()) format = 'gen9coparinhanationaldexza';
 				newTeam = {
 					name: (isBox ? 'Box ' : 'Untitled ') + (teams.length + 1),
 					format: format,

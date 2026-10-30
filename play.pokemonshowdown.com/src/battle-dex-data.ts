@@ -74,7 +74,7 @@ export class BattleFormat implements FormatData {
 	defaultLevel = 100;
 
 	constructor(name: string, data?: FormatData) {
-		this.id = toID(name);
+		this.id = Dex.normalizeTeamFormat(toID(name));
 		this.name = name;
 		const id = this.id;
 		this.gen = !id ? Dex.gen : id.startsWith('gen') ? parseInt(id.charAt(3)) || Dex.gen : 6;
@@ -102,6 +102,7 @@ export class BattleFormat implements FormatData {
 		) this.defaultLevel = 50;
 		if (id.includes('lc')) this.defaultLevel = 5;
 		if (data) Object.assign(this, data);
+		if (this.id === 'gen9coparinhanationaldexza') this.name = 'Copa Rinha II';
 	}
 }
 

@@ -328,3 +328,56 @@ ignorado). Chromium validou 1440, 1000, 390 e 320 px, alinhamento, proporção,
 limite de largura, ausência de overflow, controles e clique real na logo.
 `/copa-rinha.html` respondeu HTTP 200 no servidor local e fez seu encaminhamento
 existente para `testclient-new.html`; não houve solicitação à raiz `/`.
+
+## Formato único: Copa Rinha II
+
+O nome público agora é **Copa Rinha II**; o ID de protocolo, armazenamento de
+times e replays permanece `gen9coparinhanationaldexza`. `Dex.normalizeTeamFormat`
+resolve os nomes novos e IDs legados, e os parsers nativos moderno/legado mantêm
+o ID canônico ao receber o nome novo. O construtor BattleFormat continua derivando
+Gen 9/National Dex do ID, portanto mantém os dados e buscas de Mega, Z, Tera e Max.
+
+A política de apresentação fica centralizada no carregamento de BattleFormats.
+Na entrada Copa Rinha (nickname local habilitado ou servidor configurado como
+`copa-rinha-showdown.onrender.com`), a lista pública contém apenas Copa Rinha II.
+Fora dessa entrada o cliente mantém todos os formatos recebidos. Para QA contra
+localhost, pode-se definir `Config.copaRinhaSingleFormat = true` antes dos scripts.
+Search/Challenge usam o formato canônico, os seletores nativos mostram a única
+opção e novos times já nascem nesse formato. Preferências antigas de estrelas
+não reintroduzem formatos oficiais no seletor. Times de outros formatos já
+armazenados não são apagados nem convertidos silenciosamente; podem ser abertos
+e explicitamente reassociados à Copa no editor. Import/export e os IDs dos times
+Copa existentes continuam compatíveis. Não foram removidos dados oficiais.
+
+Replays antigos mantêm metadados e log armazenados. Só os rótulos visuais da
+página e do log de replay usam Copa Rinha II; a API e seu filtro de ID permanecem
+iguais. A restrição real de criação de partidas é responsabilidade do servidor.
+
+### Deploy coordenado
+
+1. Faça deploy **primeiro do cliente**, branch `feat/copa-rinha-gimmick-ui`.
+   Ele compreende tanto a lista/nome antigos quanto os novos. Mantenha o build
+   completo e a publicação de `play.pokemonshowdown.com`. O cache de dados do
+   servidor deve usar `feat/copa-rinha-national-dex-za`, como já configurado;
+   se persistido, atualize esse checkout para o commit desta etapa antes do build.
+2. Após o cliente estar Live, faça deploy do servidor na branch
+   `feat/copa-rinha-national-dex-za`. O preset Render habilita automaticamente
+   a política exclusiva. Nenhuma credencial/variável R2 muda.
+3. Recarregue o cliente para atualizar scripts. Confira o único formato em
+   busca, challenge e editor; crie/import/exporte e valide um time. Envie um
+   desafio Copa e teste as quatro mecânicas. Tentativas `/search gen9ou` e
+   `/search gen9randombattle` devem ser rejeitadas. O mesmo vale para challenge
+   e regras customizadas. Antes do deploy do servidor, a busca ainda segue a
+   disponibilidade antiga; a experiência fica completa após os dois deploys.
+4. Termine a partida e teste seu replay e um link antigo. Confira o nome Copa
+   Rinha II e o ID canônico na resposta JSON. Confirme o novo objeto no R2 privado.
+
+Validação automatizada: build completo aprovado; `npm test` aprovou TypeScript,
+lint e 172 testes (1 ignorado). Chromium aprovou os quatro cenários
+moderno/legado × lista antiga/nova. Comandos: `npm test`,
+`CHROMIUM_PATH=/usr/bin/chromium npm run test:copa-format-browser` e
+`CHROMIUM_PATH=/usr/bin/chromium npm run test:replay-browser`.
+O teste de formatos exercita os dois clientes nativos com listas antiga/nova,
+picker único e criação de time. A conexão externa é bloqueada e a lista do
+servidor é injetada; ele não equivale a uma partida entre dois usuários no Render.
+Os testes de replay também usam API mockada. R2 real não foi acessado nesta etapa.

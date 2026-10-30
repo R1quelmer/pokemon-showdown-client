@@ -299,7 +299,7 @@ export class MainMenuRoom extends PSRoom {
 						name = name.substr(0, name.length - 1);
 					}
 				}
-				let id = toID(name);
+				let id = Dex.normalizeTeamFormat(toID(name));
 				let isTeambuilderFormat = !team && !name.endsWith('Custom Game');
 				let teambuilderFormat = '' as ID;
 				let teambuilderFormatName = '';
@@ -1065,6 +1065,7 @@ export class TeamForm extends preact.Component<{
 			this.setFormat(this.props.defaultFormat.slice(2));
 		}
 		if (this.props.format) this.format = this.props.format;
+		if (Dex.isCopaRinha()) this.format = 'gen9coparinhanationaldexza';
 		if (!this.props.format && this.format.includes('@@@')) this.setFormat(this.format);
 		const formatId = toID(this.format.split('@@@')[0]);
 		const format = window.BattleFormats[formatId];

@@ -1403,7 +1403,7 @@ function toId() {
 							name = name.substr(0, name.length - 1);
 						}
 					}
-					var id = toID(name);
+					var id = Dex.normalizeTeamFormat(toID(name));
 					var isTeambuilderFormat = !team && name.slice(-11) !== 'Custom Game';
 					var teambuilderFormat = '';
 					var teambuilderFormatName = '';

@@ -17,7 +17,7 @@ const ADD_FORMAT_FOLDER_VALUE = '+';
 const ADD_FOLDER_VALUE = '++';
 
 class TeambuilderRoom extends PSRoom {
-	readonly DEFAULT_FORMAT = Dex.modid;
+	readonly DEFAULT_FORMAT = Dex.isCopaRinha() ? 'gen9coparinhanationaldexza' as ID : Dex.modid;
 
 	/**
 	 * - `""` - all
@@ -203,7 +203,7 @@ class TeambuilderRoom extends PSRoom {
 		if (copyFrom) {
 			return {
 				name: `Copy of ${copyFrom.name}`,
-				format: copyFrom.format,
+				format: Dex.isCopaRinha() ? this.DEFAULT_FORMAT : copyFrom.format,
 				folder: copyFrom.folder,
 				packedTeam: copyFrom.packedTeam,
 				iconCache: null,
@@ -211,7 +211,8 @@ class TeambuilderRoom extends PSRoom {
 				key: '',
 			};
 		} else {
-			const format = this.curFolder && !this.curFolder.endsWith('/') ? this.curFolder as ID : this.DEFAULT_FORMAT;
+			const format = Dex.isCopaRinha() ? this.DEFAULT_FORMAT :
+				this.curFolder && !this.curFolder.endsWith('/') ? this.curFolder as ID : this.DEFAULT_FORMAT;
 			const folder = this.curFolder.endsWith('/') ? this.curFolder.slice(0, -1) : '';
 			return {
 				name: `${isBox ? "Box" : "Untitled"} ${PS.teams.list.length + 1}`,
@@ -562,7 +563,7 @@ class TeambuilderPanel extends PSRoomPanel<TeambuilderRoom> {
 		} else {
 			children = [
 				<i class={`fa ${folderOpenIcon}-o`}></i>,
-				value.slice(4) || TL`(uncategorized)`,
+				value === 'gen9coparinhanationaldexza' ? 'Copa Rinha II' : value.slice(4) || TL`(uncategorized)`,
 			];
 		}
 

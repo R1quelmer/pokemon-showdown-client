@@ -402,7 +402,7 @@ export class BattleLog {
 			break;
 
 		case 'tier':
-			this.addDiv('', `<small>${TL.label(TL`Format`)}</small><br /><strong>` + BattleLog.escapeHTML(args[1]) + '</strong>');
+			this.addDiv('', `<small>${TL.label(TL`Format`)}</small><br /><strong>` + BattleLog.escapeFormat(args[1]) + '</strong>');
 			break;
 
 		case 'turn':
@@ -1125,9 +1125,9 @@ export class BattleLog {
 	static formatId(format: string): ID {
 		const atIndex = format.indexOf('@@@');
 		if (atIndex >= 0) {
-			format = toID(format.slice(0, atIndex)) + format.slice(atIndex).trim();
+			format = Dex.normalizeTeamFormat(toID(format.slice(0, atIndex))) + format.slice(atIndex).trim();
 		} else {
-			format = toID(format);
+			format = Dex.normalizeTeamFormat(toID(format));
 		}
 		if (!format) return '' as ID;
 		if (!format.startsWith('gen')) format = `${Dex.modid}${format}`;
@@ -1139,6 +1139,7 @@ export class BattleLog {
 	 */
 	static formatName(formatid = '', fixGen6?: boolean): string {
 		if (!formatid) return '';
+		if (Dex.normalizeTeamFormat(toID(formatid)) === 'gen9coparinhanationaldexza') return 'Copa Rinha II';
 
 		let atIndex = formatid.indexOf('@@@');
 		if (atIndex >= 0) {

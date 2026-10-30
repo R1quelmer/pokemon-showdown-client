@@ -101,7 +101,7 @@ const replay = {
 				assert(layout.player.width >= width - 20);
 			}
 			const metadata = await page.locator('#metadata').textContent();
-			assert(metadata.includes('Alice × Bob')); assert(!metadata.includes('gen9coparinhanationaldexza')); assert(metadata.includes('Forfeit'));
+			assert(metadata.includes('Copa Rinha II')); assert(metadata.includes('Alice × Bob')); assert(!metadata.includes('gen9coparinhanationaldexza')); assert(metadata.includes('Forfeit'));
 			await page.locator('#turn').fill('3'); await page.locator('#turn-form button').click();
 			await page.waitForFunction(() => testBattle.turn === 3 && testBattle.seeking === null);
 			await assertCounter();
@@ -157,6 +157,7 @@ const replay = {
 			await page.locator('#viewpoint').click();
 			await page.waitForFunction(() => testBattle.viewpointSwitched && testBattle.atQueueEnd);
 			assert.equal(await page.locator('#metadata').textContent(), metadata);
+			assert(!(await page.locator('.battle-log').textContent()).includes('National Dex ZA'));
 			assert.equal(await page.evaluate(() => testBattle.p2.active[0].speciesForme), 'Pikachu-Gmax');
 			assert(await page.evaluate(() => testBattle.stepQueue.join('\n').includes('|-terastallize|')));
 			await page.locator('#restart').click();
@@ -180,7 +181,7 @@ const replay = {
 			console.log(`Native replay controls, double viewpoint switch, forfeit and layout passed at ${width}px`);
 			if (process.env.REPLAY_SCREENSHOTS) await page.screenshot({path: path.join(process.env.REPLAY_SCREENSHOTS, `replay-${width}.png`), fullPage: true});
 			// Regression: a real one-turn forfeit must show 1 / 1, never a stale draft/placeholder.
-			currentReplay = {...replay, turns: 1, log: log.slice(0, log.indexOf('|turn|2')) + '|-message|Bob forfeited.\n|win|Alice',
+			currentReplay = {...replay, turns: 1, log: log.slice(0, log.indexOf('|turn|2')).replace('|tier|[Copa Rinha] National Dex ZA', '|tier|Copa Rinha II') + '|-message|Bob forfeited.\n|win|Alice',
 				players: [{name: 'LongPlayerNameAlpha'}, {name: 'LongPlayerNameBravo'}]};
 			await page.reload();
 			await page.waitForFunction(() => document.getElementById('status').textContent === 'Replay carregado.');

@@ -429,7 +429,7 @@ class FormatDropdownPanel extends PSRoomPanel {
 			}
 		}
 		const curGen = (gen: string) => this.gen === gen ? ' cur' : '';
-		const searchBar = <div>
+		const searchBar = Dex.isCopaRinha() ? null : <div>
 			<input
 				type="search" name="search" placeholder={TL`Search formats`} class="textbox autofocus" autocomplete="off"
 				onInput={this.updateSearch} onChange={this.updateSearch}
@@ -477,7 +477,7 @@ class FormatDropdownPanel extends PSRoomPanel {
 			if (searchID && !toID(format.name).includes(searchID)) {
 				continue;
 			}
-			if (this.gen && !format.id.startsWith(this.gen)) continue;
+			if (!Dex.isCopaRinha() && this.gen && !format.id.startsWith(this.gen)) continue;
 
 			if (format.column !== curColumnNum) {
 				if (curColumn.length) {
@@ -493,7 +493,7 @@ class FormatDropdownPanel extends PSRoomPanel {
 			}
 			curSection.formats.push(format);
 		}
-		if (this.gen && selectType === 'teambuilder') {
+		if (!Dex.isCopaRinha() && this.gen && selectType === 'teambuilder') {
 			columns[0].unshift({
 				section: '',
 				formats: [{ id: this.gen, name: `[Gen ${this.gen.slice(3)}]`, section: 'No Format' }],
@@ -504,7 +504,9 @@ class FormatDropdownPanel extends PSRoomPanel {
 		const noResults = curColumn.length === 0;
 		const starredPrefs = PS.prefs.starredformats || {};
 		// reverse because the newest starred format should be the default
-		const starred = Object.keys(starredPrefs).filter(id => starredPrefs[id] === true).reverse();
+		const starred = Object.keys(starredPrefs).filter(id =>
+			starredPrefs[id] === true && (!Dex.isCopaRinha() || id === 'gen9coparinhanationaldexza')
+		).reverse();
 		let starredDone = false;
 
 		return <PSPanelWrapper room={room} width={width}><div class="pad">
@@ -512,7 +514,7 @@ class FormatDropdownPanel extends PSRoomPanel {
 			{columns.map(column => (
 				<div class="options-column" onClick={this.click}>
 					{!starredDone && !!starred.length && <ul>{starred.map((id, i) => {
-						if (this.gen && !id.startsWith(this.gen)) return null;
+						if (!Dex.isCopaRinha() && this.gen && !id.startsWith(this.gen)) return null;
 						let format = BattleFormats[id] as FormatData | undefined;
 						if (/^gen[1-9]$/.test(id)) {
 							format ||= {
@@ -529,7 +531,9 @@ class FormatDropdownPanel extends PSRoomPanel {
 						if (selectType === 'challenge' && format.challengeShow === false) return null;
 						if (selectType === 'search' && format.searchShow === false) return null;
 						if (selectType === 'teambuilder' && !format.isTeambuilderFormat) return null;
-						return <li><button value={format.name} class={`option${curFormat === format.id ? ' cur' : ''}`}>
+						return <li><button
+							value={Dex.isCopaRinha() ? format.id : format.name} class={`option${curFormat === format.id ? ' cur' : ''}`}
+						>
 							{format.name.replace('[Gen 8 ', '[').replace('[Gen 9] ', '').replace('[Gen 7 ', '[')}
 							{format.section === 'No Format' && <em> {TL`(uncategorized)`}</em>}
 							<i class="star fa fa-star cur" data-cmd={`/unstar ${format.id}`}></i>
@@ -540,7 +544,7 @@ class FormatDropdownPanel extends PSRoomPanel {
 						const unstarred = sectionFormats.filter(format => !starred.includes(format.id));
 						if (!unstarred.length) return null;
 						const options = <ul>{unstarred.map(format => <li key={format.id}><button
-							value={format.name}
+							value={Dex.isCopaRinha() ? format.id : format.name}
 							class={`option${curFormat === format.id ? ' cur' : ''}`}
 						>
 							{format.name.replace('[Gen 8 ', '[').replace('[Gen 9] ', '').replace('[Gen 7 ', '[')}

@@ -61,6 +61,7 @@ export interface PSConfig {
 	whitelist?: string[];
 	testclient?: boolean;
 	copaRinhaLocalNames?: boolean;
+	copaRinhaSingleFormat?: boolean;
 }
 export declare const Config: PSConfig;
 

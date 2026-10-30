@@ -516,7 +516,7 @@ export const Dex = new class implements ModdedDex {
 	}
 	/** Upgrade the former Copa Rinha IDs without changing legacy IDs for other formats. */
 	normalizeTeamFormat(format: string): ID {
-		return (format === 'coparinhanationaldexza' || format === 'gen6coparinhanationaldexza' ?
+		return (format === 'coparinhaii' || format === 'coparinhanationaldexza' || format === 'gen6coparinhanationaldexza' ?
 			'gen9coparinhanationaldexza' : format) as ID;
 	}
 	/** Change only saved format prefixes; preserve every other byte of the team backup. */
@@ -526,14 +526,27 @@ export const Dex = new class implements ModdedDex {
 			'$1$2gen9coparinhanationaldexza'
 		);
 	}
+	isCopaRinha() {
+		return !!(window.Config && (Config.copaRinhaLocalNames || Config.copaRinhaSingleFormat ||
+			Config.defaultserver?.host === 'copa-rinha-showdown.onrender.com' ||
+			Config.server?.host === 'copa-rinha-showdown.onrender.com'));
+	}
 	formats = {
 		cache: Object.create(null) as { [id: string]: BattleFormat },
 		get(name: string): BattleFormat {
-			const id = toID(name);
+			const id = Dex.normalizeTeamFormat(toID(name));
 			this.cache[id] ||= new BattleFormat(name, window.BattleFormats?.[id]);
 			return this.cache[id];
 		},
 		load(data: { [id: string]: FormatData }): { [id: string]: BattleFormat } {
+			if (Dex.isCopaRinha()) {
+				const id = 'gen9coparinhanationaldexza';
+				const entry = data[id] || data.coparinhaii;
+				data = entry ? { [id]: {
+					...entry, id: id as ID, name: 'Copa Rinha II', section: 'Copa Rinha', column: 1,
+					isTeambuilderFormat: true, teambuilderFormat: undefined,
+				} } : {};
+			}
 			// Update in-place so retained references get updated too
 			for (const id in this.cache) {
 				Object.assign(this.cache[id], new BattleFormat(this.cache[id].name, data[id]));
