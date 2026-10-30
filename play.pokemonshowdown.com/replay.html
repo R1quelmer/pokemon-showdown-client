@@ -7,19 +7,48 @@
 <link rel="stylesheet" href="style/replay.css">
 <link rel="stylesheet" href="style/utilichart.css">
 <style>
-[hidden]{display:none!important}body{margin:0;padding:12px;background:#eef1f5;color:#222;font:16px system-ui}main{max-width:1000px;margin:auto}button,select{font:inherit;padding:10px;margin:4px}#arena{position:relative;width:640px;height:360px;transform-origin:top left}.battle{position:absolute;top:0;left:0}.battle-log{position:relative;top:auto;left:auto;right:auto;height:240px;width:auto;margin:12px 0;overflow:auto;background:white}#viewport{overflow:hidden}#status{padding:12px}#controls{display:flex;flex-wrap:wrap}h1{font-size:1.5rem}
+[hidden]{display:none!important}
+body{margin:0;padding:12px;background:#eef1f5;color:#222;font:16px system-ui}
+main{max-width:1000px;min-width:0;margin:auto}
+button,select,input{font:inherit;padding:10px;margin:4px;max-width:100%;box-sizing:border-box}
+button{cursor:pointer}button:disabled{cursor:default}
+#arena{position:relative;width:640px;height:360px;transform-origin:top left}
+.battle{position:absolute;top:0;left:0}
+.battle-log{position:relative;top:auto;left:auto;right:auto;height:240px;width:auto;margin:12px 0;overflow:auto;background:white}
+#viewport{overflow:hidden}#status{padding:12px}
+#controls{background:white;padding:8px;border-radius:8px}
+.control-row,#turn-form{display:flex;flex-wrap:wrap;align-items:center;gap:4px}
+#turn{width:6em}#metadata,#perspective{overflow-wrap:anywhere}
+#turn-position{margin:4px}h1{font-size:1.5rem}
 </style>
 <main>
 <h1>Replay da Copa Rinha</h1>
 <p id="status" role="status">Carregando replay…</p>
 <p id="metadata"></p>
 <div id="viewport"><div id="arena"><div class="battle"></div></div></div>
-<div id="controls" hidden>
-<button id="play">Reproduzir</button><button id="pause">Pausar</button>
-<button id="restart">Reiniciar</button><button id="next">Próximo turno</button>
-<label>Velocidade <select id="speed"><option value="1">Normal</option><option value="2">2×</option><option value="4">4×</option></select></label>
+<section id="controls" aria-label="Controles do replay" hidden>
+<p id="turn-position" role="status"></p>
+<div class="control-row">
+<button id="play">Reproduzir</button><button id="pause" hidden>Pausar</button>
+<button id="restart">Reiniciar</button>
+<button id="previous">Turno anterior</button><button id="next">Próximo turno</button>
+<button id="end">Ir para o fim</button>
+</div>
+<form id="turn-form">
+<label for="turn">Ir para o turno</label><input id="turn" type="number" min="0" step="1" inputmode="numeric" required>
+<button type="submit">Ir</button>
+</form>
+<div class="control-row">
+<label>Velocidade <select id="speed">
+<option value="hyperfast">Muito rápida</option><option value="fast">Rápida</option>
+<option value="normal" selected>Normal</option><option value="slow">Lenta</option>
+<option value="reallyslow">Muito lenta</option>
+</select></label>
+<button id="viewpoint" aria-pressed="false">Trocar lados</button>
 <button id="copy">Copiar link</button>
 </div>
+<p id="perspective"></p>
+</section>
 <div class="battle-log"></div>
 </main>
 <script>window.exports = window; window.Config = {routes: {client: 'play.pokemonshowdown.com'}, testclient: true};</script>

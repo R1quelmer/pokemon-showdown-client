@@ -191,3 +191,60 @@ motor Battle real, sem erro JavaScript e sem overflow horizontal. A rede deste
 ambiente bloqueou sprites/áudio da CDN; a aparência completa precisa de QA no
 site. O aviso de PHP ausente no build afeta apenas atualização opcional de notícias.
 R2 real não foi testado neste ambiente.
+
+## Controles nativos de replay e perspectiva
+
+A página própria reutiliza as mesmas APIs do player oficial, investigadas em
+`replay.pokemonshowdown.com/src/replays-battle.tsx` e
+`play.pokemonshowdown.com/src/replay-embed.ts`:
+
+- `Battle.switchViewpoint()` → `setViewpoint()` troca `nearSide`/`farSide` e
+  reconstrói a cena no turno atual. Isso inclui sprites, treinadores, nomes,
+  times, HP, campo e animações; o CSS apenas mantém a escala móvel existente.
+- `play()`, `pause()` e `reset()` controlam reprodução e reinício.
+- `seekBy(1/-1)` navega entre turnos, incluindo navegação durante busca;
+  `seekTurn(numero/Infinity)` vai para um turno ou até o final.
+- Velocidade usa as cinco opções oficiais e os mesmos valores de
+  `messageFadeTime`/`messageShownTime`, com `scene.updateAcceleration()`.
+- `subscribe()` sincroniza os controles com reprodução, pausa e fim do replay.
+
+A interface inclui turno anterior/próximo, ir para um turno, ir para o fim,
+reproduzir novamente após o fim, trocar lados com indicação de quem está embaixo,
+e copiar link. Metadados, protocolo, endpoint e URL de entrada foram preservados.
+Não houve alteração no motor Battle, na batalha ao vivo nem no servidor.
+
+Validação desta etapa:
+
+```sh
+node build full --no-update
+npm test
+# Chromium já instalado no sistema:
+CHROMIUM_PATH=/usr/bin/chromium npm run test:replay-browser
+# Alternativa para desenvolvimento, usando o Chromium do Playwright:
+# npx playwright install chromium
+# npm run test:replay-browser
+```
+
+Build completo aprovado. `npm test` aprovou TypeScript do cliente e build-tools,
+ESLint e 165 testes (1 ignorado), incluindo oito testes unitários do replay.
+Chromium real aprovou controles e troca de perspectiva em 1000, 390 e 320 px,
+incluindo troca durante reprodução, dupla troca, retorno ao turno anterior,
+reconstrução de HP/clima, Mega, Z, Tera, G-Max e término por forfeit.
+O teste de navegador usa protocolo sintético e API mockada com o motor nativo
+real. Sprites/áudio externos são bloqueados no teste, portanto não é uma
+validação visual desses arquivos nem um teste de produção/R2.
+O aviso de PHP ausente na atualização opcional de notícias continua sem impedir o build.
+
+Para deploy no Render, use o serviço estático do cliente, branch
+`feat/copa-rinha-gimmick-ui`, **Manual Deploy → Deploy latest commit**.
+Mantenha o comando de build completo e o diretório publicado
+`play.pokemonshowdown.com` já configurados. Aguarde o build/deploy terminar e
+abra um replay existente em `/replay.html?id=<id>`; recarregue a página para
+obter os scripts novos. Não é necessário mudar variáveis, servidor, R2 ou API.
+Confira Trocar lados no meio do replay e novamente para retornar, inclusive no
+celular, e teste navegação/velocidade/copiar link.
+
+Diferenças restantes frente ao site oficial: esta página mantém o layout e os
+metadados próprios da Copa Rinha; não inclui atalhos globais de teclado,
+seletor de tema, controles de volume/música, download de HTML nem persistência
+de perspectiva/turno na URL. A reprodução continua iniciando sem áudio.
