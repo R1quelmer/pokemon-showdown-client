@@ -7,7 +7,7 @@ const id = 'a'.repeat(32);
 async function load({search = `?id=${id}`, status = 200, fail = false, endType = 'normal', clipboardFails = false} = {}) {
 	const elements = new Map();
 	const element = key => {
-		if (!elements.has(key)) elements.set(key, {textContent: '', style: {}, clientWidth: 320, hidden: true, value: '', setAttribute(key, value) { this[key] = value; }});
+		if (!elements.has(key)) elements.set(key, {textContent: '', style: {}, clientWidth: 320, hidden: true, value: '', blur() {}, setAttribute(key, value) { this[key] = value; }});
 		if (key === 'metadata' && !elements.get(key).composite) {
 			Object.defineProperty(elements.get(key), 'textContent', {get() {
 				return ['match-players', 'match-details', 'match-winner'].map(id => element(id).textContent).join(' ');
@@ -17,9 +17,12 @@ async function load({search = `?id=${id}`, status = 200, fail = false, endType =
 		return elements.get(key);
 	};
 	let options; let requested; let battle; const calls = [];
+	const timers = new Map(); let timerID = 0;
 	const context = {
 		document: {getElementById: element}, location: {search, href: 'https://copa-rinha-client.onrender.com/replay.html' + search},
-		URLSearchParams, AbortSignal, console, $: selector => selector,
+		URLSearchParams, AbortSignal, console,
+		setTimeout(fn, delay) { timers.set(++timerID, {fn, delay}); return timerID; },
+		clearTimeout(id) { timers.delete(id); }, $: selector => selector,
 		navigator: {clipboard: {async writeText(text) { if (clipboardFails) throw Error('denied'); calls.push(text); }}},
 		window: {addEventListener() {}},
 		async fetch(url, init) {
@@ -49,7 +52,7 @@ async function load({search = `?id=${id}`, status = 200, fail = false, endType =
 	};
 	vm.runInNewContext(source.replace('void loadCopaReplay();', ''), context);
 	await context.loadCopaReplay();
-	return {element, options, requested, calls, battle};
+	return {element, options, requested, calls, battle, timers, context};
 }
 test('loads from our API into native Battle with controls, text-only metadata and mobile scaling', async () => {
 	const {element, options, requested, calls} = await load();
@@ -82,17 +85,17 @@ test('switches native viewpoint twice, preserves metadata/log and keeps playback
 	const {element, battle, calls, options} = await load();
 	const metadata = element('metadata').textContent;
 	const log = options.log.join('\n');
-	assert.equal(element('perspective').textContent, 'Perspectiva: <Alice>');
+	assert.equal(`Perspectiva: ${element('perspective-name').textContent}`, 'Perspectiva: <Alice>');
 	element('viewpoint').onclick();
 	assert.equal(battle.viewpointSwitched, true);
 	assert.equal(element('viewpoint')['aria-pressed'], 'true');
-	assert.equal(element('perspective').textContent, 'Perspectiva: Bob');
+	assert.equal(`Perspectiva: ${element('perspective-name').textContent}`, 'Perspectiva: Bob');
 	element('play').onclick(); assert.equal(battle.paused, false);
 	element('pause').onclick(); assert.equal(battle.paused, true);
 	element('next').onclick(); assert.equal(battle.turn, 1);
 	element('previous').onclick(); assert.equal(battle.turn, 0);
 	element('viewpoint').onclick(); assert.equal(battle.viewpointSwitched, false);
-	assert.equal(element('perspective').textContent, 'Perspectiva: <Alice>');
+	assert.equal(`Perspectiva: ${element('perspective-name').textContent}`, 'Perspectiva: <Alice>');
 	assert.equal(calls.filter(call => call === 'switchViewpoint').length, 2);
 	assert.equal(element('metadata').textContent, metadata);
 	assert.equal(options.log.join('\n'), log);
@@ -139,5 +142,36 @@ test('forfeit replay preserves all metadata, log, perspective and controls', asy
 test('copy link reports clipboard failures with a usable URL', async () => {
 	const {element} = await load({clipboardFails: true});
 	await element('copy').onclick();
-	assert(element('status').textContent.startsWith('Copie o endereço: https://copa-rinha-client.onrender.com/replay.html?id='));
+	assert(element('copy-feedback').textContent.startsWith('Copie o endereço: https://copa-rinha-client.onrender.com/replay.html?id='));
+});
+
+test('counter follows actual Battle.turn across seek, navigation, pause, end, reset and viewpoint', async () => {
+	const {element, battle} = await load();
+	for (const turn of [-1, 0, 1, 7]) {
+		battle.turn = turn; battle.listener();
+		assert.equal(element('turn').value, String(Math.max(0, turn)));
+	}
+	element('previous').onclick(); assert.equal(element('turn').value, '6');
+	element('play').onclick(); element('pause').onclick(); assert.equal(element('turn').value, '6');
+	element('end').onclick(); assert.equal(element('turn').value, '7');
+	element('viewpoint').onclick(); assert.equal(element('turn').value, '7');
+	element('restart').onclick(); assert.equal(element('turn').value, '0');
+});
+test('counter does not overwrite a seek destination being edited', async () => {
+	const {element, battle, context} = await load();
+	context.document.activeElement = element('turn');
+	element('turn').value = '5'; battle.turn = 2; battle.listener();
+	assert.equal(element('turn').value, '5');
+	context.document.activeElement = null; battle.listener();
+	assert.equal(element('turn').value, '2');
+});
+test('copy toast expires after two seconds and repeated copies reset its timer', async () => {
+	const {element, timers} = await load();
+	await element('copy').onclick();
+	assert.equal(element('copy-feedback').textContent, 'Link copiado');
+	assert.equal(element('copy-feedback').hidden, false);
+	await element('copy').onclick(); assert.equal(timers.size, 1);
+	const timer = [...timers.values()][0]; assert.equal(timer.delay, 2000);
+	timer.fn(); assert.equal(element('copy-feedback').hidden, true);
+	assert.equal(element('status').textContent, 'Replay carregado.');
 });

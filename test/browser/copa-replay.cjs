@@ -30,7 +30,7 @@ const replay = {
 		if (!file.startsWith(root + path.sep)) { res.writeHead(403).end(); return; }
 		try {
 			const body = await fs.readFile(file);
-			const type = {'.js': 'text/javascript', '.html': 'text/html', '.css': 'text/css'}[path.extname(file)];
+			const type = {'.js': 'text/javascript', '.html': 'text/html', '.css': 'text/css', '.woff2': 'font/woff2'}[path.extname(file)];
 			res.writeHead(200, {'Content-Type': type || 'application/octet-stream'}).end(body);
 		} catch { res.writeHead(404).end(); }
 	});
@@ -43,11 +43,12 @@ const replay = {
 		for (const width of [1440, 1000, 390, 320]) {
 			const page = await browser.newPage({viewport: {width, height: 844}});
 			const errors = [];
+			let currentReplay = replay;
 			page.on('pageerror', error => errors.push(error.message));
 			await page.route('**/*', async route => {
 				const url = route.request().url();
 				if (url === `https://copa-rinha-showdown.onrender.com/copa-rinha/replays/${id}`) {
-					await route.fulfill({json: replay});
+					await route.fulfill({json: currentReplay});
 				} else if (url.endsWith('/js/copa-replay.js')) {
 					// Expose the real native engine only in this test; do not replace its implementation.
 					const response = await route.fetch();
@@ -64,10 +65,15 @@ const replay = {
 			});
 			await page.goto(`http://127.0.0.1:${server.address().port}/replay.html?id=${id}`);
 			await page.waitForFunction(() => document.getElementById('status').textContent === 'Replay carregado.');
+			const assertCounter = async () => {
+				assert.equal(await page.locator('#turn').inputValue(), String(await page.evaluate(() => Math.max(0, testBattle.turn))));
+			};
+			await assertCounter();
 			const metadata = await page.locator('#metadata').textContent();
 			assert(metadata.includes('Alice × Bob')); assert(!metadata.includes('gen9coparinhanationaldexza')); assert(metadata.includes('Forfeit'));
 			await page.locator('#turn').fill('3'); await page.locator('#turn-form button').click();
 			await page.waitForFunction(() => testBattle.turn === 3 && testBattle.seeking === null);
+			await assertCounter();
 			const state = () => page.evaluate(() => ({
 				near: testBattle.nearSide.name, far: testBattle.farSide.name,
 				nearSpecies: testBattle.nearSide.active[0].speciesForme,
@@ -103,11 +109,15 @@ const replay = {
 			await page.locator('#viewpoint').click();
 			await page.locator('#turn').fill('3'); await page.locator('#turn-form button').click();
 			await page.waitForFunction(() => testBattle.turn === 3 && testBattle.seeking === null);
+			await assertCounter();
 			assert(await page.evaluate(() => testBattle.paused));
+			await assertCounter();
 			await page.locator('#next').click();
 			await page.waitForFunction(() => testBattle.turn === 4 && testBattle.seeking === null);
+			await assertCounter();
 			await page.locator('#previous').click();
 			await page.waitForFunction(() => testBattle.turn === 3 && testBattle.seeking === null);
+			await assertCounter();
 			await page.locator('#speed').selectOption('hyperfast');
 			assert.deepEqual(await page.evaluate(() => [testBattle.messageFadeTime, testBattle.messageShownTime]), [40, 1]);
 			await page.locator('#end').click();
@@ -120,16 +130,51 @@ const replay = {
 			assert(await page.evaluate(() => testBattle.stepQueue.join('\n').includes('|-terastallize|')));
 			await page.locator('#restart').click();
 			assert(await page.evaluate(() => testBattle.paused && !testBattle.atQueueEnd && testBattle.turn <= 0));
+			await assertCounter();
 			await page.locator('#turn').fill('4'); await page.locator('#turn-form button').click();
 			await page.waitForFunction(() => testBattle.turn === 4 && testBattle.seeking === null);
+			await assertCounter();
 			assert.equal(await page.evaluate(() => testBattle.p1.active[0].teraType), 'Ground');
 			await page.locator('#end').click(); await page.waitForFunction(() => testBattle.atQueueEnd);
 			await page.locator('#copy').click();
-			await page.waitForFunction(() => /Link copiado|Copie o endereço/.test(document.getElementById('status').textContent));
+			await page.waitForFunction(() => /Link copiado|Copie o endereço/.test(document.getElementById('copy-feedback').textContent));
+			const toast = await page.locator('#copy-feedback').boundingBox();
+			assert(toast && toast.x >= 0 && toast.x + toast.width <= width);
+			await page.waitForFunction(() => document.getElementById('copy-feedback').hidden);
+			assert(await page.evaluate(() => document.fonts.check('700 30px "Barlow Condensed"')));
+			assert(await page.evaluate(() => document.fonts.check('400 14px Inter')));
+			await assertCounter();
 			assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
 			assert.deepEqual(errors, []);
 			console.log(`Native replay controls, double viewpoint switch, forfeit and layout passed at ${width}px`);
 			if (process.env.REPLAY_SCREENSHOTS) await page.screenshot({path: path.join(process.env.REPLAY_SCREENSHOTS, `replay-${width}.png`), fullPage: true});
+			// Regression: a real one-turn forfeit must show 1 / 1, never a stale draft/placeholder.
+			currentReplay = {...replay, turns: 1, log: log.slice(0, log.indexOf('|turn|2')) + '|-message|Bob forfeited.\n|win|Alice',
+				players: [{name: 'LongPlayerNameAlpha'}, {name: 'LongPlayerNameBravo'}]};
+			await page.reload();
+			await page.waitForFunction(() => document.getElementById('status').textContent === 'Replay carregado.');
+			await assertCounter();
+			await page.locator('#speed').selectOption('hyperfast');
+			await page.locator('#play').click();
+			await page.waitForFunction(() => testBattle.atQueueEnd);
+			await assertCounter();
+			assert.equal(await page.locator('#turn').inputValue(), '1');
+			assert.equal(await page.locator('#turn-total').textContent(), '/ 1');
+			assert((await page.locator('.battle .turn').textContent()).includes('1'));
+			await page.locator('#viewpoint').click(); await page.locator('#viewpoint').click();
+			await assertCounter();
+			await page.locator('#restart').click(); await assertCounter();
+			assert.equal(await page.locator('#turn').inputValue(), '0');
+			await page.locator('#turn').fill('1'); await page.locator('#turn-form button').click();
+			await page.waitForFunction(() => testBattle.turn === 1 && testBattle.seeking === null);
+			await assertCounter();
+			await page.locator('#previous').click(); await assertCounter();
+			await page.locator('#next').click();
+			await page.locator('#end').click(); await page.waitForFunction(() => testBattle.atQueueEnd);
+			await assertCounter();
+			assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+			assert.deepEqual(errors, []);
+			console.log(`One-turn forfeit counter and long player names passed at ${width}px`);
 			await page.close();
 		}
 	} finally {

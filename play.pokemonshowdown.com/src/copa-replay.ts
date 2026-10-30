@@ -42,6 +42,7 @@ async function loadCopaReplay() {
 		const next = document.getElementById('next')! as HTMLButtonElement;
 		const end = document.getElementById('end')! as HTMLButtonElement;
 		const viewpoint = document.getElementById('viewpoint')!;
+		const turnInput = document.getElementById('turn')! as HTMLInputElement;
 		const updateControls = () => {
 			const atEnd = battle.atQueueEnd;
 			play.hidden = !battle.paused && !atEnd;
@@ -51,7 +52,10 @@ async function loadCopaReplay() {
 			next.disabled = end.disabled = atEnd;
 			viewpoint.setAttribute('aria-pressed', String(battle.viewpointSwitched));
 			const nearPlayer = replay.players[battle.viewpointSwitched ? 1 : 0]?.name || '';
-			document.getElementById('perspective')!.textContent = `Perspectiva: ${nearPlayer}`;
+			document.getElementById('perspective-name')!.textContent = nearPlayer;
+			// Battle.turn is -1 before playback, 0 at preview, then the actual protocol turn.
+			// Preserve an in-progress seek destination while the user is typing.
+			if (document.activeElement !== turnInput) turnInput.value = String(Math.max(0, battle.turn));
 			document.getElementById('turn-position')!.textContent =
 				`Turno ${Math.max(0, battle.turn)} de ${replay.turns}${atEnd ? ' · Fim do replay' : ''}`;
 		};
@@ -74,6 +78,7 @@ async function loadCopaReplay() {
 			const input = document.getElementById('turn')! as HTMLInputElement;
 			const turn = Number(input.value);
 			if (!input.value.trim() || !Number.isSafeInteger(turn) || turn < 0) return;
+			input.blur();
 			battle.seekTurn(turn);
 		};
 		document.getElementById('speed')!.onchange = event => {
@@ -88,23 +93,32 @@ async function loadCopaReplay() {
 		};
 		document.getElementById('controls')!.hidden = false;
 		updateControls();
+		const feedback = document.getElementById('copy-feedback')!;
+		let feedbackTimer: ReturnType<typeof setTimeout> | undefined;
+		const showFeedback = (message: string, temporary = false) => {
+			clearTimeout(feedbackTimer);
+			feedback.textContent = message;
+			feedback.hidden = false;
+			if (temporary) feedbackTimer = setTimeout(() => { feedback.hidden = true; }, 2000);
+		};
 		document.getElementById('copy')!.onclick = async () => {
 			try {
 				await navigator.clipboard.writeText(location.href);
-				status.textContent = 'Link copiado.';
+				showFeedback('Link copiado', true);
 			} catch {
-				status.textContent = `Copie o endereço: ${location.href}`;
+				showFeedback(`Copie o endereço: ${location.href}`);
 			}
 		};
 		const resize = () => {
 			const width = document.getElementById('viewport')!.clientWidth;
-			const scale = Math.min(1, width / 640);
+			const scale = width / 640;
 			document.getElementById('arena')!.style.transform = `scale(${scale})`;
 			document.getElementById('viewport')!.style.height = `${360 * scale}px`;
 		};
 		window.addEventListener('resize', resize);
 		resize();
 		status.textContent = 'Replay carregado.';
+		status.className = 'sr-only';
 	} catch (error) {
 		const known = error instanceof Error && ['Replay não encontrado.', 'Replay inválido.'].includes(error.message);
 		status.textContent = known ? error.message : 'Não foi possível carregar o replay. Tente novamente.';

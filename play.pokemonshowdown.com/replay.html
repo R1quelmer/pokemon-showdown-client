@@ -8,10 +8,10 @@
 <link rel="stylesheet" href="style/utilichart.css">
 <link rel="stylesheet" href="style/copa-replay.css">
 <main>
-<header class="site-header"><a class="wordmark" href="/">COPA RINHA<span>REPLAY</span></a><span class="header-note">A batalha, de novo.</span></header>
+<header class="site-header"><a class="wordmark" href="/">COPA RINHA<span>REPLAY</span></a></header>
 <section class="match-info" aria-label="Informações da partida">
 <div id="metadata"><h1 id="match-players">Replay da Copa Rinha</h1><p id="match-details"></p><p id="match-winner" class="winner"></p></div>
-<button id="copy" class="copy-button" title="Copiar link do replay">Copiar link <span aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m10 13 4-4M8 16l-1 1a4 4 0 0 1-6-6l4-4a4 4 0 0 1 6 0m2 1 1-1a4 4 0 0 1 6 6l-4 4a4 4 0 0 1-6 0"/></svg></span></button>
+<button id="copy" class="copy-button" title="Copiar link do replay">Copiar link <span aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m10 13 4-4M8 16l-1 1a4 4 0 0 1-6-6l4-4a4 4 0 0 1 6 0m2 1 1-1a4 4 0 0 1 6 6l-4 4a4 4 0 0 1-6 0"/></svg></span></button><span id="copy-feedback" class="copy-feedback" role="status" hidden></span>
 </section>
 <p id="status" role="status">Carregando replay…</p>
 <div class="player-shell"><div id="viewport"><div id="arena"><div class="battle"></div></div></div></div>
@@ -31,7 +31,7 @@
 <option value="reallyslow">Muito lenta</option>
 </select></label>
 </div>
-<div class="perspective-control"><span id="perspective"></span><button id="viewpoint" aria-pressed="false" title="Trocar perspectiva da batalha">Trocar lados <span aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 8h16m-4-4 4 4-4 4M20 16H4m4-4-4 4 4 4"/></svg></span></button></div>
+<div class="perspective-control"><span id="perspective"><span>Perspectiva: </span><strong id="perspective-name"></strong></span><button id="viewpoint" aria-pressed="false" title="Trocar perspectiva da batalha">Trocar lados <span aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 8h16m-4-4 4 4-4 4M20 16H4m4-4-4 4 4 4"/></svg></span></button></div>
 <p id="turn-position" class="sr-only" role="status"></p>
 </section>
 <section class="log-section" aria-labelledby="log-heading"><div class="section-heading"><h2 id="log-heading">LOG DA BATALHA</h2><span>Registro da partida</span></div><div class="battle-log"></div></section>

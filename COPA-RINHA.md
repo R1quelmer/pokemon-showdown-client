@@ -262,3 +262,38 @@ Validação: `npm test` (TypeScript, lint, 165 aprovados e 1 ignorado) e
 em 1440, 1000, 390 e 320 px, sem overflow horizontal. Para capturas locais,
 defina `REPLAY_SCREENSHOTS` para um diretório existente. A API é mockada e os
 recursos externos de sprites/áudio são bloqueados na QA automatizada.
+
+## Refinamento final de tipografia, escala e feedback
+
+Barlow Condensed 600/700/800 e Inter 400/500/600 são servidas localmente em
+`style/fonts/`, com `font-display: swap` e fallbacks de sistema. Os arquivos Latin
+incluem acentos portugueses e as respectivas licenças OFL. Origem: pacotes
+`@fontsource/barlow-condensed@5.3.0` e `@fontsource/inter@5.3.0`. Nenhuma fonte exige
+chamada a terceiros. Barlow identifica marca, jogadores e seções; Inter atende
+metadados, controles e log. A frase do canto direito foi removida, o topo foi
+compactado e o contraste do log/controles foi refinado.
+
+O conjunto principal tem 960 px úteis no desktop. A cena continua com geometria
+nativa de 640 × 360 e recebe uma única escala uniforme baseada na largura do
+viewport, incluindo a altura correspondente. Não há alteração nos sprites,
+protocolo, mecânicas ou implementação do BattleScene/switchViewpoint.
+
+O antigo “Turno 0 / 1” era um campo de navegação não sincronizado: o placeholder
+ou último destino digitado permanecia visível, embora Battle.turn e o campo
+nativo já estivessem no turno 1. O campo agora acompanha a assinatura do motor,
+com -1 (antes do início) apresentado como 0 e os turnos reais sem deslocamento.
+Um destino em edição é preservado; ao enviar a busca, o campo perde foco e volta
+a refletir o turno exibido. Reset, seek, fim e forfeit são cobertos no navegador.
+
+Copiar link usa feedback acessível posicionado fora do fluxo, por dois segundos.
+Cópias repetidas reiniciam o prazo. Se o clipboard falhar, o endereço permanece
+no feedback para cópia manual. O status de carregamento continua acessível e
+falhas de carregamento continuam visíveis.
+
+Validação: `npm test` aprovou build incremental, TypeScript do cliente/build-tools,
+ESLint e 168 testes (1 ignorado), incluindo 11 testes unitários do replay.
+Chromium com motor nativo, API mockada e fontes locais aprovou 1440, 1000, 390 e
+320 px, com todos os controles anteriores, contador em replay de um turno,
+forfeit, nomes longos, toast visível dentro da tela e desaparecimento automático.
+Sprites/áudio da CDN são bloqueados nesse teste; as capturas validam layout e
+estado do motor, sem atestar carregamento desses recursos externos em produção.

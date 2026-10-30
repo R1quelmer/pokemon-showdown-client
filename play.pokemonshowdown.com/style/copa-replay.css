@@ -1,25 +1,31 @@
+@font-face{font-family:"Barlow Condensed";font-style:normal;font-weight:600;font-display:swap;src:url("fonts/barlow-condensed/barlow-condensed-latin-600-normal.woff2") format("woff2")}
+@font-face{font-family:"Barlow Condensed";font-style:normal;font-weight:700;font-display:swap;src:url("fonts/barlow-condensed/barlow-condensed-latin-700-normal.woff2") format("woff2")}
+@font-face{font-family:"Barlow Condensed";font-style:normal;font-weight:800;font-display:swap;src:url("fonts/barlow-condensed/barlow-condensed-latin-800-normal.woff2") format("woff2")}
+@font-face{font-family:"Inter";font-style:normal;font-weight:400;font-display:swap;src:url("fonts/inter/inter-latin-400-normal.woff2") format("woff2")}
+@font-face{font-family:"Inter";font-style:normal;font-weight:500;font-display:swap;src:url("fonts/inter/inter-latin-500-normal.woff2") format("woff2")}
+@font-face{font-family:"Inter";font-style:normal;font-weight:600;font-display:swap;src:url("fonts/inter/inter-latin-600-normal.woff2") format("woff2")}
 /* Copa Rinha page chrome. Battle arena keeps its native Showdown styling. */
 :root{color-scheme:dark;--page:#080f1b;--surface:#101c2c;--line:#243246;--text:#f0f5fa;--muted:#93a7bd;--accent:#59d9f5}
 [hidden]{display:none!important}
 body{margin:0;background:var(--page);color:var(--text);font:14px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-main{box-sizing:border-box;max-width:784px;margin:auto;padding:0 24px}
-.site-header{height:88px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}
+main{box-sizing:border-box;max-width:1008px;margin:auto;padding:0 24px}
+.site-header{height:72px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}
 .wordmark{color:var(--text);font-size:15px;font-weight:850;letter-spacing:2px;text-decoration:none;display:flex;align-items:center;gap:16px}
 .wordmark span{border-left:1px solid var(--line);padding-left:16px;color:var(--accent);font-size:10px;font-weight:600;letter-spacing:2px}
 .header-note{color:var(--muted);font-size:11px}
-.match-info{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:28px 0 20px}
+.match-info{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 0 14px}
 #metadata{min-width:0}h1{font-size:28px;line-height:1.2;letter-spacing:-.8px;margin:0 0 10px;font-weight:700;overflow-wrap:anywhere}
 #match-details{font-size:12px;color:var(--muted);margin:0;line-height:1.8}
 .winner{display:inline-flex;align-items:center;gap:7px;font-size:11px;color:var(--accent);margin:10px 0 0}
 .winner:empty{display:none}.winner:not(:empty):before{content:"";width:5px;height:5px;border-radius:50%;background:var(--accent)}
 #controls button,#controls input,#controls select,.copy-button{box-sizing:border-box;font:inherit;border:1px solid transparent;border-radius:5px;max-width:100%}
 #controls button,.copy-button{cursor:pointer;color:var(--text);background:transparent;min-height:40px;padding:8px 10px;transition:background .15s,color .15s}
-#controls button:hover,.copy-button:hover{background:#203047}#controls button:disabled{opacity:.3;cursor:default}#controls button:disabled:hover{background:transparent}
+#controls button:hover,.copy-button:hover{background:#203047}#controls button:disabled{opacity:.55;cursor:default}#controls button:disabled:hover{background:transparent}
 #controls button:focus-visible,#controls input:focus-visible,#speed:focus-visible,.copy-button:focus-visible,.wordmark:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 .copy-button{white-space:nowrap;color:var(--muted);font-size:12px;flex-shrink:0}.copy-button span{margin-left:6px;color:var(--accent)}
 #status{font-size:12px;color:var(--muted);overflow-wrap:anywhere;min-height:18px;margin:0 0 10px}
 .player-shell{background:#060b12;border:1px solid var(--line);border-radius:8px 8px 0 0;overflow:hidden}
-#viewport{overflow:hidden;max-width:640px;margin:auto}
+#viewport{overflow:hidden;max-width:960px;margin:auto}
 #arena{position:relative;width:640px;height:360px;transform-origin:top left}
 .battle{position:absolute;top:0;left:0;color-scheme:light}
 /* Preserve native arena geometry, fonts, sprites, field and statbars. */
@@ -39,7 +45,38 @@ main{box-sizing:border-box;max-width:784px;margin:auto;padding:0 24px}
 .battle-log .inner{padding:0}.battle-log .chat{color:#a9bacd}.battle-log .battle-history{color:#a9bacd}.battle-log h2{background:#142235;color:#d7e2ef;border-color:var(--line);font-size:12px}.battle-log a{color:var(--accent)}.battle-log .message-error{color:#ffaca5}
 footer{display:flex;justify-content:space-between;padding:22px 0 28px;color:#526880;font-size:9px;font-weight:600;letter-spacing:1.8px}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-@media(max-width:600px){main{padding:0 10px}.site-header{height:64px}.header-note{display:none}.match-info{padding:22px 2px 16px;align-items:flex-start;gap:8px}h1{font-size:23px}#match-details{font-size:11px}.copy-button{font-size:0;min-width:36px;padding:6px}.copy-button span{font-size:18px;margin:0}#controls{padding:8px;gap:8px}.transport{flex-basis:100%;justify-content:space-between;gap:2px}.icon-button{width:42px;min-height:44px}.primary{min-height:44px;min-width:116px}.playback-options{justify-content:space-between;width:100%}#turn-form{font-size:12px}#turn{width:48px;min-height:38px}#speed{min-height:38px;width:125px}.go-button{min-height:38px;padding:5px 8px}.perspective-control{padding-top:6px}#viewpoint{min-height:40px}.log-section{margin-top:24px}.battle-log{height:210px;padding:10px;font-size:12px}}
+@media(max-width:600px){main{padding:0 10px}.site-header{height:58px}.header-note{display:none}.match-info{padding:18px 2px 12px;align-items:flex-start;gap:8px}h1{font-size:23px}#match-details{font-size:11px}.copy-button{font-size:0;min-width:36px;padding:6px}.copy-button span{font-size:18px;margin:0}#controls{padding:8px;gap:8px}.transport{flex-basis:100%;justify-content:space-between;gap:2px}.icon-button{width:42px;min-height:44px}.primary{min-height:44px;min-width:116px}.playback-options{justify-content:space-between;width:100%}#turn-form{font-size:12px}#turn{width:48px;min-height:38px}#speed{min-height:38px;width:125px}.go-button{min-height:38px;padding:5px 8px}.perspective-control{padding-top:6px}#viewpoint{min-height:40px}.log-section{margin-top:24px}.battle-log{height:210px;padding:10px;font-size:12px}}
 @media(prefers-reduced-motion:reduce){#controls button,.copy-button{transition:none}}
 
 .copy-button svg,#viewpoint svg{width:16px;height:16px;vertical-align:middle;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+
+/* Final typography and proportional refinement; arena stays at native 640 × 360. */
+body{font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.wordmark,h1,.section-heading h2,footer{font-family:"Barlow Condensed","Arial Narrow",sans-serif}
+.wordmark{font-size:22px;font-weight:800;letter-spacing:.8px}
+.wordmark span{font-size:13px;font-weight:600;letter-spacing:1px}
+h1{font-size:36px;font-weight:700;letter-spacing:0;margin-bottom:7px}
+#match-details{color:#a5b5c8;line-height:1.7}.winner{font-weight:500;margin-top:8px}
+.match-info{position:relative}
+#status{margin-bottom:8px}
+#controls{gap:10px;padding:10px 12px}
+#controls .icon-button{width:40px;min-height:40px;padding:8px;flex-shrink:0}
+.icon-button svg{width:19px;height:19px;stroke-width:1.9}
+#controls .primary{background:var(--accent);color:#07131e;font-size:12px;font-weight:600;min-height:40px;min-width:120px}
+#controls .primary:hover{background:#8be5fa}
+#controls button:disabled{opacity:.55;color:#a4b4c8}
+#controls input,#controls select{font-size:12px;font-weight:400}
+#controls .go-button{min-height:36px;padding:5px 8px;color:var(--accent);font-size:12px}
+#speed{width:134px;min-height:36px}#turn{min-height:36px}
+#perspective{font-weight:400}#perspective strong{color:#d4e1ee;font-weight:500}
+#viewpoint{font-size:12px}#controls #viewpoint{min-height:36px}
+.section-heading h2{font-size:14px;letter-spacing:1px;font-weight:600}
+.section-heading>span{color:#91a3b8}
+.battle-log{font-family:Inter,system-ui,sans-serif;color:#b9c8d8;line-height:1.7}
+.battle-log .battle-history,.battle-log .chat{color:#b9c8d8}
+.battle-log .chat small,.battle-log .message small,.battle-log .battle-history small{color:#9fb2c8}
+.battle-log .battle-history strong,.battle-log .chat strong{color:#dbe6f1}
+.battle-log .spacer{background:transparent}
+footer{font-size:12px;letter-spacing:1px}
+.copy-feedback{position:absolute;right:0;top:calc(100% - 6px);z-index:10;max-width:min(360px,100%);box-sizing:border-box;padding:8px 12px;background:#163342;color:#d6f6fd;border:1px solid #2e6073;border-radius:5px;font-size:12px;overflow-wrap:anywhere;box-shadow:0 3px 10px #0003}
+@media(max-width:600px){h1{font-size:30px}.wordmark{font-size:21px}#controls .icon-button{min-height:44px;width:36px;padding:7px}#controls .primary{min-height:44px;min-width:116px;font-size:11px;padding:8px}#controls{padding:8px;gap:8px}#controls #viewpoint{min-height:40px}#speed{min-height:40px}#turn{min-height:40px}#controls .go-button{min-height:40px}.copy-feedback{right:2px;max-width:calc(100% - 4px)}}
