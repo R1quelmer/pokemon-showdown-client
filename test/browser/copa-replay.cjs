@@ -40,7 +40,7 @@ const replay = {
 		browser = await chromium.launch({
 			executablePath: process.env.CHROMIUM_PATH || undefined, args: ['--no-sandbox'],
 		});
-		for (const width of [1000, 390, 320]) {
+		for (const width of [1440, 1000, 390, 320]) {
 			const page = await browser.newPage({viewport: {width, height: 844}});
 			const errors = [];
 			page.on('pageerror', error => errors.push(error.message));
@@ -65,7 +65,7 @@ const replay = {
 			await page.goto(`http://127.0.0.1:${server.address().port}/replay.html?id=${id}`);
 			await page.waitForFunction(() => document.getElementById('status').textContent === 'Replay carregado.');
 			const metadata = await page.locator('#metadata').textContent();
-			assert(metadata.includes('Alice × Bob')); assert(metadata.includes('forfeit'));
+			assert(metadata.includes('Alice × Bob')); assert(!metadata.includes('gen9coparinhanationaldexza')); assert(metadata.includes('Forfeit'));
 			await page.locator('#turn').fill('3'); await page.locator('#turn-form button').click();
 			await page.waitForFunction(() => testBattle.turn === 3 && testBattle.seeking === null);
 			const state = () => page.evaluate(() => ({
@@ -129,6 +129,7 @@ const replay = {
 			assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
 			assert.deepEqual(errors, []);
 			console.log(`Native replay controls, double viewpoint switch, forfeit and layout passed at ${width}px`);
+			if (process.env.REPLAY_SCREENSHOTS) await page.screenshot({path: path.join(process.env.REPLAY_SCREENSHOTS, `replay-${width}.png`), fullPage: true});
 			await page.close();
 		}
 	} finally {

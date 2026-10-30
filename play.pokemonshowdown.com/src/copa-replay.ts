@@ -23,7 +23,14 @@ async function loadCopaReplay() {
 			typeof replay.log !== 'string' || !Array.isArray(replay.players)) {
 			throw new Error('Replay inválido.');
 		}
-		document.getElementById('metadata')!.textContent = `${replay.players.map((p: { name: string }) => p.name).join(' × ')} · ${replay.format} · ${new Date(replay.createdAt).toLocaleString('pt-BR')} · ${replay.winner ? `Vencedor: ${replay.winner}` : 'Empate'} · ${replay.turns} turnos · ${replay.endType}`;
+		document.getElementById('match-players')!.textContent =
+			replay.players.map((p: { name: string }) => p.name).join(' × ');
+		const endLabels: Record<string, string> = { normal: 'Vitória', forfeit: 'Forfeit', tie: 'Empate', forced: 'Encerrada' };
+		document.getElementById('match-details')!.textContent =
+			`National Dex ZA · ${new Date(replay.createdAt).toLocaleString('pt-BR')} · ` +
+			`${replay.turns} ${replay.turns === 1 ? 'turno' : 'turnos'} · ${endLabels[replay.endType] || 'Encerrada'}`;
+		document.getElementById('match-winner')!.textContent = replay.winner ? `Vencedor: ${replay.winner}` : 'Empate';
+		document.getElementById('turn-total')!.textContent = `/ ${replay.turns}`;
 		const battle = new Battle({
 			id: `battle-${replay.format}-${id}` as ID, $frame: $('.battle'), $logFrame: $('.battle-log'),
 			log: replay.log.split('\n'), isReplay: true, paused: true,
@@ -44,7 +51,7 @@ async function loadCopaReplay() {
 			next.disabled = end.disabled = atEnd;
 			viewpoint.setAttribute('aria-pressed', String(battle.viewpointSwitched));
 			const nearPlayer = replay.players[battle.viewpointSwitched ? 1 : 0]?.name || '';
-			document.getElementById('perspective')!.textContent = `Embaixo: ${nearPlayer}`;
+			document.getElementById('perspective')!.textContent = `Perspectiva: ${nearPlayer}`;
 			document.getElementById('turn-position')!.textContent =
 				`Turno ${Math.max(0, battle.turn)} de ${replay.turns}${atEnd ? ' · Fim do replay' : ''}`;
 		};

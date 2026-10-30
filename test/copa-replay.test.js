@@ -8,6 +8,12 @@ async function load({search = `?id=${id}`, status = 200, fail = false, endType =
 	const elements = new Map();
 	const element = key => {
 		if (!elements.has(key)) elements.set(key, {textContent: '', style: {}, clientWidth: 320, hidden: true, value: '', setAttribute(key, value) { this[key] = value; }});
+		if (key === 'metadata' && !elements.get(key).composite) {
+			Object.defineProperty(elements.get(key), 'textContent', {get() {
+				return ['match-players', 'match-details', 'match-winner'].map(id => element(id).textContent).join(' ');
+			}});
+			elements.get(key).composite = true;
+		}
 		return elements.get(key);
 	};
 	let options; let requested; let battle; const calls = [];
@@ -76,17 +82,17 @@ test('switches native viewpoint twice, preserves metadata/log and keeps playback
 	const {element, battle, calls, options} = await load();
 	const metadata = element('metadata').textContent;
 	const log = options.log.join('\n');
-	assert.equal(element('perspective').textContent, 'Embaixo: <Alice>');
+	assert.equal(element('perspective').textContent, 'Perspectiva: <Alice>');
 	element('viewpoint').onclick();
 	assert.equal(battle.viewpointSwitched, true);
 	assert.equal(element('viewpoint')['aria-pressed'], 'true');
-	assert.equal(element('perspective').textContent, 'Embaixo: Bob');
+	assert.equal(element('perspective').textContent, 'Perspectiva: Bob');
 	element('play').onclick(); assert.equal(battle.paused, false);
 	element('pause').onclick(); assert.equal(battle.paused, true);
 	element('next').onclick(); assert.equal(battle.turn, 1);
 	element('previous').onclick(); assert.equal(battle.turn, 0);
 	element('viewpoint').onclick(); assert.equal(battle.viewpointSwitched, false);
-	assert.equal(element('perspective').textContent, 'Embaixo: <Alice>');
+	assert.equal(element('perspective').textContent, 'Perspectiva: <Alice>');
 	assert.equal(calls.filter(call => call === 'switchViewpoint').length, 2);
 	assert.equal(element('metadata').textContent, metadata);
 	assert.equal(options.log.join('\n'), log);
@@ -124,7 +130,7 @@ test('uses every official speed timing and updates native scene acceleration', a
 });
 test('forfeit replay preserves all metadata, log, perspective and controls', async () => {
 	const {element, options, battle} = await load({endType: 'forfeit'});
-	for (const text of ['<Alice> × Bob', 'gen9coparinhanationaldexza', '29/10/2026', 'Vencedor: <Alice>', '7 turnos', 'forfeit']) {
+	for (const text of ['<Alice> × Bob', 'National Dex ZA', '29/10/2026', 'Vencedor: <Alice>', '7 turnos', 'Forfeit']) {
 		assert(element('metadata').textContent.includes(text));
 	}
 	element('viewpoint').onclick(); element('end').onclick();

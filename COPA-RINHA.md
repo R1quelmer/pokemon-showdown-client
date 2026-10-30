@@ -248,3 +248,17 @@ Diferenças restantes frente ao site oficial: esta página mantém o layout e os
 metadados próprios da Copa Rinha; não inclui atalhos globais de teclado,
 seletor de tema, controles de volume/música, download de HTML nem persistência
 de perspectiva/turno na URL. A reprodução continua iniciando sem áudio.
+
+## Redesign visual do replay
+
+A página usa `style/copa-replay.css` para a identidade azul-marinho/ciano,
+cabeçalho compacto, metadados separados, controles agrupados e log escuro.
+O ID técnico do formato é apresentado como “National Dex ZA”; os textos da
+perspectiva e do encerramento são formatados apenas para exibição. As APIs,
+handlers, player e protocolo permanecem os mesmos da etapa aprovada.
+
+Validação: `npm test` (TypeScript, lint, 165 aprovados e 1 ignorado) e
+`CHROMIUM_PATH=/usr/bin/chromium npm run test:replay-browser`, com player nativo
+em 1440, 1000, 390 e 320 px, sem overflow horizontal. Para capturas locais,
+defina `REPLAY_SCREENSHOTS` para um diretório existente. A API é mockada e os
+recursos externos de sprites/áudio são bloqueados na QA automatizada.

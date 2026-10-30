@@ -6,50 +6,36 @@
 <link rel="stylesheet" href="style/battle.css">
 <link rel="stylesheet" href="style/replay.css">
 <link rel="stylesheet" href="style/utilichart.css">
-<style>
-[hidden]{display:none!important}
-body{margin:0;padding:12px;background:#eef1f5;color:#222;font:16px system-ui}
-main{max-width:1000px;min-width:0;margin:auto}
-button,select,input{font:inherit;padding:10px;margin:4px;max-width:100%;box-sizing:border-box}
-button{cursor:pointer}button:disabled{cursor:default}
-#arena{position:relative;width:640px;height:360px;transform-origin:top left}
-.battle{position:absolute;top:0;left:0}
-.battle-log{position:relative;top:auto;left:auto;right:auto;height:240px;width:auto;margin:12px 0;overflow:auto;background:white}
-#viewport{overflow:hidden}#status{padding:12px}
-#controls{background:white;padding:8px;border-radius:8px}
-.control-row,#turn-form{display:flex;flex-wrap:wrap;align-items:center;gap:4px}
-#turn{width:6em}#metadata,#perspective{overflow-wrap:anywhere}
-#turn-position{margin:4px}h1{font-size:1.5rem}
-</style>
+<link rel="stylesheet" href="style/copa-replay.css">
 <main>
-<h1>Replay da Copa Rinha</h1>
+<header class="site-header"><a class="wordmark" href="/">COPA RINHA<span>REPLAY</span></a><span class="header-note">A batalha, de novo.</span></header>
+<section class="match-info" aria-label="Informações da partida">
+<div id="metadata"><h1 id="match-players">Replay da Copa Rinha</h1><p id="match-details"></p><p id="match-winner" class="winner"></p></div>
+<button id="copy" class="copy-button" title="Copiar link do replay">Copiar link <span aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m10 13 4-4M8 16l-1 1a4 4 0 0 1-6-6l4-4a4 4 0 0 1 6 0m2 1 1-1a4 4 0 0 1 6 6l-4 4a4 4 0 0 1-6 0"/></svg></span></button>
+</section>
 <p id="status" role="status">Carregando replay…</p>
-<p id="metadata"></p>
-<div id="viewport"><div id="arena"><div class="battle"></div></div></div>
+<div class="player-shell"><div id="viewport"><div id="arena"><div class="battle"></div></div></div></div>
 <section id="controls" aria-label="Controles do replay" hidden>
-<p id="turn-position" role="status"></p>
-<div class="control-row">
-<button id="play">Reproduzir</button><button id="pause" hidden>Pausar</button>
-<button id="restart">Reiniciar</button>
-<button id="previous">Turno anterior</button><button id="next">Próximo turno</button>
-<button id="end">Ir para o fim</button>
+<div class="transport" role="group" aria-label="Reprodução">
+<button id="restart" class="icon-button" aria-label="Reiniciar" title="Reiniciar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10a8 8 0 1 1 1 7M4 4v6h6"/></svg></button>
+<button id="previous" class="icon-button" aria-label="Turno anterior" title="Turno anterior"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5v14M18 5l-9 7 9 7Z"/></svg></button>
+<button id="play" class="primary">Reproduzir</button><button id="pause" class="primary" hidden>Pausar</button>
+<button id="next" class="icon-button" aria-label="Próximo turno" title="Próximo turno"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 5v14M6 5l9 7-9 7Z"/></svg></button>
+<button id="end" class="icon-button" aria-label="Ir para o fim" title="Ir para o fim"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 5v14M3 5l7 7-7 7ZM10 5l7 7-7 7Z"/></svg></button>
 </div>
-<form id="turn-form">
-<label for="turn">Ir para o turno</label><input id="turn" type="number" min="0" step="1" inputmode="numeric" required>
-<button type="submit">Ir</button>
-</form>
-<div class="control-row">
-<label>Velocidade <select id="speed">
+<div class="playback-options">
+<form id="turn-form"><label for="turn">Turno</label><input id="turn" type="number" min="0" step="1" inputmode="numeric" placeholder="0" required><span id="turn-total"></span><button type="submit" class="go-button">Ir</button></form>
+<label class="speed-label"><span class="sr-only">Velocidade</span><select id="speed" title="Velocidade de reprodução">
 <option value="hyperfast">Muito rápida</option><option value="fast">Rápida</option>
 <option value="normal" selected>Normal</option><option value="slow">Lenta</option>
 <option value="reallyslow">Muito lenta</option>
 </select></label>
-<button id="viewpoint" aria-pressed="false">Trocar lados</button>
-<button id="copy">Copiar link</button>
 </div>
-<p id="perspective"></p>
+<div class="perspective-control"><span id="perspective"></span><button id="viewpoint" aria-pressed="false" title="Trocar perspectiva da batalha">Trocar lados <span aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 8h16m-4-4 4 4-4 4M20 16H4m4-4-4 4 4 4"/></svg></span></button></div>
+<p id="turn-position" class="sr-only" role="status"></p>
 </section>
-<div class="battle-log"></div>
+<section class="log-section" aria-labelledby="log-heading"><div class="section-heading"><h2 id="log-heading">LOG DA BATALHA</h2><span>Registro da partida</span></div><div class="battle-log"></div></section>
+<footer>COPA RINHA <span>REPLAYS</span></footer>
 </main>
 <script>window.exports = window; window.Config = {routes: {client: 'play.pokemonshowdown.com'}, testclient: true};</script>
 <script src="js/lib/jquery-2.2.4.min.js"></script>
