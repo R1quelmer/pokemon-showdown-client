@@ -308,3 +308,23 @@ O cabeçalho usa 112 px de largura no desktop e 92 px no celular, com altura
 automática, mantendo todo o canvas e a proporção original. “REPLAY” permanece
 ao lado. A QA Chromium verifica carregamento, dimensões naturais, proporção e
 largura exibida em 1440, 1000, 390 e 320 px, além dos controles existentes.
+
+## Últimos ajustes de navegação e proporção
+
+A logo permanece à esquerda, alinhada ao conteúdo, com 140 px no desktop e
+92 px no mobile, sem corte nem alteração do asset. Seu link interno é
+`/copa-rinha.html`, na mesma aba, com cursor de link e aria-label de retorno à
+página inicial. Essa página já existente encaminha ao testclient da Copa Rinha.
+
+A largura útil máxima do conjunto foi reduzida de 960 para 880 px (main externo
+928 px com 24 px de padding por lado). Usar 1050 px aumentaria a versão anterior;
+880 px mantém o player maior que os 640 px originais e diminui moderadamente sua
+altura. O motor e sua escala proporcional não foram alterados. Nas viewports
+desktop testadas de 1440 × 844 e 1000 × 844, a barra de controles cabe na primeira
+tela. Mobile continua usando a largura disponível com as margens atuais.
+
+QA: `npm test` aprovou build incremental, TypeScript, lint e 168 testes (1
+ignorado). Chromium validou 1440, 1000, 390 e 320 px, alinhamento, proporção,
+limite de largura, ausência de overflow, controles e clique real na logo.
+`/copa-rinha.html` respondeu HTTP 200 no servidor local e fez seu encaminhamento
+existente para `testclient-new.html`; não houve solicitação à raiz `/`.

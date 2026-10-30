@@ -77,8 +77,29 @@ const replay = {
 			}));
 			assert.equal(logo.naturalWidth, 3344); assert.equal(logo.naturalHeight, 1882);
 			assert(Math.abs(logo.width / logo.height - 3344 / 1882) < 0.01);
-			assert.equal(logo.width, width <= 600 ? 92 : 112);
+			assert.equal(logo.width, width <= 600 ? 92 : 140);
 			assert.equal(await page.locator('.wordmark span').textContent(), 'REPLAY');
+			assert.equal(await page.locator('.wordmark').getAttribute('href'), '/copa-rinha.html');
+			assert.equal(await page.locator('.wordmark').getAttribute('target'), null);
+			assert((await page.locator('.wordmark').getAttribute('aria-label')).includes('página inicial'));
+			const layout = await page.evaluate(() => {
+				const rect = selector => {
+					const {x, right, width, height, bottom} = document.querySelector(selector).getBoundingClientRect();
+					return {x, right, width, height, bottom};
+				};
+				return {brand: rect('.brand-logo'), label: rect('.wordmark span'), player: rect('.player-shell'),
+					viewport: rect('#viewport'), controls: rect('#controls')};
+			});
+			assert.equal(layout.brand.x, layout.player.x);
+			assert(layout.label.x >= layout.brand.right);
+			assert(layout.viewport.width <= 880);
+			assert(Math.abs(layout.viewport.width / layout.viewport.height - 640 / 360) < 0.01);
+			if (width >= 1000) {
+				assert.equal(layout.player.width, 880);
+				assert(layout.controls.bottom <= 844);
+			} else {
+				assert(layout.player.width >= width - 20);
+			}
 			const metadata = await page.locator('#metadata').textContent();
 			assert(metadata.includes('Alice × Bob')); assert(!metadata.includes('gen9coparinhanationaldexza')); assert(metadata.includes('Forfeit'));
 			await page.locator('#turn').fill('3'); await page.locator('#turn-form button').click();
@@ -185,6 +206,13 @@ const replay = {
 			assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
 			assert.deepEqual(errors, []);
 			console.log(`One-turn forfeit counter and long player names passed at ${width}px`);
+			const [home] = await Promise.all([
+				page.waitForResponse(response => new URL(response.url()).pathname === '/copa-rinha.html'),
+				page.locator('.wordmark').click(),
+			]);
+			assert.equal(home.status(), 200);
+			await page.waitForURL(url => url.pathname === '/testclient-new.html', {waitUntil: 'commit'});
+			console.log(`Logo navigation to /copa-rinha.html returned 200 at ${width}px`);
 			await page.close();
 		}
 	} finally {

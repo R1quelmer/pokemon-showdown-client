@@ -8,9 +8,9 @@
 :root{color-scheme:dark;--page:#080f1b;--surface:#101c2c;--line:#243246;--text:#f0f5fa;--muted:#93a7bd;--accent:#59d9f5}
 [hidden]{display:none!important}
 body{margin:0;background:var(--page);color:var(--text);font:14px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-main{box-sizing:border-box;max-width:1008px;margin:auto;padding:0 24px}
-.site-header{height:72px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}
-.wordmark{color:var(--text);font-size:15px;font-weight:850;letter-spacing:2px;text-decoration:none;display:flex;align-items:center;gap:16px}
+main{box-sizing:border-box;max-width:928px;margin:auto;padding:0 24px}
+.site-header{height:84px;display:flex;align-items:center;justify-content:flex-start;border-bottom:1px solid var(--line)}
+.wordmark{cursor:pointer;margin:0;flex:0 0 auto;color:var(--text);font-size:15px;font-weight:850;letter-spacing:2px;text-decoration:none;display:flex;align-items:center;gap:16px}
 .wordmark span{border-left:1px solid var(--line);padding-left:16px;color:var(--accent);font-size:10px;font-weight:600;letter-spacing:2px}
 .header-note{color:var(--muted);font-size:11px}
 .match-info{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 0 14px}
@@ -25,7 +25,7 @@ main{box-sizing:border-box;max-width:1008px;margin:auto;padding:0 24px}
 .copy-button{white-space:nowrap;color:var(--muted);font-size:12px;flex-shrink:0}.copy-button span{margin-left:6px;color:var(--accent)}
 #status{font-size:12px;color:var(--muted);overflow-wrap:anywhere;min-height:18px;margin:0 0 10px}
 .player-shell{background:#060b12;border:1px solid var(--line);border-radius:8px 8px 0 0;overflow:hidden}
-#viewport{overflow:hidden;max-width:960px;margin:auto}
+#viewport{overflow:hidden;max-width:880px;margin:auto}
 #arena{position:relative;width:640px;height:360px;transform-origin:top left}
 .battle{position:absolute;top:0;left:0;color-scheme:light}
 /* Preserve native arena geometry, fonts, sprites, field and statbars. */
@@ -82,5 +82,5 @@ footer{font-size:12px;letter-spacing:1px}
 @media(max-width:600px){h1{font-size:30px}.wordmark{font-size:21px}#controls .icon-button{min-height:44px;width:36px;padding:7px}#controls .primary{min-height:44px;min-width:116px;font-size:11px;padding:8px}#controls{padding:8px;gap:8px}#controls #viewpoint{min-height:40px}#speed{min-height:40px}#turn{min-height:40px}#controls .go-button{min-height:40px}.copy-feedback{right:2px;max-width:calc(100% - 4px)}}
 
 /* Original transparent logo: preserve its full canvas and native aspect ratio. */
-.wordmark .brand-logo{display:block;width:112px;height:auto;object-fit:contain;flex-shrink:0}
+.wordmark .brand-logo{display:block;width:140px;height:auto;object-fit:contain;flex-shrink:0}
 @media(max-width:600px){.wordmark{gap:12px}.wordmark .brand-logo{width:92px}.wordmark span{padding-left:12px}}
