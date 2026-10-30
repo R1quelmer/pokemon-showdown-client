@@ -9,7 +9,8 @@ npm-debug.log
 /play.pokemonshowdown.com/dirindex/webfonts/
 /play.pokemonshowdown.com/dirindex/fontawesome5*
 
-/play.pokemonshowdown.com/sprites/
+/play.pokemonshowdown.com/sprites/*
+!/play.pokemonshowdown.com/sprites/za/
 /play.pokemonshowdown.com/audio/
 
 # built from other sources

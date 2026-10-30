@@ -1,0 +1,1420 @@
+{
+  "attribution": "Animated Z-A Mega sprites by Aronousqui20",
+  "creator": "https://www.deviantart.com/aronousqui20/gallery",
+  "collection": "https://champsnatdex.dedyn.io/credits.html",
+  "scope": "37 exact forms; non-shiny front/back only. Original bytes and animation timings preserved.",
+  "terms": "Permission for Copa Rinha reuse with attribution; no blanket license asserted.",
+  "assets": [
+    {
+      "id": "absolmegaz",
+      "side": "back",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/back/absolmegaz.gif",
+      "file": "absolmegaz-back.gif",
+      "width": 90,
+      "height": 89,
+      "frames": 62,
+      "durationCs": 496,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 62,
+      "loop": 0,
+      "sha256": "20fcb88b04b637f65b86a8f127c1bc32b04ae5ac17cf831098c468cb50c04228",
+      "installedPath": "za/back/absolmegaz.gif",
+      "sourcePath": "gen5ani-back/za-absolmegaz.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani-back/za-absolmegaz.gif"
+    },
+    {
+      "id": "absolmegaz",
+      "side": "front",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/front/absolmegaz.gif",
+      "file": "absolmegaz-front.gif",
+      "width": 70,
+      "height": 77,
+      "frames": 62,
+      "durationCs": 496,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 62,
+      "loop": 0,
+      "sha256": "f0ffddbe2b44c5e9212b6a1fe9efaee64174acc25901c29fadaf866d98d9ff06",
+      "installedPath": "za/front/absolmegaz.gif",
+      "sourcePath": "gen5ani/za-absolmegaz.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani/za-absolmegaz.gif"
+    },
+    {
+      "id": "barbaraclemega",
+      "side": "back",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/back/barbaraclemega.gif",
+      "file": "barbaraclemega-back.gif",
+      "width": 92,
+      "height": 98,
+      "frames": 122,
+      "durationCs": 366,
+      "delays": [
+        3
+      ],
+      "transparentFrames": 122,
+      "loop": 0,
+      "sha256": "f0e5c819ccb1b8770242a14c7467f67cb104f928efde5f8c23f64141cc292717",
+      "installedPath": "za/back/barbaraclemega.gif",
+      "sourcePath": "gen5ani-back/za-barbaraclemega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani-back/za-barbaraclemega.gif"
+    },
+    {
+      "id": "barbaraclemega",
+      "side": "front",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/front/barbaraclemega.gif",
+      "file": "barbaraclemega-front.gif",
+      "width": 96,
+      "height": 97,
+      "frames": 122,
+      "durationCs": 366,
+      "delays": [
+        3
+      ],
+      "transparentFrames": 122,
+      "loop": 0,
+      "sha256": "cb4095a742810e11ca8d1cfb549bd2ebf6ecef743069c3c70e3cd01f3861aa62",
+      "installedPath": "za/front/barbaraclemega.gif",
+      "sourcePath": "gen5ani/za-barbaraclemega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani/za-barbaraclemega.gif"
+    },
+    {
+      "id": "baxcaliburmega",
+      "side": "back",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/back/baxcaliburmega.gif",
+      "file": "baxcaliburmega-back.gif",
+      "width": 134,
+      "height": 122,
+      "frames": 61,
+      "durationCs": 488,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 61,
+      "loop": 0,
+      "sha256": "53cfa1c4e4f7011f2dce04a112f6eae6f18c2c7ad3cf3175a004cee9f18920f1",
+      "installedPath": "za/back/baxcaliburmega.gif",
+      "sourcePath": "gen5ani-back/za-baxcaliburmega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani-back/za-baxcaliburmega.gif"
+    },
+    {
+      "id": "baxcaliburmega",
+      "side": "front",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/front/baxcaliburmega.gif",
+      "file": "baxcaliburmega-front.gif",
+      "width": 132,
+      "height": 119,
+      "frames": 61,
+      "durationCs": 488,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 61,
+      "loop": 0,
+      "sha256": "929872161408e015912caf9e02d73788a2d1044adc912df3b0ad8c9919c11aae",
+      "installedPath": "za/front/baxcaliburmega.gif",
+      "sourcePath": "gen5ani/za-baxcaliburmega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani/za-baxcaliburmega.gif"
+    },
+    {
+      "id": "chandeluremega",
+      "side": "back",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/back/chandeluremega.gif",
+      "file": "chandeluremega-back.gif",
+      "width": 96,
+      "height": 124,
+      "frames": 62,
+      "durationCs": 496,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 62,
+      "loop": 0,
+      "sha256": "f3c67db77294e80d5c55b7dafa65dcd963d1b839cc132247d1f6eeceefcb4e54",
+      "installedPath": "za/back/chandeluremega.gif",
+      "sourcePath": "gen5ani-back/za-chandeluremega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani-back/za-chandeluremega.gif"
+    },
+    {
+      "id": "chandeluremega",
+      "side": "front",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/front/chandeluremega.gif",
+      "file": "chandeluremega-front.gif",
+      "width": 96,
+      "height": 124,
+      "frames": 62,
+      "durationCs": 496,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 62,
+      "loop": 0,
+      "sha256": "72f1d04f5da587893de8ce837f6467a6dc400df9f7a4ca342ccd28f17fb3494a",
+      "installedPath": "za/front/chandeluremega.gif",
+      "sourcePath": "gen5ani/za-chandeluremega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani/za-chandeluremega.gif"
+    },
+    {
+      "id": "chesnaughtmega",
+      "side": "back",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/back/chesnaughtmega.gif",
+      "file": "chesnaughtmega-back.gif",
+      "width": 125,
+      "height": 159,
+      "frames": 52,
+      "durationCs": 416,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 52,
+      "loop": 0,
+      "sha256": "b6c708cc99d3363520b6150a7d1d3af1c1eccfb042fa48de92e6b2777d51bf71",
+      "installedPath": "za/back/chesnaughtmega.gif",
+      "sourcePath": "gen5ani-back/za-chesnaughtmega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani-back/za-chesnaughtmega.gif"
+    },
+    {
+      "id": "chesnaughtmega",
+      "side": "front",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/front/chesnaughtmega.gif",
+      "file": "chesnaughtmega-front.gif",
+      "width": 162,
+      "height": 140,
+      "frames": 52,
+      "durationCs": 416,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 52,
+      "loop": 0,
+      "sha256": "b2d373146801d77fac793c74dc77832086dcfcfac3f776b23a836e9249f195ae",
+      "installedPath": "za/front/chesnaughtmega.gif",
+      "sourcePath": "gen5ani/za-chesnaughtmega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani/za-chesnaughtmega.gif"
+    },
+    {
+      "id": "chimechomega",
+      "side": "back",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/back/chimechomega.gif",
+      "file": "chimechomega-back.gif",
+      "width": 117,
+      "height": 103,
+      "frames": 36,
+      "durationCs": 288,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 36,
+      "loop": 0,
+      "sha256": "f6243fc7badb455a1d2b5719563a5cbed751c360da2cccce28dd37298a8d4919",
+      "installedPath": "za/back/chimechomega.gif",
+      "sourcePath": "gen5ani-back/za-chimechomega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani-back/za-chimechomega.gif"
+    },
+    {
+      "id": "chimechomega",
+      "side": "front",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/front/chimechomega.gif",
+      "file": "chimechomega-front.gif",
+      "width": 113,
+      "height": 102,
+      "frames": 36,
+      "durationCs": 288,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 36,
+      "loop": 0,
+      "sha256": "7226ee09126b3a943b51fcf7e366cdfe971f7039724e3d2bec25e81bb40a18ad",
+      "installedPath": "za/front/chimechomega.gif",
+      "sourcePath": "gen5ani/za-chimechomega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani/za-chimechomega.gif"
+    },
+    {
+      "id": "crabominablemega",
+      "side": "back",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/back/crabominablemega.gif",
+      "file": "crabominablemega-back.gif",
+      "width": 122,
+      "height": 110,
+      "frames": 54,
+      "durationCs": 432,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 54,
+      "loop": 0,
+      "sha256": "1e6a71056e2438621569b42db5e752fde8b5e188b3ac1b0f63d8df44c9c6690f",
+      "installedPath": "za/back/crabominablemega.gif",
+      "sourcePath": "gen5ani-back/za-crabominablemega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani-back/za-crabominablemega.gif"
+    },
+    {
+      "id": "crabominablemega",
+      "side": "front",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/front/crabominablemega.gif",
+      "file": "crabominablemega-front.gif",
+      "width": 144,
+      "height": 115,
+      "frames": 54,
+      "durationCs": 432,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 54,
+      "loop": 0,
+      "sha256": "53ca644d93b6cb74cd55ce3ed0daeb1d620078efc4c3e1c57feb55aa035c46dc",
+      "installedPath": "za/front/crabominablemega.gif",
+      "sourcePath": "gen5ani/za-crabominablemega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani/za-crabominablemega.gif"
+    },
+    {
+      "id": "darkraimega",
+      "side": "back",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/back/darkraimega.gif",
+      "file": "darkraimega-back.gif",
+      "width": 132,
+      "height": 107,
+      "frames": 58,
+      "durationCs": 522,
+      "delays": [
+        9
+      ],
+      "transparentFrames": 58,
+      "loop": 0,
+      "sha256": "30b614da69a38abe16b6997e99c79f79208a3a7a94f08b84d6951721dfd9ad70",
+      "installedPath": "za/back/darkraimega.gif",
+      "sourcePath": "gen5ani-back/za-darkraimega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani-back/za-darkraimega.gif"
+    },
+    {
+      "id": "darkraimega",
+      "side": "front",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/front/darkraimega.gif",
+      "file": "darkraimega-front.gif",
+      "width": 143,
+      "height": 102,
+      "frames": 58,
+      "durationCs": 522,
+      "delays": [
+        9
+      ],
+      "transparentFrames": 58,
+      "loop": 0,
+      "sha256": "be88f2bb978ac3f7ac24b8f05442bfe54719c5a8f76ba62197afb45a2cbb757e",
+      "installedPath": "za/front/darkraimega.gif",
+      "sourcePath": "gen5ani/za-darkraimega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani/za-darkraimega.gif"
+    },
+    {
+      "id": "delphoxmega",
+      "side": "back",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/back/delphoxmega.gif",
+      "file": "delphoxmega-back.gif",
+      "width": 150,
+      "height": 139,
+      "frames": 42,
+      "durationCs": 336,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 42,
+      "loop": 0,
+      "sha256": "fc3e2012b14c8b8746666a7919d36c68b7d9b988c71683f610f2ba57d158b62a",
+      "installedPath": "za/back/delphoxmega.gif",
+      "sourcePath": "gen5ani-back/za-delphoxmega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani-back/za-delphoxmega.gif"
+    },
+    {
+      "id": "delphoxmega",
+      "side": "front",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/front/delphoxmega.gif",
+      "file": "delphoxmega-front.gif",
+      "width": 149,
+      "height": 134,
+      "frames": 42,
+      "durationCs": 336,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 42,
+      "loop": 0,
+      "sha256": "2a3920f388e79ec37542e02319eb4fbdfcd31cb7ea1be12cbd81d7ad11fcf3dd",
+      "installedPath": "za/front/delphoxmega.gif",
+      "sourcePath": "gen5ani/za-delphoxmega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani/za-delphoxmega.gif"
+    },
+    {
+      "id": "dragalgemega",
+      "side": "back",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/back/dragalgemega.gif",
+      "file": "dragalgemega-back.gif",
+      "width": 153,
+      "height": 108,
+      "frames": 68,
+      "durationCs": 544,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 68,
+      "loop": 0,
+      "sha256": "e75191e95b744c01f805d1df65d441a12cbc6aa44c28c57d9fc6fce6506019ec",
+      "installedPath": "za/back/dragalgemega.gif",
+      "sourcePath": "gen5ani-back/za-dragalgemega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani-back/za-dragalgemega.gif"
+    },
+    {
+      "id": "dragalgemega",
+      "side": "front",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/front/dragalgemega.gif",
+      "file": "dragalgemega-front.gif",
+      "width": 167,
+      "height": 118,
+      "frames": 68,
+      "durationCs": 544,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 68,
+      "loop": 0,
+      "sha256": "44e75d39014aba9b364c6913693fefc568888c4f0592b55c9be79c3ec9d6ee5a",
+      "installedPath": "za/front/dragalgemega.gif",
+      "sourcePath": "gen5ani/za-dragalgemega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani/za-dragalgemega.gif"
+    },
+    {
+      "id": "drampamega",
+      "side": "back",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/back/drampamega.gif",
+      "file": "drampamega-back.gif",
+      "width": 120,
+      "height": 125,
+      "frames": 44,
+      "durationCs": 352,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 44,
+      "loop": 0,
+      "sha256": "7fc707c4c7b1dc9f81cd754b3a4644d2f52e397512e8a73698bebe199b4e84d3",
+      "installedPath": "za/back/drampamega.gif",
+      "sourcePath": "gen5ani-back/za-drampamega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani-back/za-drampamega.gif"
+    },
+    {
+      "id": "drampamega",
+      "side": "front",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/front/drampamega.gif",
+      "file": "drampamega-front.gif",
+      "width": 103,
+      "height": 117,
+      "frames": 44,
+      "durationCs": 352,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 44,
+      "loop": 0,
+      "sha256": "32d6d4d279d9fa0bb86976267b7caa7d91b637deb60d022e602d45bd4897ef35",
+      "installedPath": "za/front/drampamega.gif",
+      "sourcePath": "gen5ani/za-drampamega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani/za-drampamega.gif"
+    },
+    {
+      "id": "eelektrossmega",
+      "side": "back",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/back/eelektrossmega.gif",
+      "file": "eelektrossmega-back.gif",
+      "width": 129,
+      "height": 112,
+      "frames": 60,
+      "durationCs": 180,
+      "delays": [
+        3
+      ],
+      "transparentFrames": 60,
+      "loop": 0,
+      "sha256": "f6d9e177e129edf8bd732fa0e43891c994e03ab350ce5c8171961e75d15943ce",
+      "installedPath": "za/back/eelektrossmega.gif",
+      "sourcePath": "gen5ani-back/za-eelektrossmega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani-back/za-eelektrossmega.gif"
+    },
+    {
+      "id": "eelektrossmega",
+      "side": "front",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/front/eelektrossmega.gif",
+      "file": "eelektrossmega-front.gif",
+      "width": 133,
+      "height": 98,
+      "frames": 60,
+      "durationCs": 180,
+      "delays": [
+        3
+      ],
+      "transparentFrames": 60,
+      "loop": 0,
+      "sha256": "99bf568fa21caa6dbbbdace225529da470b89a4e6769ade9737fefe44c83850a",
+      "installedPath": "za/front/eelektrossmega.gif",
+      "sourcePath": "gen5ani/za-eelektrossmega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani/za-eelektrossmega.gif"
+    },
+    {
+      "id": "emboarmega",
+      "side": "back",
+      "url": "https://www.deviantart.com/aronousqui20/art/Mega-Emboar-back-sprite-1302089763",
+      "file": "emboarmega-back.gif",
+      "width": 127,
+      "height": 113,
+      "frames": 49,
+      "durationCs": 392,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 49,
+      "loop": 0,
+      "sha256": "9be1f09a24d11553d30cc7585e6ac59b2b7b0567768025fe4a04eebef340ed54",
+      "installedPath": "za/back/emboarmega.gif",
+      "sourcePath": "gen5ani-back/za-emboarmega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani-back/za-emboarmega.gif"
+    },
+    {
+      "id": "emboarmega",
+      "side": "front",
+      "url": "https://www.deviantart.com/aronousqui20/art/Mega-Emboar-front-sprite-1302089618",
+      "file": "emboarmega-front.gif",
+      "width": 128,
+      "height": 122,
+      "frames": 49,
+      "durationCs": 392,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 49,
+      "loop": 0,
+      "sha256": "45907c262f7fa8e8ee1dd2dddb6571b73d395b9d487711f7b14c5351d197b565",
+      "installedPath": "za/front/emboarmega.gif",
+      "sourcePath": "gen5ani/za-emboarmega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani/za-emboarmega.gif"
+    },
+    {
+      "id": "excadrillmega",
+      "side": "back",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/back/excadrillmega.gif",
+      "file": "excadrillmega-back.gif",
+      "width": 112,
+      "height": 80,
+      "frames": 37,
+      "durationCs": 296,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 37,
+      "loop": 0,
+      "sha256": "83985624f35334428286d1daddd04496d06312240c499400dc394cf730391034",
+      "installedPath": "za/back/excadrillmega.gif",
+      "sourcePath": "gen5ani-back/za-excadrillmega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani-back/za-excadrillmega.gif"
+    },
+    {
+      "id": "excadrillmega",
+      "side": "front",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/front/excadrillmega.gif",
+      "file": "excadrillmega-front.gif",
+      "width": 159,
+      "height": 97,
+      "frames": 37,
+      "durationCs": 296,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 37,
+      "loop": 0,
+      "sha256": "fd2515e44ff026383f9e2eff6a46e203b10f30891e41a68ea55b1f33044fa216",
+      "installedPath": "za/front/excadrillmega.gif",
+      "sourcePath": "gen5ani/za-excadrillmega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani/za-excadrillmega.gif"
+    },
+    {
+      "id": "falinksmega",
+      "side": "back",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/back/falinksmega.gif",
+      "file": "falinksmega-back.gif",
+      "width": 119,
+      "height": 92,
+      "frames": 48,
+      "durationCs": 384,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 48,
+      "loop": 0,
+      "sha256": "c8af67375649dd13a445c72bf5925d7c2852151da8a1ab3c095ffb09c54171de",
+      "installedPath": "za/back/falinksmega.gif",
+      "sourcePath": "gen5ani-back/za-falinksmega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani-back/za-falinksmega.gif"
+    },
+    {
+      "id": "falinksmega",
+      "side": "front",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/front/falinksmega.gif",
+      "file": "falinksmega-front.gif",
+      "width": 125,
+      "height": 92,
+      "frames": 48,
+      "durationCs": 384,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 48,
+      "loop": 0,
+      "sha256": "76ab7140f50611e874667a1efeb4891a01e8261ceabaad3349e5d58751ae1d33",
+      "installedPath": "za/front/falinksmega.gif",
+      "sourcePath": "gen5ani/za-falinksmega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani/za-falinksmega.gif"
+    },
+    {
+      "id": "floettemega",
+      "side": "back",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/back/floettemega.gif",
+      "file": "floettemega-back.gif",
+      "width": 122,
+      "height": 139,
+      "frames": 64,
+      "durationCs": 512,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 64,
+      "loop": 0,
+      "sha256": "8c4dafcd3012333f4d08ce65d7b5c52d619bfba425dc640031aece2e990750ad",
+      "installedPath": "za/back/floettemega.gif",
+      "sourcePath": "gen5ani-back/za-floettemega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani-back/za-floettemega.gif"
+    },
+    {
+      "id": "floettemega",
+      "side": "front",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/front/floettemega.gif",
+      "file": "floettemega-front.gif",
+      "width": 127,
+      "height": 139,
+      "frames": 64,
+      "durationCs": 512,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 64,
+      "loop": 0,
+      "sha256": "279084cc739c8f5269eef89a428fbb2fe6bc0131a392fbb7eaed472a431d05dc",
+      "installedPath": "za/front/floettemega.gif",
+      "sourcePath": "gen5ani/za-floettemega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani/za-floettemega.gif"
+    },
+    {
+      "id": "garchompmegaz",
+      "side": "back",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/back/garchompmegaz.gif",
+      "file": "garchompmegaz-back.gif",
+      "width": 159,
+      "height": 112,
+      "frames": 60,
+      "durationCs": 480,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 60,
+      "loop": 0,
+      "sha256": "fc43f9658c8ccf3740b5d1fec5cdac9dc03fa48003b2639d7f70e9be18230a2a",
+      "installedPath": "za/back/garchompmegaz.gif",
+      "sourcePath": "gen5ani-back/za-garchompmegaz.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani-back/za-garchompmegaz.gif"
+    },
+    {
+      "id": "garchompmegaz",
+      "side": "front",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/front/garchompmegaz.gif",
+      "file": "garchompmegaz-front.gif",
+      "width": 138,
+      "height": 122,
+      "frames": 60,
+      "durationCs": 480,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 60,
+      "loop": 0,
+      "sha256": "86cba513a063e3ae35d6e27ffab3f4ddb9c5c1063149b6254c6ca07ec2dadc1e",
+      "installedPath": "za/front/garchompmegaz.gif",
+      "sourcePath": "gen5ani/za-garchompmegaz.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani/za-garchompmegaz.gif"
+    },
+    {
+      "id": "glimmoramega",
+      "side": "back",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/back/glimmoramega.gif",
+      "file": "glimmoramega-back.gif",
+      "width": 143,
+      "height": 155,
+      "frames": 30,
+      "durationCs": 240,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 30,
+      "loop": 0,
+      "sha256": "53f7636d6a6b466a4d7859385b07e4a51da5119fcfd8d0afbad93b4362ad91a4",
+      "installedPath": "za/back/glimmoramega.gif",
+      "sourcePath": "gen5ani-back/za-glimmoramega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani-back/za-glimmoramega.gif"
+    },
+    {
+      "id": "glimmoramega",
+      "side": "front",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/front/glimmoramega.gif",
+      "file": "glimmoramega-front.gif",
+      "width": 124,
+      "height": 139,
+      "frames": 33,
+      "durationCs": 264,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 33,
+      "loop": 0,
+      "sha256": "3319961c970da1477c729e9819fefbb5852fc9d7af9c00a6c2da49be183508f3",
+      "installedPath": "za/front/glimmoramega.gif",
+      "sourcePath": "gen5ani/za-glimmoramega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani/za-glimmoramega.gif"
+    },
+    {
+      "id": "golisopodmega",
+      "side": "back",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/back/golisopodmega.gif",
+      "file": "golisopodmega-back.gif",
+      "width": 102,
+      "height": 97,
+      "frames": 24,
+      "durationCs": 192,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 24,
+      "loop": 0,
+      "sha256": "af05758c60d58b7c10b2324c843d210c702f0662235af942e79144622e8f7564",
+      "installedPath": "za/back/golisopodmega.gif",
+      "sourcePath": "gen5ani-back/za-golisopodmega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani-back/za-golisopodmega.gif"
+    },
+    {
+      "id": "golisopodmega",
+      "side": "front",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/front/golisopodmega.gif",
+      "file": "golisopodmega-front.gif",
+      "width": 98,
+      "height": 97,
+      "frames": 24,
+      "durationCs": 192,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 24,
+      "loop": 0,
+      "sha256": "0b8be6b4c91a0fb6f496527bcae173166826d995620b907a2bb40f785b5c4ada",
+      "installedPath": "za/front/golisopodmega.gif",
+      "sourcePath": "gen5ani/za-golisopodmega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani/za-golisopodmega.gif"
+    },
+    {
+      "id": "golurkmega",
+      "side": "back",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/back/golurkmega.gif",
+      "file": "golurkmega-back.gif",
+      "width": 129,
+      "height": 103,
+      "frames": 60,
+      "durationCs": 180,
+      "delays": [
+        3
+      ],
+      "transparentFrames": 60,
+      "loop": 0,
+      "sha256": "8eb3a3c3a7cbec97072952e590720f12c84e03fbba8c0d38af6d7d2b4449218c",
+      "installedPath": "za/back/golurkmega.gif",
+      "sourcePath": "gen5ani-back/za-golurkmega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani-back/za-golurkmega.gif"
+    },
+    {
+      "id": "golurkmega",
+      "side": "front",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/front/golurkmega.gif",
+      "file": "golurkmega-front.gif",
+      "width": 118,
+      "height": 104,
+      "frames": 22,
+      "durationCs": 198,
+      "delays": [
+        9
+      ],
+      "transparentFrames": 22,
+      "loop": 0,
+      "sha256": "4bf1d69f56e55959928f4c99541caac3df27ad365d133497a3d66ef7d2ff4f33",
+      "installedPath": "za/front/golurkmega.gif",
+      "sourcePath": "gen5ani/za-golurkmega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani/za-golurkmega.gif"
+    },
+    {
+      "id": "greninjamega",
+      "side": "back",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/back/greninjamega.gif",
+      "file": "greninjamega-back.gif",
+      "width": 93,
+      "height": 117,
+      "frames": 48,
+      "durationCs": 384,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 48,
+      "loop": 0,
+      "sha256": "78793b25d3b27b503015140ca076f9450d931416898ab527c0fc508628a973e7",
+      "installedPath": "za/back/greninjamega.gif",
+      "sourcePath": "gen5ani-back/za-greninjamega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani-back/za-greninjamega.gif"
+    },
+    {
+      "id": "greninjamega",
+      "side": "front",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/front/greninjamega.gif",
+      "file": "greninjamega-front.gif",
+      "width": 93,
+      "height": 116,
+      "frames": 48,
+      "durationCs": 384,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 48,
+      "loop": 0,
+      "sha256": "f38b1f0b6822ecf197d12913636a243b5e2c9eb9fddcd355538d654bf6634b52",
+      "installedPath": "za/front/greninjamega.gif",
+      "sourcePath": "gen5ani/za-greninjamega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani/za-greninjamega.gif"
+    },
+    {
+      "id": "hawluchamega",
+      "side": "back",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/back/hawluchamega.gif",
+      "file": "hawluchamega-back.gif",
+      "width": 107,
+      "height": 106,
+      "frames": 54,
+      "durationCs": 432,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 54,
+      "loop": 0,
+      "sha256": "78c8a4775e95d2c47fdb17f8758ccb788b1249341b718d72455b88c113bbbafe",
+      "installedPath": "za/back/hawluchamega.gif",
+      "sourcePath": "gen5ani-back/za-hawluchamega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani-back/za-hawluchamega.gif"
+    },
+    {
+      "id": "hawluchamega",
+      "side": "front",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/front/hawluchamega.gif",
+      "file": "hawluchamega-front.gif",
+      "width": 107,
+      "height": 75,
+      "frames": 54,
+      "durationCs": 432,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 54,
+      "loop": 0,
+      "sha256": "8383afba610782997533e62490b478bca2fe8ff5b6ba2c41aafdfbb583ab0eee",
+      "installedPath": "za/front/hawluchamega.gif",
+      "sourcePath": "gen5ani/za-hawluchamega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani/za-hawluchamega.gif"
+    },
+    {
+      "id": "heatranmega",
+      "side": "back",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/back/heatranmega.gif",
+      "file": "heatranmega-back.gif",
+      "width": 134,
+      "height": 126,
+      "frames": 33,
+      "durationCs": 297,
+      "delays": [
+        9
+      ],
+      "transparentFrames": 33,
+      "loop": 0,
+      "sha256": "6c27f6db5ecb97ca72f9d6a01b3ed7e6a22b8735930bb345f8fd4e3c6f0b95f4",
+      "installedPath": "za/back/heatranmega.gif",
+      "sourcePath": "gen5ani-back/za-heatranmega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani-back/za-heatranmega.gif"
+    },
+    {
+      "id": "heatranmega",
+      "side": "front",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/front/heatranmega.gif",
+      "file": "heatranmega-front.gif",
+      "width": 153,
+      "height": 125,
+      "frames": 33,
+      "durationCs": 297,
+      "delays": [
+        9
+      ],
+      "transparentFrames": 33,
+      "loop": 0,
+      "sha256": "872b69a5f5b0a0020036ab3bf32d78f18ef3e618199c55162bc55dac29693cf4",
+      "installedPath": "za/front/heatranmega.gif",
+      "sourcePath": "gen5ani/za-heatranmega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani/za-heatranmega.gif"
+    },
+    {
+      "id": "lucariomegaz",
+      "side": "back",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/back/lucariomegaz.gif",
+      "file": "lucariomegaz-back.gif",
+      "width": 67,
+      "height": 71,
+      "frames": 33,
+      "durationCs": 264,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 33,
+      "loop": 0,
+      "sha256": "c9b3a688e36a78d907c8e510c5accfc0a8e549ea0707ba0ea821b7edd398b770",
+      "installedPath": "za/back/lucariomegaz.gif",
+      "sourcePath": "gen5ani-back/za-lucariomegaz.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani-back/za-lucariomegaz.gif"
+    },
+    {
+      "id": "lucariomegaz",
+      "side": "front",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/front/lucariomegaz.gif",
+      "file": "lucariomegaz-front.gif",
+      "width": 75,
+      "height": 71,
+      "frames": 36,
+      "durationCs": 288,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 36,
+      "loop": 0,
+      "sha256": "e9e3f22724c45135d0d59903c81fcd16a4bfa4e7e1f221cb0ec166730d2e7a89",
+      "installedPath": "za/front/lucariomegaz.gif",
+      "sourcePath": "gen5ani/za-lucariomegaz.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani/za-lucariomegaz.gif"
+    },
+    {
+      "id": "magearnamega",
+      "side": "back",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/back/magearnamega.gif",
+      "file": "magearnamega-back.gif",
+      "width": 105,
+      "height": 89,
+      "frames": 49,
+      "durationCs": 441,
+      "delays": [
+        9
+      ],
+      "transparentFrames": 49,
+      "loop": 0,
+      "sha256": "1bdaddf69a2b99a0d2567886ea424e89e57e81c59b474723dd662efa8567f1da",
+      "installedPath": "za/back/magearnamega.gif",
+      "sourcePath": "gen5ani-back/za-magearnamega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani-back/za-magearnamega.gif"
+    },
+    {
+      "id": "magearnamega",
+      "side": "front",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/front/magearnamega.gif",
+      "file": "magearnamega-front.gif",
+      "width": 108,
+      "height": 89,
+      "frames": 49,
+      "durationCs": 441,
+      "delays": [
+        9
+      ],
+      "transparentFrames": 49,
+      "loop": 0,
+      "sha256": "0835ec6a5f0fd72cffedfb528d9bf5288345a4f77b3a3a9e1ad4b13ffd09c711",
+      "installedPath": "za/front/magearnamega.gif",
+      "sourcePath": "gen5ani/za-magearnamega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani/za-magearnamega.gif"
+    },
+    {
+      "id": "malamarmega",
+      "side": "back",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/back/malamarmega.gif",
+      "file": "malamarmega-back.gif",
+      "width": 159,
+      "height": 114,
+      "frames": 73,
+      "durationCs": 584,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 73,
+      "loop": 0,
+      "sha256": "d22dcdad34dbafc34119cfebf87d7bc070d064f77391ec103ed49ab2041bd4c3",
+      "installedPath": "za/back/malamarmega.gif",
+      "sourcePath": "gen5ani-back/za-malamarmega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani-back/za-malamarmega.gif"
+    },
+    {
+      "id": "malamarmega",
+      "side": "front",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/front/malamarmega.gif",
+      "file": "malamarmega-front.gif",
+      "width": 155,
+      "height": 115,
+      "frames": 73,
+      "durationCs": 584,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 73,
+      "loop": 0,
+      "sha256": "dd71ef45303016ad805e882eae7ff6c6418f19a799e86efcba63aeab6a44ed76",
+      "installedPath": "za/front/malamarmega.gif",
+      "sourcePath": "gen5ani/za-malamarmega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani/za-malamarmega.gif"
+    },
+    {
+      "id": "meowsticfmega",
+      "side": "back",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/back/meowsticfmega.gif",
+      "file": "meowsticfmega-back.gif",
+      "width": 60,
+      "height": 96,
+      "frames": 50,
+      "durationCs": 400,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 50,
+      "loop": 0,
+      "sha256": "7031c34257efa406fd80c7003ab853c63f4cf6de7c7e771d3c9d59248f8a48d8",
+      "installedPath": "za/back/meowsticfmega.gif",
+      "sourcePath": "gen5ani-back/za-meowsticfmega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani-back/za-meowsticfmega.gif"
+    },
+    {
+      "id": "meowsticfmega",
+      "side": "front",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/front/meowsticfmega.gif",
+      "file": "meowsticfmega-front.gif",
+      "width": 54,
+      "height": 99,
+      "frames": 50,
+      "durationCs": 400,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 50,
+      "loop": 0,
+      "sha256": "5115ad31af0853d6d8e93ce98763b1b16e9cd2f065100f74f671226bee794f44",
+      "installedPath": "za/front/meowsticfmega.gif",
+      "sourcePath": "gen5ani/za-meowsticfmega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani/za-meowsticfmega.gif"
+    },
+    {
+      "id": "pyroarmega",
+      "side": "back",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/back/pyroarmega.gif",
+      "file": "pyroarmega-back.gif",
+      "width": 100,
+      "height": 101,
+      "frames": 61,
+      "durationCs": 488,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 61,
+      "loop": 0,
+      "sha256": "06820bdc8d2796176a08e38dca908c1fc3eafb273a2b1e2822e2c8d420c72860",
+      "installedPath": "za/back/pyroarmega.gif",
+      "sourcePath": "gen5ani-back/za-pyroarmega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani-back/za-pyroarmega.gif"
+    },
+    {
+      "id": "pyroarmega",
+      "side": "front",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/front/pyroarmega.gif",
+      "file": "pyroarmega-front.gif",
+      "width": 93,
+      "height": 100,
+      "frames": 61,
+      "durationCs": 488,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 61,
+      "loop": 0,
+      "sha256": "074d4511e503d03162dcccda953c7e141c4a5adfff21dff1cd99b75b1e2989cb",
+      "installedPath": "za/front/pyroarmega.gif",
+      "sourcePath": "gen5ani/za-pyroarmega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani/za-pyroarmega.gif"
+    },
+    {
+      "id": "raichumegax",
+      "side": "back",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/back/raichumegax.gif",
+      "file": "raichumegax-back.gif",
+      "width": 121,
+      "height": 102,
+      "frames": 24,
+      "durationCs": 192,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 24,
+      "loop": 0,
+      "sha256": "ea6ba76d4d5f8e5b84df7a7d84558d92f3d3031b980aca4a156024af3dda1f7c",
+      "installedPath": "za/back/raichumegax.gif",
+      "sourcePath": "gen5ani-back/za-raichumegax.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani-back/za-raichumegax.gif"
+    },
+    {
+      "id": "raichumegax",
+      "side": "front",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/front/raichumegax.gif",
+      "file": "raichumegax-front.gif",
+      "width": 130,
+      "height": 74,
+      "frames": 24,
+      "durationCs": 192,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 24,
+      "loop": 0,
+      "sha256": "3e85598d3b3442be674b1261f4593caa45afcbedf4b449856718fc173a1d53e9",
+      "installedPath": "za/front/raichumegax.gif",
+      "sourcePath": "gen5ani/za-raichumegax.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani/za-raichumegax.gif"
+    },
+    {
+      "id": "raichumegay",
+      "side": "back",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/back/raichumegay.gif",
+      "file": "raichumegay-back.gif",
+      "width": 95,
+      "height": 84,
+      "frames": 48,
+      "durationCs": 384,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 48,
+      "loop": 0,
+      "sha256": "0884ed85e0b74e94cfc8218a7069c83c44bc3a8879e3d43eb3e4ebfda1c33381",
+      "installedPath": "za/back/raichumegay.gif",
+      "sourcePath": "gen5ani-back/za-raichumegay.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani-back/za-raichumegay.gif"
+    },
+    {
+      "id": "raichumegay",
+      "side": "front",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/front/raichumegay.gif",
+      "file": "raichumegay-front.gif",
+      "width": 114,
+      "height": 93,
+      "frames": 48,
+      "durationCs": 384,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 48,
+      "loop": 0,
+      "sha256": "7441b2a38409f2dab1ff33c69f9c2805c948aa668b350ec6649d683fe398be8d",
+      "installedPath": "za/front/raichumegay.gif",
+      "sourcePath": "gen5ani/za-raichumegay.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani/za-raichumegay.gif"
+    },
+    {
+      "id": "scolipedemega",
+      "side": "back",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/back/scolipedemega.gif",
+      "file": "scolipedemega-back.gif",
+      "width": 84,
+      "height": 103,
+      "frames": 43,
+      "durationCs": 344,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 43,
+      "loop": 0,
+      "sha256": "11fce2e236b076593198d4ad20bc9023a6fbfad1ed502be89f5cad6d05104dc9",
+      "installedPath": "za/back/scolipedemega.gif",
+      "sourcePath": "gen5ani-back/za-scolipedemega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani-back/za-scolipedemega.gif"
+    },
+    {
+      "id": "scolipedemega",
+      "side": "front",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/front/scolipedemega.gif",
+      "file": "scolipedemega-front.gif",
+      "width": 79,
+      "height": 113,
+      "frames": 43,
+      "durationCs": 344,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 43,
+      "loop": 0,
+      "sha256": "152df410847f3f419a385a8c0c1bf3318bec9f35890db5e075b820361097abe9",
+      "installedPath": "za/front/scolipedemega.gif",
+      "sourcePath": "gen5ani/za-scolipedemega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani/za-scolipedemega.gif"
+    },
+    {
+      "id": "scovillainmega",
+      "side": "back",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/back/scovillainmega.gif",
+      "file": "scovillainmega-back.gif",
+      "width": 89,
+      "height": 79,
+      "frames": 60,
+      "durationCs": 480,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 60,
+      "loop": 0,
+      "sha256": "961e3fe547244182348da4335175dc369a3c9c38e89842297ed6a379063ec0d9",
+      "installedPath": "za/back/scovillainmega.gif",
+      "sourcePath": "gen5ani-back/za-scovillainmega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani-back/za-scovillainmega.gif"
+    },
+    {
+      "id": "scovillainmega",
+      "side": "front",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/front/scovillainmega.gif",
+      "file": "scovillainmega-front.gif",
+      "width": 80,
+      "height": 85,
+      "frames": 60,
+      "durationCs": 480,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 60,
+      "loop": 0,
+      "sha256": "c586c91224bfafdcc20bab54fab791308a6787aafbaf19f1e61a3ebb552cc53a",
+      "installedPath": "za/front/scovillainmega.gif",
+      "sourcePath": "gen5ani/za-scovillainmega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani/za-scovillainmega.gif"
+    },
+    {
+      "id": "scraftymega",
+      "side": "back",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/back/scraftymega.gif",
+      "file": "scraftymega-back.gif",
+      "width": 67,
+      "height": 72,
+      "frames": 54,
+      "durationCs": 432,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 54,
+      "loop": 0,
+      "sha256": "ae1333fc451a45774364ede63f7244bec52120dbd0c76fc533d26dfe7af78f4d",
+      "installedPath": "za/back/scraftymega.gif",
+      "sourcePath": "gen5ani-back/za-scraftymega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani-back/za-scraftymega.gif"
+    },
+    {
+      "id": "scraftymega",
+      "side": "front",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/front/scraftymega.gif",
+      "file": "scraftymega-front.gif",
+      "width": 66,
+      "height": 73,
+      "frames": 54,
+      "durationCs": 432,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 54,
+      "loop": 0,
+      "sha256": "e11bb25f37becb89c8c1794281eb68464873194533fef2f0302f06f1610df441",
+      "installedPath": "za/front/scraftymega.gif",
+      "sourcePath": "gen5ani/za-scraftymega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani/za-scraftymega.gif"
+    },
+    {
+      "id": "staraptormega",
+      "side": "back",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/back/staraptormega.gif",
+      "file": "staraptormega-back.gif",
+      "width": 134,
+      "height": 130,
+      "frames": 24,
+      "durationCs": 192,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 24,
+      "loop": 0,
+      "sha256": "b119778d373707a1e4f299c0b8edbfb30068760bf9696b4596f6314d8f996f66",
+      "installedPath": "za/back/staraptormega.gif",
+      "sourcePath": "gen5ani-back/za-staraptormega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani-back/za-staraptormega.gif"
+    },
+    {
+      "id": "staraptormega",
+      "side": "front",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/front/staraptormega.gif",
+      "file": "staraptormega-front.gif",
+      "width": 140,
+      "height": 137,
+      "frames": 24,
+      "durationCs": 192,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 24,
+      "loop": 0,
+      "sha256": "dd9dd1968dac019b6907d6d8d3cc183033af06d6af5dd886621e45251864c2ea",
+      "installedPath": "za/front/staraptormega.gif",
+      "sourcePath": "gen5ani/za-staraptormega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani/za-staraptormega.gif"
+    },
+    {
+      "id": "tatsugiricurlymega",
+      "side": "back",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/back/tatsugiricurlymega.gif",
+      "file": "tatsugiricurlymega-back.gif",
+      "width": 119,
+      "height": 77,
+      "frames": 60,
+      "durationCs": 180,
+      "delays": [
+        3
+      ],
+      "transparentFrames": 60,
+      "loop": 0,
+      "sha256": "97fc8476fb13e6ab679849fc8c95352ba48f7f3aaba85227e4dcf41cd6110373",
+      "installedPath": "za/back/tatsugiricurlymega.gif",
+      "sourcePath": "gen5ani-back/za-tatsugiricurlymega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani-back/za-tatsugiricurlymega.gif"
+    },
+    {
+      "id": "tatsugiricurlymega",
+      "side": "front",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/front/tatsugiricurlymega.gif",
+      "file": "tatsugiricurlymega-front.gif",
+      "width": 129,
+      "height": 108,
+      "frames": 60,
+      "durationCs": 180,
+      "delays": [
+        3
+      ],
+      "transparentFrames": 60,
+      "loop": 0,
+      "sha256": "91ab1483825ab876261609ab5e3394229456b4b7f44ea7472f96056445d15c16",
+      "installedPath": "za/front/tatsugiricurlymega.gif",
+      "sourcePath": "gen5ani/za-tatsugiricurlymega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani/za-tatsugiricurlymega.gif"
+    },
+    {
+      "id": "zeraoramega",
+      "side": "back",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/back/zeraoramega.gif",
+      "file": "zeraoramega-back.gif",
+      "width": 128,
+      "height": 139,
+      "frames": 84,
+      "durationCs": 756,
+      "delays": [
+        9
+      ],
+      "transparentFrames": 84,
+      "loop": 0,
+      "sha256": "bea9fbe237032d67650cb0c4e05ea3283ae659f5f12b315168cb48cdd8e00faa",
+      "installedPath": "za/back/zeraoramega.gif",
+      "sourcePath": "gen5ani-back/za-zeraoramega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani-back/za-zeraoramega.gif"
+    },
+    {
+      "id": "zeraoramega",
+      "side": "front",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/front/zeraoramega.gif",
+      "file": "zeraoramega-front.gif",
+      "width": 144,
+      "height": 140,
+      "frames": 79,
+      "durationCs": 711,
+      "delays": [
+        9
+      ],
+      "transparentFrames": 79,
+      "loop": 0,
+      "sha256": "2566d469bc4242b81fb9b8871cc5e562a474492ae03899dbbacffd34702864ba",
+      "installedPath": "za/front/zeraoramega.gif",
+      "sourcePath": "gen5ani/za-zeraoramega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani/za-zeraoramega.gif"
+    },
+    {
+      "id": "zygardemega",
+      "side": "back",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/back/zygardemega.gif",
+      "file": "zygardemega-back.gif",
+      "width": 108,
+      "height": 113,
+      "frames": 54,
+      "durationCs": 432,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 54,
+      "loop": 0,
+      "sha256": "dd6e9d2f8124ed293a7f553d79ab636b87efc55b66dda30408bf2c9987c04ee9",
+      "installedPath": "za/back/zygardemega.gif",
+      "sourcePath": "gen5ani-back/za-zygardemega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani-back/za-zygardemega.gif"
+    },
+    {
+      "id": "zygardemega",
+      "side": "front",
+      "url": "https://champsnatdex.dedyn.io/sprites/za/front/zygardemega.gif",
+      "file": "zygardemega-front.gif",
+      "width": 122,
+      "height": 124,
+      "frames": 54,
+      "durationCs": 432,
+      "delays": [
+        8
+      ],
+      "transparentFrames": 54,
+      "loop": 0,
+      "sha256": "0b49bd28156439588a69cc7306ca0c5bfb40689fa65145a3ec60a7c2da3fc5e4",
+      "installedPath": "za/front/zygardemega.gif",
+      "sourcePath": "gen5ani/za-zygardemega.gif",
+      "downloadUrl": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/gen5ani/za-zygardemega.gif"
+    }
+  ],
+  "sourceRepository": "https://github.com/MasterTernimus/PokemonShowdown-Client",
+  "sourceBranch": "main",
+  "sourceCommit": "1da66daf7e6b418c213ebc110835561ffc42f191",
+  "referenceManifest": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/1da66daf7e6b418c213ebc110835561ffc42f191/play.pokemonshowdown.com/sprites/za-bw-credits.json",
+  "permission": "Copa Rinha has permission to reuse these sprites with attribution."
+}

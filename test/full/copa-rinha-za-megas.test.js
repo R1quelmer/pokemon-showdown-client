@@ -127,7 +127,8 @@ describe('Copa Rinha Legends Z-A client data and selectors', () => {
 		const official = ids(search('ability', 'meowsticfmega', 'gen9nationaldexag'), 'ability');
 		assert.ok(official.includes('prankster'), 'the official-format selector is unchanged');
 	});
-	it('preserves all names, type/stat/ability rows and existing icon/sprite paths', () => {
+	it('preserves names, type/stat/ability rows and icons while using exact installed Z-A sprites', () => {
+		const assets = JSON.parse(fs.readFileSync(path.join(root, 'sprites/za/manifest.json'))).assets;
 		const selector = search('pokemon');
 		selector.numAbilityCols = 2;
 		const renderer = new PSSearchResults({search: selector});
@@ -142,7 +143,13 @@ describe('Copa Rinha Legends Z-A client data and selectors', () => {
 			assert.equal(builder.spriteid, mega.spriteid, mega.name);
 			assert.notEqual(builder.spriteid, '0', mega.name);
 			for (const front of [true, false]) {
-				assert.ok(Dex.getSpriteData(mega.name, front, {gen: 9}).url.endsWith(`/${mega.spriteid}.png`), mega.name);
+				const asset = assets.find(entry => entry.id === mega.id && entry.side === (front ? 'front' : 'back'));
+				const sprite = Dex.getSpriteData(mega.name, front, {gen: 9});
+				if (asset) {
+					assert.equal(sprite.url, '/sprites/' + asset.installedPath, mega.name);
+				} else {
+					assert.ok(sprite.url.endsWith(`/${mega.spriteid}.png`), mega.name);
+				}
 			}
 		}
 	});

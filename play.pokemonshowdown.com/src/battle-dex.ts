@@ -28,6 +28,48 @@ import type { Teams } from "./battle-teams";
 import { Config } from "./client-main";
 import { BattleLog } from "./battle-log";
 
+// Exact non-shiny forms from sprites/za/manifest.json (National Dex Champions).
+// Keep dimensions in sync with the original GIFs; do not inherit from base species.
+const copaRinhaZASprites: { [id: string]: { front?: [number, number], back?: [number, number] } } = {
+	absolmegaz: { front: [70, 77], back: [90, 89] },
+	barbaraclemega: { front: [96, 97], back: [92, 98] },
+	baxcaliburmega: { front: [132, 119], back: [134, 122] },
+	chandeluremega: { front: [96, 124], back: [96, 124] },
+	chesnaughtmega: { front: [162, 140], back: [125, 159] },
+	chimechomega: { front: [113, 102], back: [117, 103] },
+	crabominablemega: { front: [144, 115], back: [122, 110] },
+	darkraimega: { front: [143, 102], back: [132, 107] },
+	delphoxmega: { front: [149, 134], back: [150, 139] },
+	dragalgemega: { front: [167, 118], back: [153, 108] },
+	drampamega: { front: [103, 117], back: [120, 125] },
+	eelektrossmega: { front: [133, 98], back: [129, 112] },
+	emboarmega: { front: [128, 122], back: [127, 113] },
+	excadrillmega: { front: [159, 97], back: [112, 80] },
+	falinksmega: { front: [125, 92], back: [119, 92] },
+	floettemega: { front: [127, 139], back: [122, 139] },
+	garchompmegaz: { front: [138, 122], back: [159, 112] },
+	glimmoramega: { front: [124, 139], back: [143, 155] },
+	golisopodmega: { front: [98, 97], back: [102, 97] },
+	golurkmega: { front: [118, 104], back: [129, 103] },
+	greninjamega: { front: [93, 116], back: [93, 117] },
+	hawluchamega: { front: [107, 75], back: [107, 106] },
+	heatranmega: { front: [153, 125], back: [134, 126] },
+	lucariomegaz: { front: [75, 71], back: [67, 71] },
+	magearnamega: { front: [108, 89], back: [105, 89] },
+	malamarmega: { front: [155, 115], back: [159, 114] },
+	meowsticfmega: { front: [54, 99], back: [60, 96] },
+	pyroarmega: { front: [93, 100], back: [100, 101] },
+	raichumegax: { front: [130, 74], back: [121, 102] },
+	raichumegay: { front: [114, 93], back: [95, 84] },
+	scolipedemega: { front: [79, 113], back: [84, 103] },
+	scovillainmega: { front: [80, 85], back: [89, 79] },
+	scraftymega: { front: [66, 73], back: [67, 72] },
+	staraptormega: { front: [140, 137], back: [134, 130] },
+	tatsugiricurlymega: { front: [129, 108], back: [119, 77] },
+	zeraoramega: { front: [144, 140], back: [128, 139] },
+	zygardemega: { front: [122, 124], back: [108, 113] },
+};
+
 export declare namespace Dex {
 	/* eslint-disable @typescript-eslint/no-shadow */
 	export type Ability = DexData.Ability;
@@ -1056,6 +1098,14 @@ export const Dex = new class implements ModdedDex {
 
 		let animatedSprite = false;
 		if (!Dex.prefs('noanim') && !Dex.prefs('nogif') && spriteData.gen >= 5) {
+			// These files are served by this client, independently of the official sprite CDN.
+			// Only exact, installed forms qualify; shiny and absent forms use native resolution.
+			const zaSprite = !options.shiny && copaRinhaZASprites[species.id]?.[isFront ? 'front' : 'back'];
+			if (zaSprite) {
+				spriteData.url = `/sprites/za/${facing}/${species.id}.gif`;
+				[spriteData.w, spriteData.h] = zaSprite;
+				animatedSprite = true;
+			}
 			const animationArray: [AnyObject, string][] = [];
 			if (baseDir === '' && window.BattlePokemonSprites) {
 				animationArray.push([BattlePokemonSprites[speciesid], '']);
@@ -1064,6 +1114,7 @@ export const Dex = new class implements ModdedDex {
 				animationArray.push([BattlePokemonSpritesBW[speciesid], 'gen5']);
 			}
 			for (const [animationData, animDir] of animationArray) {
+				if (animatedSprite) break;
 				if (!animationData) continue;
 				if (animationData[facing + 'f'] && options.gender === 'F') facing += 'f';
 				if (!animationData[facing]) continue;
