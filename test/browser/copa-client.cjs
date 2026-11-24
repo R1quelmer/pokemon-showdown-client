@@ -5,6 +5,7 @@ const fs = require('node:fs/promises');
 const path = require('node:path');
 const http = require('node:http');
 const {chromium} = require('playwright');
+const {serveNativeSprite, assertSpriteElementsLoaded} = require('./copa-sprite-assets.cjs');
 const root = path.resolve(__dirname, '../../play.pokemonshowdown.com');
 const canonical = 'gen9coparinhanationaldexza';
 const id = 'a'.repeat(32);
@@ -68,8 +69,9 @@ const exportText = [
 				if (url.includes('/config/config.js')) {
 					return route.fulfill({contentType: 'text/javascript', body: "var Config={customcolors:{},whitelist:[],routes:{client:'play.pokemonshowdown.com'},defaultserver:{id:'showdown',host:'sim3.psim.us',port:443}};"});
 				}
+				if (await serveNativeSprite(route)) return;
 				if (url.startsWith(origin)) return route.continue();
-				return route.abort(); // External native sprites/audio are outside this UI fixture.
+				return route.abort(); // Unrelated external services stay outside this UI fixture.
 			});
 			const overflow = async label => {
 				const geometry = await page.evaluate(() => ({viewport: innerWidth, scroll: document.documentElement.scrollWidth}));
@@ -102,7 +104,9 @@ const exportText = [
 			assert.equal(await page.evaluate(() => document.documentElement.classList.contains('copa-rinha')), true);
 			await overflow('home'); await capture('home');
 
-			await page.evaluate(() => PS.join('teambuilder'));
+			// The official HOME CDN is unavailable in this offline fixture. Exercise
+			// native BW graphics with genuine pinned PNGs; production prefs are untouched.
+			await page.evaluate(() => { PS.prefs.set('bwgfx', true); PS.join('teambuilder'); });
 			await page.getByRole('button', {name: /New team/i}).first().click();
 			assert.equal(await page.evaluate(() => PS.teams.list[0].format), canonical);
 			await page.locator('.teamname input').fill(`Time QA ${width}`);
@@ -110,6 +114,10 @@ const exportText = [
 			await page.locator('textarea.teamtextbox:not(.heighttester)').fill(exportText);
 			await page.waitForFunction(() => PS.teams.list[0].packedTeam && Teams.unpack(PS.teams.list[0].packedTeam)[0]?.species === 'Greninja');
 			await page.getByRole('button', {name: 'Form', exact: true}).click();
+			const decoded = await assertSpriteElementsLoaded(page, '.set-form table, .set-form img, .set-form .typeicon, .picon, .itemicon');
+			assert(decoded.some(image => image.url.includes('/sprites/gen5/greninja.png')), 'native Pokémon sprite decoded');
+			assert(decoded.some(image => /\/sprites\/(?:types|typeicons)\//.test(image.url)), 'native type icon decoded');
+			console.log(`Native BW Teambuilder sprite/type icons decoded at ${width}px`);
 			await overflow('teambuilder'); await capture('teambuilder');
 			const packed = await page.evaluate(() => PS.teams.list[0].packedTeam);
 			await page.getByRole('button', {name: 'Compartilhar time', exact: true}).click();

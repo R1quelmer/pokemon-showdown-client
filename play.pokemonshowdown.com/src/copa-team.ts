@@ -19,53 +19,60 @@ function renderCopaTeam(shared: CopaSharedTeam) {
 		if (text !== undefined) element.textContent = text;
 		return element;
 	};
-	const stats: { [stat: string]: string } = { hp: 'HP', atk: 'Atk', def: 'Def', spa: 'SpA', spd: 'SpD', spe: 'Spe' };
 	shared.sets.forEach(set => {
 		const species = Dex.species.get(set.species);
 		const article = node('article'); article.className = 'pokemon-build';
-		const header = node('div'); header.className = 'pokemon-header';
+		article.setAttribute('aria-label', `Build de ${species.name}`);
 		const gender = ['M', 'F', 'N'].includes(set.gender || '') ? set.gender as Dex.GenderName : undefined;
 		const sprite = Dex.getSpriteData(species.name, true, { gen: 9, shiny: !!set.shiny, gender });
 		const image = node('img'); image.className = 'pokemon-sprite'; image.src = sprite.url;
 		image.alt = `${species.name}${set.shiny ? ' shiny' : ''}`; image.width = sprite.w; image.height = sprite.h;
-		image.loading = 'lazy'; image.referrerPolicy = 'no-referrer';
-		const heading = node('div');
-		heading.appendChild(node('h2', set.name || species.name));
-		if (set.name && set.name !== species.name) heading.appendChild(node('p', species.name));
-		const traits = [set.gender, set.shiny ? 'Shiny' : '', `Nível ${set.level || 100}`];
-		heading.appendChild(node('p', traits.filter(Boolean).join(' · ')));
-		header.append(image, heading); article.appendChild(header);
-		const details = node('dl');
-		const row = (label: string, value: string | HTMLElement) => {
-			const wrapper = node('div'), description = node('dd');
-			if (typeof value === 'string') description.textContent = value; else description.appendChild(value);
-			wrapper.append(node('dt', label), description); details.appendChild(wrapper);
-		};
-		row('Espécie', species.name);
-		row('Item', set.item || 'Sem item');
-		row('Habilidade', set.ability || species.abilities[0]);
-		row('Natureza', set.nature || 'Hardy');
-		row('Tera Type', set.teraType || species.types[0]);
-		row('EVs', Object.entries(stats).map(([key, label]) => `${set.evs?.[key as 'hp'] || 0} ${label}`).join(' / '));
-		row('IVs', Object.entries(stats).map(([key, label]) => `${set.ivs?.[key as 'hp'] ?? 31} ${label}`).join(' / '));
-		const moves = node('ul'); moves.className = 'move-list';
-		for (const move of set.moves) moves.appendChild(node('li', Dex.moves.get(move).name || move));
-		row('Movimentos', moves);
-		if (set.happiness !== undefined) row('Felicidade', String(set.happiness));
-		if (set.gigantamax) row('Gigantamax', 'Sim');
-		if (set.dynamaxLevel !== undefined) row('Nível Dynamax', String(set.dynamaxLevel));
-		if (set.pokeball) row('Poké Ball', set.pokeball);
-		if (set.hpType) row('Hidden Power', set.hpType);
-		article.appendChild(details); list.appendChild(article);
+		image.referrerPolicy = 'no-referrer';
+		const build = node('pre'), code = node('code');
+		build.className = 'pokemon-export';
+		// The native exporter owns all values, optional fields and line ordering.
+		// Highlight text nodes only: nicknames and API data never become HTML.
+		const lines = Teams.exportSet(set).replace(/\s+$/, '').split('\n');
+		lines.forEach((line, index) => {
+			const token = (text: string, className: string) => {
+				const span = node('span', text); span.className = className; code.appendChild(span);
+			};
+			if (!index) {
+				const item = line.lastIndexOf(' @ ');
+				token(item < 0 ? line : line.slice(0, item), 'paste-name');
+				if (item >= 0) {
+					token(' @ ', 'paste-label'); token(line.slice(item + 3), 'paste-item');
+				}
+			} else if (line.startsWith('- ')) {
+				token('- ', 'paste-label'); token(line.slice(2), 'paste-move');
+			} else if (line.endsWith(' Nature')) {
+				token(line.slice(0, -7), 'paste-nature'); token(' Nature', 'paste-label');
+			} else {
+				const colon = line.indexOf(': ');
+				if (colon < 0) {
+					code.appendChild(document.createTextNode(line));
+				} else {
+					token(line.slice(0, colon + 2), 'paste-label');
+					const value = line.slice(colon + 2);
+					if (line.startsWith('EVs: ') || line.startsWith('IVs: ')) {
+						for (const part of value.split(/(\d+)/)) token(part, /^\d+$/.test(part) ? 'paste-number' : 'paste-stat');
+					} else {
+						token(value, line.startsWith('Ability: ') ? 'paste-ability' : 'paste-value');
+					}
+				}
+			}
+			if (index < lines.length - 1) code.appendChild(document.createTextNode('\n'));
+		});
+		build.appendChild(code); article.append(image, build); list.appendChild(article);
 	});
 	const exported = Teams.export(shared.sets);
-	(document.getElementById('team-export') as HTMLTextAreaElement).value = exported;
 	(document.getElementById('import-team') as HTMLAnchorElement).href = CopaSharedTeams.importURL(shared.id);
 	const copy = async (value: string, success: string) => {
 		try { await navigator.clipboard.writeText(value); status.textContent = success; } catch {
-			status.textContent = 'Não foi possível copiar automaticamente. Selecione o texto abaixo ou copie o endereço da página.';
-			const textarea = document.getElementById('team-export') as HTMLTextAreaElement;
-			textarea.focus(); textarea.select();
+			status.textContent = 'Não foi possível copiar automaticamente. Selecione o texto do time ou copie o endereço da página.';
+			list.focus();
+			const range = document.createRange(); range.selectNodeContents(list);
+			const selection = window.getSelection(); selection?.removeAllRanges(); selection?.addRange(range);
 		}
 	};
 	document.getElementById('copy-team')!.onclick = () => { void copy(exported, 'Time copiado.'); };

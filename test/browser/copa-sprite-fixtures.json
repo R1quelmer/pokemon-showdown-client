@@ -1,0 +1,207 @@
+{
+  "repository": "https://github.com/MasterTernimus/PokemonShowdown-Client",
+  "revision": "0d2cfb8f2300eb630b1fc3e47ce1572fed59aa57",
+  "assets": {
+    "ani/charizard-megax.gif": {
+      "gitBlob": "810e97ad241b9b00f5848f77d5d942e339d36d56"
+    },
+    "ani/clefairy.gif": {
+      "gitBlob": "c67af1fee69af3b51574fd80981f353c8b962322"
+    },
+    "ani/greninja.gif": {
+      "gitBlob": "01d4e2d848da6996ada33f83b1779a438786e93c"
+    },
+    "ani/kingambit.gif": {
+      "gitBlob": "41e6f314d89e45e24f9d4894d8a52dfdf7a56207"
+    },
+    "ani/landorus-therian.gif": {
+      "gitBlob": "8f8fc96ca3f88d42c3e2d0065d374a802ca7d183"
+    },
+    "gen5/baxcalibur-mega.png": {
+      "gitBlob": "0cb4918d06c4ebd4e1863a48c11b59d82c88fe1e"
+    },
+    "gen5/charizard-megax.png": {
+      "gitBlob": "43db5400b7fa33f2e854bbf827d1bbcd91406770"
+    },
+    "gen5/clefairy.png": {
+      "gitBlob": "9f758123f88872a9a2e701e3aa2db3e7c6425b24"
+    },
+    "gen5/greninja-mega.png": {
+      "gitBlob": "4da1fb68dd7623a1436e554699bf9ab8a8212523"
+    },
+    "gen5/greninja.png": {
+      "gitBlob": "bdf7bd94dbf0246de383d41060e8b655ae117f04",
+      "source": "https://raw.githubusercontent.com/smogon/sprites/ee5a2c2d23e4455482e5b831aee6041320934c01/src/sprites/gen5/sgreninja.png",
+      "canonicalPath": "src/sprites/gen5/sgreninja.png",
+      "note": "Canonical unscaled Gen 5 fixture. The collection fork stores a 2x PNG unsuitable for the native Teambuilder background; official CDN bytes cannot be compared in this environment."
+    },
+    "gen5/kingambit.png": {
+      "gitBlob": "28e30e0235f9f28fc271e46b6f046e3963eaee02"
+    },
+    "gen5/landorus-therian.png": {
+      "gitBlob": "3c7f53321c851f7ddbf45b04c2e27ab7fa12f17e"
+    },
+    "gen5ani/baxcalibur-mega.gif": {
+      "gitBlob": "0cb4918d06c4ebd4e1863a48c11b59d82c88fe1e"
+    },
+    "gen5ani/clefairy.gif": {
+      "gitBlob": "148ce5215bc381b3fb6311bd52557b753e1d8d5b"
+    },
+    "gen5ani/greninja-mega.gif": {
+      "gitBlob": "d727ac51eda2559d9f20196d050f9123bef52216"
+    },
+    "gen5ani/greninja.gif": {
+      "gitBlob": "a3b730d21aaefacb5b0f3d3bff36d27d9f999af0"
+    },
+    "gen5ani/landorus-therian.gif": {
+      "gitBlob": "1fb2e87dee79b8ca139f52c6e7c0bfcfe39625c6"
+    },
+    "itemicons-sheet.png": {
+      "gitBlob": "57ec9c5be9bcdf0a7f2fd98c7e307a38c875ffae"
+    },
+    "pokemonicons-pokeball-sheet.png": {
+      "gitBlob": "1a37a54b1c2822f61b06bbdb77890ffd25f4cf3f"
+    },
+    "pokemonicons-sheet.png": {
+      "gitBlob": "629310da81b9289639f877e46872129bbc8a41b5"
+    },
+    "trainers/unknown.png": {
+      "gitBlob": "88c5c8c33eab4809ef41b059ec3babdfe713cb37"
+    },
+    "types/Bird.png": {
+      "gitBlob": "672b62330d53c37840ca2fa06929c635ab2833c1"
+    },
+    "types/Bug.png": {
+      "gitBlob": "5688c0f9d388835f0c99d3c463b9b2cb97c5a02d"
+    },
+    "types/Dark.png": {
+      "gitBlob": "5eb4c8b0923d1ca924f261f7195db77a9164d542"
+    },
+    "types/Dragon.png": {
+      "gitBlob": "0a043a1775a3a3a6698e162da13c82f18361776f"
+    },
+    "types/Electric.png": {
+      "gitBlob": "52a3d516a363aae64bc2bb8dc9aa26f1711fd465"
+    },
+    "types/Fairy.png": {
+      "gitBlob": "3998d191362edf58d13b855b9245abfa34f1c674"
+    },
+    "types/Fighting.png": {
+      "gitBlob": "8ce727255d41acb721a046fb18372cfb9cabc311"
+    },
+    "types/Fire.png": {
+      "gitBlob": "8ca915f2c428f938a2d29c78c1785f9b94fdc54a"
+    },
+    "types/Flying.png": {
+      "gitBlob": "377f16c4006ab90e8f0af4fe2b361987d4672675"
+    },
+    "types/Ghost.png": {
+      "gitBlob": "5b18d28e1d4e946730509d4b7adf65c39ec87020"
+    },
+    "types/Grass.png": {
+      "gitBlob": "15065b5798412c00943be0e83f9209af22e89cad"
+    },
+    "types/Ground.png": {
+      "gitBlob": "8583891797336d8839b671d0fc4da1f8e0049e19"
+    },
+    "types/Ice.png": {
+      "gitBlob": "0eb4a9b9e712c2cd9bffa82cde057ccc2e9e6f04"
+    },
+    "types/Normal.png": {
+      "gitBlob": "a1d09dbdb25749ba8166e68e70c108c64b0ed1a4"
+    },
+    "types/Poison.png": {
+      "gitBlob": "16fc4b2f3c62c49c93221f0d6c75149aef036914"
+    },
+    "types/Psychic.png": {
+      "gitBlob": "618d13d73026c0cad67da6bb27625cb4bfa2fed2"
+    },
+    "types/Rock.png": {
+      "gitBlob": "b3194b9aefdf73e89dd7917fa3bd58fcc33d3b9e"
+    },
+    "types/Steel.png": {
+      "gitBlob": "9ca9dc01c029a7e48ef2301c813a8be1a95c31b1"
+    },
+    "types/Stellar.png": {
+      "gitBlob": "cafc442e48f217a68007177adb3f0e3f13cc2a12"
+    },
+    "types/TeraBug.png": {
+      "gitBlob": "f61f32d697ba1c3241af450b1f6fac5ca5d29f8b"
+    },
+    "types/TeraDark.png": {
+      "gitBlob": "6529c0adcf93d74d5659111ebbc66fc97240e567"
+    },
+    "types/TeraDragon.png": {
+      "gitBlob": "65c55eaa2e07d784f60681ab4890a885cfa847e0"
+    },
+    "types/TeraElectric.png": {
+      "gitBlob": "468b7eab10fdab04c6c281e8917768f23c74cb6b"
+    },
+    "types/TeraFairy.png": {
+      "gitBlob": "764fce539b9bc4bd97011524126cf53f90deb492"
+    },
+    "types/TeraFighting.png": {
+      "gitBlob": "404d947efac1df74bd94f5cbc671e99980510b1a"
+    },
+    "types/TeraFire.png": {
+      "gitBlob": "627b8692b1a56807630b1be4e5f527c4245d565c"
+    },
+    "types/TeraFlying.png": {
+      "gitBlob": "28f6043b3e8ab9a3fb1be13ebd76e74d894bf923"
+    },
+    "types/TeraGhost.png": {
+      "gitBlob": "7cfc2b5f31162f2950c5bcbaab0f0208bbe7d5a6"
+    },
+    "types/TeraGrass.png": {
+      "gitBlob": "8e53d57a1997699c0e846f16b564184ec1583ae5"
+    },
+    "types/TeraGround.png": {
+      "gitBlob": "95ff9ecf897bd7561d03020418bd6c39f7d0f5ab"
+    },
+    "types/TeraIce.png": {
+      "gitBlob": "38082d60b6a132579e6307e01b316fac7b51a837"
+    },
+    "types/TeraNormal.png": {
+      "gitBlob": "e3aa4e98ceb48ed924ff0ac87374c1eab14504ab"
+    },
+    "types/TeraPoison.png": {
+      "gitBlob": "71fb7a00f6fdf36f2cfe8296d74cf21859f8ddd8"
+    },
+    "types/TeraPsychic.png": {
+      "gitBlob": "e68c96795492c39619608d21994daa08836fba13"
+    },
+    "types/TeraRock.png": {
+      "gitBlob": "0e96d92c40f65aa51f9656ea0b359bb1fc9f47c6"
+    },
+    "types/TeraSteel.png": {
+      "gitBlob": "0cd7bcfac0a3384d0f12144e2d837aacab6a5c82"
+    },
+    "types/TeraStellar.png": {
+      "gitBlob": "92df17bc52b2018c8c5b5ad629693539ee93e2da"
+    },
+    "types/TeraWater.png": {
+      "gitBlob": "ba264907e5acd58f53e08b1b3d4177812161fdaa"
+    },
+    "types/Water.png": {
+      "gitBlob": "abe1126f42b1fbe5b4cd1ac8ea6fce4f54c227be"
+    },
+    "categories/Physical.png": {
+      "gitBlob": "e03c0ed358bb75783e6586eaddf58a8bfddffb30"
+    },
+    "categories/Special.png": {
+      "gitBlob": "341ec5dff6fcb4f6df9969797f189262cba0463f"
+    },
+    "typeicons/Water.png": {
+      "gitBlob": "37ae8d3fff7fef5777332007c2543b7b98820264",
+      "source": "https://raw.githubusercontent.com/smogon/sprites/ee5a2c2d23e4455482e5b831aee6041320934c01/src/_uncategorized/canonical/ui/types/gen9/icon/Water.png",
+      "canonicalPath": "src/_uncategorized/canonical/ui/types/gen9/icon/Water.png",
+      "note": "Canonical Gen 9 icon fixture; official CDN bytes cannot be compared in the offline browser environment."
+    },
+    "typeicons/Dark.png": {
+      "gitBlob": "05c29aa4e9f7d3b2231105bd805f16f7edd0d013",
+      "source": "https://raw.githubusercontent.com/smogon/sprites/ee5a2c2d23e4455482e5b831aee6041320934c01/src/_uncategorized/canonical/ui/types/gen9/icon/Dark.png",
+      "canonicalPath": "src/_uncategorized/canonical/ui/types/gen9/icon/Dark.png",
+      "note": "Canonical Gen 9 icon fixture; official CDN bytes cannot be compared in the offline browser environment."
+    }
+  }
+}

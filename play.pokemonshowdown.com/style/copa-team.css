@@ -1,1 +1,43 @@
-.team-heading{padding:28px 0 18px}.team-heading h1{overflow-wrap:anywhere}.eyebrow{color:var(--accent);font-size:11px;font-weight:600;letter-spacing:1.6px;margin:0 0 8px}#team-details{color:var(--muted);font-size:12px;overflow-wrap:anywhere}.team-heading+form{margin-bottom:18px}#open-team label{display:block;color:var(--muted);font-size:12px;margin-bottom:7px}.open-fields{display:flex;gap:8px;min-width:0}.open-fields input{flex:1;min-width:0;padding:10px 12px;background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:6px;font:inherit}.open-fields button,.team-actions button,.team-button{min-height:42px;padding:9px 14px;font:500 12px Inter,system-ui,sans-serif;border-radius:5px;border:1px solid var(--line);background:var(--surface);color:var(--text);text-decoration:none;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}.open-fields button:hover,.team-actions button:hover,.team-button:hover{border-color:var(--accent);color:var(--accent)}.open-fields button:focus-visible,.team-actions button:focus-visible,.team-button:focus-visible{outline:2px solid var(--accent);outline-offset:3px}#team-status{font-size:13px;min-height:20px;color:var(--muted);overflow-wrap:anywhere}.team-privacy{color:var(--muted);font-size:12px;line-height:1.6;margin:4px 0 12px}.team-actions{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 22px}.team-actions .primary{background:var(--accent);color:#07131e}.pokemon-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:28px}.pokemon-build{border-top:1px solid var(--line);padding:18px 0 22px;min-width:0}.pokemon-header{display:flex;gap:14px;align-items:center;margin-bottom:12px}.pokemon-sprite{width:96px;height:96px;object-fit:contain;flex-shrink:0;image-rendering:pixelated}.pokemon-header h2{font:700 24px 'Barlow Condensed',sans-serif;margin:0 0 4px;overflow-wrap:anywhere}.pokemon-header p{margin:2px 0;color:var(--muted);font-size:12px}.pokemon-header>div{min-width:0}.pokemon-build dl{margin:0;font-size:12px;line-height:1.7}.pokemon-build dl>div{display:grid;grid-template-columns:85px minmax(0,1fr);gap:7px;margin:4px 0}.pokemon-build dt{color:var(--muted)}.pokemon-build dd{margin:0;overflow-wrap:anywhere}.move-list{padding:0;margin:0;list-style:none}.team-export{margin-top:24px}.team-export h2{font:600 13px 'Barlow Condensed',sans-serif;letter-spacing:1.5px;color:var(--muted)}#team-export{box-sizing:border-box;width:100%;min-height:220px;resize:vertical;background:var(--surface);border:1px solid var(--line);color:var(--text);border-radius:6px;padding:14px;font:12px/1.65 ui-monospace,monospace;white-space:pre;overflow:auto}footer a{color:var(--muted);text-decoration:none}footer a:hover{color:var(--accent)}[hidden]{display:none!important}@media(max-width:600px){.team-heading{padding:22px 2px 14px}.pokemon-list{grid-template-columns:minmax(0,1fr)}.pokemon-build{padding:16px 2px 20px}.open-fields{flex-wrap:wrap}.open-fields input{flex-basis:100%;width:100%;box-sizing:border-box}.open-fields button{width:100%}.team-actions{gap:7px}.team-actions>*{flex:1 1 130px}.pokemon-header h2{font-size:25px}.pokemon-build dl>div{grid-template-columns:83px minmax(0,1fr)}#team-export{font-size:11px;padding:10px}.team-privacy{font-size:11px}}
+.team-heading { padding: 28px 0 18px; }
+.team-heading h1 { overflow-wrap: anywhere; }
+.eyebrow { color: var(--accent); font-size: 11px; font-weight: 600; letter-spacing: 1.6px; margin: 0 0 8px; }
+#team-details { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
+.team-heading + form { margin-bottom: 18px; }
+#open-team label { display: block; color: var(--muted); font-size: 12px; margin-bottom: 7px; }
+.open-fields { display: flex; gap: 8px; min-width: 0; }
+.open-fields input { flex: 1; min-width: 0; padding: 10px 12px; background: var(--surface); color: var(--text); border: 1px solid var(--line); border-radius: 6px; font: inherit; }
+.open-fields button, .team-actions button, .team-button { min-height: 42px; padding: 9px 14px; font: 500 12px Inter, system-ui, sans-serif; border-radius: 5px; border: 1px solid var(--line); background: var(--surface); color: var(--text); text-decoration: none; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+.open-fields button:hover, .team-actions button:hover, .team-button:hover { border-color: var(--accent); color: var(--accent); }
+.open-fields button:focus-visible, .team-actions button:focus-visible, .team-button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+#team-status { font-size: 13px; min-height: 20px; color: var(--muted); overflow-wrap: anywhere; }
+.team-privacy { color: var(--muted); font-size: 12px; line-height: 1.6; margin: 4px 0 12px; }
+.team-actions { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 22px; }
+.team-actions .primary { background: var(--accent); color: #07131e; }
+/* One native export per Pokémon, with the sprite beside its selectable build. */
+.pokemon-list { min-width: 0; }
+.pokemon-build { display: grid; grid-template-columns: 120px minmax(0, 1fr); align-items: start; gap: 24px; border-top: 1px solid var(--line); padding: 24px 0; min-width: 0; }
+.pokemon-sprite { display: block; width: 120px; height: 120px; object-fit: contain; image-rendering: pixelated; }
+.pokemon-export { margin: 0; min-width: 0; color: #d7e2ef; font: 13px/1.75 ui-monospace, SFMono-Regular, Consolas, monospace; white-space: pre-wrap; overflow-wrap: anywhere; tab-size: 2; }
+.pokemon-export code { font: inherit; }
+.paste-name { color: #f0f5fa; font-weight: 700; }
+.paste-label { color: #a0b0c4; }
+.paste-item { color: #edcf88; }
+.paste-ability, .paste-nature { color: #98d5ad; }
+.paste-number, .paste-value { color: #86dbea; }
+.paste-stat { color: #c1cddd; }
+.paste-move { color: #b4c9f6; }
+footer a { color: var(--muted); text-decoration: none; }
+footer a:hover { color: var(--accent); }
+[hidden] { display: none !important; }
+@media (max-width: 600px) {
+	.team-heading { padding: 22px 2px 14px; }
+	.pokemon-build { grid-template-columns: 64px minmax(0, 1fr); gap: 12px; padding: 20px 2px; }
+	.pokemon-sprite { width: 64px; height: 80px; }
+	.pokemon-export { font-size: 11px; line-height: 1.8; }
+	.open-fields { flex-wrap: wrap; }
+	.open-fields input { flex-basis: 100%; width: 100%; box-sizing: border-box; }
+	.open-fields button { width: 100%; }
+	.team-actions { gap: 7px; }
+	.team-actions > * { flex: 1 1 130px; }
+	.team-privacy { font-size: 11px; }
+}
