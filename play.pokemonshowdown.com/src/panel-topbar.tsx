@@ -241,6 +241,25 @@ export class PSHeader extends preact.Component {
 			<span class="usernametext">{PS.user.name}</span>
 		</span>;
 	}
+	renderBrand(size = 48) {
+		if (Dex.isCopaRinha()) {
+			return <a href="/copa-rinha.html" class="copa-brand" aria-label="Copa Rinha II, página inicial">
+				<img class="logo" src="assets/copa-rinha/logo.png" alt="Copa Rinha" width="128" height="72" />
+				<span class="copa-edition" aria-hidden>II</span>
+			</a>;
+		}
+		return <img
+			class="logo" src={`https://${Config.routes.client}/iconbeta.png`}
+			alt="Pokémon Showdown! (beta)" width={size} height={size}
+		/>;
+	}
+	renderCopaLinks() {
+		if (!Dex.isCopaRinha()) return null;
+		return <nav class="copa-quicklinks" aria-label="Compartilhados da Copa Rinha">
+			<a href="/team.html">Times compartilhados</a>
+			<a href="/replay.html">Replays</a>
+		</nav>;
+	}
 	renderVertical() {
 		const miniRoomTabs = PSHeader.notifyingMiniRoomTabs();
 		return <div
@@ -249,12 +268,8 @@ export class PSHeader extends preact.Component {
 		>
 			<div class="maintabbarbottom"></div>
 			<div class="scrollable-part">
-				<img
-					class="logo"
-					src={`https://${Config.routes.client}/iconbeta.png`}
-					alt="Pokémon Showdown! (beta)"
-					width="50" height="50"
-				/>
+				{this.renderBrand(50)}
+				{this.renderCopaLinks()}
 				<div class="tablist" role="tablist">
 					<ul>
 						{PSHeader.renderRoomTab(PS.leftRoomList[0], false, false)}
@@ -308,13 +323,9 @@ export class PSHeader extends preact.Component {
 			<div class="tabbar maintabbar"><div class="inner-1" role={PS.leftPanelWidth ? 'none' : 'tablist'}><div class="inner-2">
 				<ul class="maintabbar-left" style={{ width: `${PS.leftPanelWidth}px` }} role={PS.leftPanelWidth ? 'tablist' : 'none'}>
 					<li>
-						<img
-							class="logo"
-							src={`https://${Config.routes.client}/iconbeta.png`}
-							alt="Pokémon Showdown! (beta)"
-							width="48" height="48"
-						/>
+						{this.renderBrand()}
 					</li>
+					{Dex.isCopaRinha() && <li class="copa-links-li">{this.renderCopaLinks()}</li>}
 					{PSHeader.renderRoomTab(PS.leftRoomList[0])}
 					{PS.leftRoomList.slice(1).map(roomid => PSHeader.renderRoomTab(roomid))}
 				</ul>
@@ -373,7 +384,7 @@ export class PSMiniHeader extends preact.Component {
 			<button data-href="options" class="mini-header-right" aria-label={TL`[Options]`}>
 				{PS.user.named ? <strong style={userColor}>{PS.user.name}</strong> : <i class="fa fa-cog" aria-hidden></i>}
 			</button>
-			{icon} {title}
+			{icon} {Dex.isCopaRinha() && PS.getPanel()?.id === '' ? 'COPA RINHA II' : title}
 		</div>;
 	}
 }

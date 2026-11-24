@@ -7,6 +7,32 @@ import type { ID } from './battle-dex';
 async function loadCopaReplay() {
 	const status = document.getElementById('status')!;
 	const id = new URLSearchParams(location.search).get('id') || '';
+	if (!id && document.getElementById('open-replay')) {
+		const form = document.getElementById('open-replay') as HTMLFormElement;
+		form.hidden = false;
+		status.textContent = 'Cole um link de replay da Copa Rinha para assistir.';
+		for (const selector of ['.match-info', '.player-shell', '.log-section']) {
+			(document.querySelector(selector) as HTMLElement).style.display = 'none';
+		}
+		form.onsubmit = event => {
+			event.preventDefault();
+			const value = (document.getElementById('replay-link') as HTMLInputElement).value.trim();
+			let target = value;
+			if (!/^[A-Za-z0-9_-]{32}$/.test(target)) {
+				try {
+					const url = new URL(value, location.href);
+					target = (url.origin === location.origin || url.origin === 'https://copa-rinha-client.onrender.com') &&
+						url.pathname === '/replay.html' && !url.username && !url.password ? url.searchParams.get('id') || '' : '';
+				} catch { target = ''; }
+			}
+			if (!/^[A-Za-z0-9_-]{32}$/.test(target)) {
+				status.textContent = 'Link de replay inválido.';
+				return;
+			}
+			location.href = `replay.html?id=${target}`;
+		};
+		return;
+	}
 	if (!/^[A-Za-z0-9_-]{32}$/.test(id)) {
 		status.textContent = 'ID de replay inválido.';
 		return;

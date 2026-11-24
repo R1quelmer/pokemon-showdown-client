@@ -1,0 +1,355 @@
+/* Copa Rinha II chrome. Native room layout, battle field, sprites and handlers remain upstream. */
+@font-face{font-family:"Barlow Condensed";font-style:normal;font-weight:600;font-display:swap;src:url("fonts/barlow-condensed/barlow-condensed-latin-600-normal.woff2") format("woff2")}
+@font-face{font-family:"Barlow Condensed";font-style:normal;font-weight:700;font-display:swap;src:url("fonts/barlow-condensed/barlow-condensed-latin-700-normal.woff2") format("woff2")}
+@font-face{font-family:"Inter";font-style:normal;font-weight:400;font-display:swap;src:url("fonts/inter/inter-latin-400-normal.woff2") format("woff2")}
+@font-face{font-family:"Inter";font-style:normal;font-weight:500;font-display:swap;src:url("fonts/inter/inter-latin-500-normal.woff2") format("woff2")}
+@font-face{font-family:"Inter";font-style:normal;font-weight:600;font-display:swap;src:url("fonts/inter/inter-latin-600-normal.woff2") format("woff2")}
+
+html.copa-rinha {
+  --copa-page:#080f1b;
+  --copa-surface:#101c2c;
+  --copa-raised:#152438;
+  --copa-input:#0b1523;
+  --copa-line:#26364a;
+  --copa-text:#f0f5fa;
+  --copa-muted:#9eb0c5;
+  --copa-cyan:#59d9f5;
+}
+html.copa-rinha body {
+  background:var(--copa-page) !important;
+  color:var(--copa-text);
+  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-size:13px;
+}
+html.copa-rinha :where(.header,.header-vertical,.mini-header,.ps-popup,.chat-log,.chat-log-add,.readable-bg,.battle-log,.battle-log-add,.ps-room-light,.ps-room-opaque,.teampane,.folderpane) {
+  color-scheme:dark;
+}
+html.copa-rinha :where(.ps-room,.ps-room-light,.ps-room-opaque) {
+  color:var(--copa-text);
+  background:var(--copa-page);
+  border-color:var(--copa-line);
+}
+html.copa-rinha :where(.header,.header-vertical) {
+  background:var(--copa-surface);
+  border-color:var(--copa-line);
+}
+html.copa-rinha :where(.maintabbarbottom,.mini-header,.tabbar:after) {
+  color:var(--copa-text);
+  background:var(--copa-surface);
+  border-color:var(--copa-line);
+  box-shadow:none;
+}
+html.copa-rinha :where(.header,.header-vertical,.mini-header,.ps-room,.ps-popup) h1,
+html.copa-rinha :where(.header,.header-vertical,.mini-header,.ps-room,.ps-popup) h2,
+html.copa-rinha :where(.header,.header-vertical,.mini-header,.ps-room,.ps-popup) h3 {
+  font-family:"Barlow Condensed","Arial Narrow",sans-serif;
+  letter-spacing:.3px;
+}
+html.copa-rinha :where(.header,.header-vertical) .copa-brand {
+  display:flex;
+  align-items:center;
+  gap:9px;
+  width:max-content;
+  max-width:calc(100% - 24px);
+  color:var(--copa-cyan);
+  text-decoration:none;
+  cursor:pointer;
+  margin:0 12px;
+  padding:0;
+}
+html.copa-rinha .copa-brand img.logo {
+  display:block;
+  width:88px;
+  height:auto;
+  object-fit:contain;
+  margin:0;
+}
+html.copa-rinha .copa-brand .copa-edition {
+  padding-left:9px;
+  border-left:1px solid var(--copa-line);
+  font:600 16px/1 "Barlow Condensed","Arial Narrow",sans-serif;
+  letter-spacing:1px;
+}
+html.copa-rinha .header-vertical .copa-brand {margin:12px 14px 14px;gap:11px}
+html.copa-rinha .header-vertical .copa-brand img.logo {width:128px}
+html.copa-rinha .header-vertical .copa-brand .copa-edition {font-size:19px}
+html.copa-rinha .header-vertical .userbar {
+  padding-top:12px;
+  border-top:1px solid var(--copa-line);
+}
+html.copa-rinha .userbar .username {color:var(--copa-text);text-shadow:none}
+html.copa-rinha .userbar .button {font-size:12px}
+html.copa-rinha .mini-header {font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-size:16px}
+html.copa-rinha :where(.mini-header-left,.mini-header-right) {color:var(--copa-text);background:transparent;border-color:var(--copa-line)}
+html.copa-rinha :where(.tabbar .button,.header-vertical .tablist .button) {
+  color:var(--copa-muted);
+  background:transparent;
+  border-color:transparent;
+  box-shadow:none;
+  text-shadow:none;
+}
+html.copa-rinha :where(.tabbar .button:hover,.header-vertical .tablist .button:hover) {
+  color:var(--copa-text);
+  background:var(--copa-raised);
+  border-color:var(--copa-line);
+  box-shadow:none;
+}
+html.copa-rinha :where(.tabbar .button.cur,.header-vertical .tablist .button.cur) {
+  color:var(--copa-cyan);
+  background:#172d3e;
+  border-color:#2a5367;
+  box-shadow:none;
+}
+html.copa-rinha :where(.tabbar .closebutton,.header-vertical .closebutton) {color:var(--copa-muted);text-shadow:none}
+html.copa-rinha :where(.mini-header,.tablist) i.text {color:var(--copa-muted);border-color:var(--copa-line);background:var(--copa-input);text-shadow:none}
+
+/* Familiar native groups, with the same compact, flat treatment as the replay controls. */
+html.copa-rinha .mainmenu {background:transparent}
+html.copa-rinha :where(.menugroup,.mini-window-header) {box-shadow:none;backdrop-filter:none;text-shadow:none}
+html.copa-rinha .menugroup {background:transparent;border:0;border-radius:0;margin-bottom:18px;padding:10px 0}
+html.copa-rinha .mainmenu-left {padding-top:22px}
+html.copa-rinha .mainmenu-right {padding-top:0}
+html.copa-rinha .mainmessage {color:var(--copa-muted);text-shadow:none}
+html.copa-rinha .mainmessage strong {color:var(--copa-text)}
+html.copa-rinha .mainmenu-footer {color:var(--copa-muted);text-shadow:none;line-height:1.9}
+html.copa-rinha :where(.mainmenu-footer a,.mainmenu-footer button) {color:var(--copa-muted);text-shadow:none}
+html.copa-rinha .mainmenu-footer a:hover {color:var(--copa-cyan)}
+html.copa-rinha .mini-window {border:1px solid var(--copa-line);border-radius:6px;overflow:hidden;background:var(--copa-surface)}
+html.copa-rinha .mini-window-header {color:var(--copa-muted);background:var(--copa-raised);border-color:var(--copa-line);font-weight:500}
+html.copa-rinha .mini-window-header a {color:var(--copa-text)}
+html.copa-rinha :where(.mini-window-contents,.newsentry,.readable-bg) {color:var(--copa-muted);background:var(--copa-surface);backdrop-filter:none}
+html.copa-rinha .newsentry h4 {color:var(--copa-text)}
+html.copa-rinha .newsentry small {color:var(--copa-muted)}
+
+/* Inputs and buttons outside the battle field only. Native move/type colors remain meaningful. */
+html.copa-rinha :where(.ps-room,.ps-popup,.header,.header-vertical) .button:not(.battle *) {
+  color:var(--copa-text);
+  background:var(--copa-surface);
+  border-color:var(--copa-line);
+  border-radius:5px;
+  box-shadow:none;
+  text-shadow:none;
+  font-family:inherit;
+}
+html.copa-rinha :where(.ps-room,.ps-popup,.header,.header-vertical) .button:not(.battle *):hover {
+  background:var(--copa-raised);
+  border-color:#446079;
+  color:var(--copa-text);
+  box-shadow:none;
+}
+html.copa-rinha :where(.ps-room,.ps-popup,.header,.header-vertical) .button:not(.battle *):active {background:#193347;box-shadow:none}
+html.copa-rinha :where(.ps-room,.ps-popup,.header,.header-vertical) .button:not(.battle *):disabled,
+html.copa-rinha :where(.ps-room,.ps-popup,.header,.header-vertical) .button:not(.battle *).disabled {color:#71869d;background:var(--copa-input);border-color:var(--copa-line);opacity:.65}
+html.copa-rinha .mainmenu .mainmenu.button {color:var(--copa-text);background:var(--copa-surface);border-color:var(--copa-line);font-size:13px;min-height:40px;padding:10px 12px;border-radius:5px}
+html.copa-rinha .mainmenu .mainmenu.button.big {color:#07131e;background:var(--copa-cyan);border-color:var(--copa-cyan);font-size:15px;font-weight:600;min-height:52px}
+html.copa-rinha .mainmenu .mainmenu.button.big small {font-size:10px;font-weight:400}
+html.copa-rinha .mainmenu .mainmenu.button.big:hover {background:#8be5fa}
+html.copa-rinha :where(.ps-popup,.ps-room) :where(.textbox,select,textarea):not(.battle *) {
+  box-sizing:border-box;
+  color:var(--copa-text);
+  background:var(--copa-input);
+  border-color:var(--copa-line);
+  border-radius:4px;
+  box-shadow:none;
+  font-family:inherit;
+}
+html.copa-rinha :where(.ps-popup,.ps-room) :where(input,select,textarea):not(.battle *) {max-width:100%}
+html.copa-rinha :where(.ps-popup,.ps-room) input::placeholder,
+html.copa-rinha :where(.ps-popup,.ps-room) textarea::placeholder {color:#7890aa;opacity:1}
+html.copa-rinha :where(.ps-popup,.ps-room) select option {background:var(--copa-input);color:var(--copa-text)}
+html.copa-rinha :where(.ps-popup,.ps-room) :where(a,button,input,select,textarea):not(.battle *):focus-visible,
+html.copa-rinha .copa-brand:focus-visible {outline:2px solid var(--copa-cyan);outline-offset:2px}
+html.copa-rinha :where(.ps-popup,.ps-room) :where(a,button).button:focus-visible {box-shadow:none}
+html.copa-rinha :where(.ps-popup,.ps-room) :where(a:not(.button):not(.username)):not(.battle *) {color:var(--copa-cyan)}
+html.copa-rinha :where(.ps-room,.ps-popup) hr {border-color:var(--copa-line)}
+html.copa-rinha :where(.ps-room,.ps-popup) .label:not(.battle *) {color:var(--copa-muted);text-shadow:none}
+html.copa-rinha :where(.ps-room,.ps-popup) .label:not(.battle *) strong {color:var(--copa-text)}
+
+/* Native overlays and all account, challenge, format and settings panels. */
+html.copa-rinha .ps-overlay {background:#020711b8;backdrop-filter:none}
+html.copa-rinha .ps-popup {color:var(--copa-text);background:var(--copa-surface);border-color:var(--copa-line);border-radius:8px;box-shadow:0 12px 40px #0006;max-width:calc(100vw - 24px);box-sizing:border-box}
+html.copa-rinha .ps-popup h3 {color:var(--copa-text);font-size:22px;font-weight:600}
+html.copa-rinha .ps-popup :where(.error,.message-error) {color:#ffaaa2}
+html.copa-rinha :where(.ps-popup,.ps-room) .infobox {background:var(--copa-input);border-color:var(--copa-line);color:var(--copa-muted);text-shadow:none;box-shadow:none}
+html.copa-rinha :where(.ps-popup,.ps-room) .option {color:var(--copa-text);background:transparent;border-color:var(--copa-line);text-shadow:none}
+html.copa-rinha :where(.ps-popup,.ps-room) .option:hover,
+html.copa-rinha :where(.ps-popup,.ps-room) .option.sel {background:var(--copa-raised);color:var(--copa-cyan)}
+html.copa-rinha :where(.formatselect,.teamselect) {text-align:left}
+html.copa-rinha .ps-popup .formatlist h3 {color:var(--copa-muted)}
+
+/* Teams retain the upstream form, sprite placements, chart rows and keyboard behavior. */
+html.copa-rinha .folderpane {border-left-color:var(--copa-surface);background:var(--copa-surface)}
+html.copa-rinha :where(.folderpane h3,.folderpane .text,.folderlist .foldersep:before,.folderlistafter:before,.folderlistbefore:before,.folder .selectFolder,.folderhack1,.folderhack2) {background:var(--copa-surface);color:var(--copa-muted);border-color:var(--copa-line)}
+html.copa-rinha .folder .selectFolder:hover {background:var(--copa-raised);color:var(--copa-text)}
+html.copa-rinha .folder .selectFolder.active,
+html.copa-rinha .folder.cur .selectFolder {background:#172d3e;color:var(--copa-cyan)}
+html.copa-rinha .folderpane i {color:var(--copa-muted)}
+html.copa-rinha .teampane {background:var(--copa-page)}
+html.copa-rinha .teamlist .team {max-width:100%;color:var(--copa-text);background:var(--copa-surface);border-color:var(--copa-line);box-shadow:none;text-shadow:none}
+html.copa-rinha .teamlist .team:hover {background:var(--copa-raised)}
+html.copa-rinha :where(.team,.teamselect) small {color:var(--copa-muted);text-shadow:none}
+html.copa-rinha .teamname .textbox {font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-size:24px;font-weight:600}
+html.copa-rinha .set-form table,
+html.copa-rinha .set-form :where(.set-nickname) {background:var(--copa-raised)}
+html.copa-rinha .set-form :where(.set-field,.set-details,.set-moves,.set-stats) {border-color:var(--copa-line)}
+html.copa-rinha .set-form .label {color:var(--copa-muted)}
+html.copa-rinha .set-form button.label {color:var(--copa-text);background:transparent;border-color:transparent}
+html.copa-rinha .searchresults {background:var(--copa-surface);border-color:var(--copa-line);box-shadow:0 4px 12px #0005;max-width:100%;box-sizing:border-box;overflow-x:auto}
+html.copa-rinha .utilichart {color:var(--copa-text);background:transparent}
+html.copa-rinha .utilichart :where(h3,.sortrow) {color:var(--copa-muted);background:var(--copa-raised);border-color:var(--copa-line);text-shadow:none}
+html.copa-rinha .utilichart li.result a {color:var(--copa-text);background:transparent;border-color:transparent}
+html.copa-rinha .utilichart li.result a:hover,
+html.copa-rinha .utilichart li.result.cur a {background:var(--copa-raised);border-color:var(--copa-line)}
+html.copa-rinha .utilichart :where(.col,.numcol,.statcol,.bstcol) {color:var(--copa-muted)}
+html.copa-rinha .utilichart :where(.pokemonnamecol,.movenamecol,.namecol) {color:var(--copa-text)}
+
+/* Chat and battle chrome. No selector below changes the .battle arena or its descendants. */
+html.copa-rinha :where(.chat-log,.readable-bg,.battle-log) {color:#bdccdd;background:var(--copa-surface);backdrop-filter:none}
+html.copa-rinha :where(.chat-log,.battle-log) :where(.chat,.battle-history) {color:#bdccdd}
+html.copa-rinha :where(.chat-log,.battle-log) :where(.chat small,.message small,.battle-history small) {color:var(--copa-muted)}
+html.copa-rinha :where(.chat-log,.battle-log) :where(.chat strong,.battle-history strong) {color:#e0eaf4}
+html.copa-rinha :where(.chat-log-add,.battle-log-add,.battle-controls) {color:var(--copa-text);background:var(--copa-page);border-color:var(--copa-line)}
+html.copa-rinha :where(.chat-log-add,.battle-log-add) textarea {color:var(--copa-text);background:var(--copa-input);border-color:var(--copa-line)}
+html.copa-rinha :where(.chat-log,.battle-log) h2 {background:var(--copa-raised);color:var(--copa-text);border-color:var(--copa-line)}
+html.copa-rinha :where(.chat-log,.battle-log) .message-error {color:#ffaaa2}
+html.copa-rinha .battle-controls :where(.whatdo,.whatdo small,.whatdo small.weak) {color:var(--copa-muted)}
+html.copa-rinha .battle-controls .whatdo strong {color:var(--copa-text)}
+html.copa-rinha .userlist {color:var(--copa-muted);background:var(--copa-surface);border-color:var(--copa-line)}
+html.copa-rinha .userlist .userlist-count {color:var(--copa-muted);background:var(--copa-raised);border-color:var(--copa-line)}
+html.copa-rinha .userlist button {color:var(--copa-text);text-shadow:none}
+html.copa-rinha .roomlist .blocklink {background:var(--copa-surface);color:var(--copa-text);border-color:var(--copa-line);box-shadow:none;text-shadow:none;border-radius:5px}
+html.copa-rinha .roomlist .blocklink:hover {background:var(--copa-raised)}
+html.copa-rinha .roomlist .blocklink small {color:var(--copa-muted)}
+
+@media(max-width:700px) {
+  html.copa-rinha .ps-popup {max-width:calc(100vw - 16px)}
+  html.copa-rinha .ps-overlay .ps-popup {margin-top:44px}
+  html.copa-rinha .ps-popup :where(input,select,button.button) {min-height:36px}
+  html.copa-rinha .ps-popup .pad {padding:10px 12px}
+  html.copa-rinha .mainmenu-left {padding-top:12px}
+  html.copa-rinha .mainmenu .mainmenu.button {min-height:44px}
+  html.copa-rinha .mainmenu .mainmenu.button.big {min-height:52px}
+  html.copa-rinha .mainmenu .mainmenu.button.big small {font-size:11px}
+  html.copa-rinha .mainmenu-footer {font-size:11px;padding-left:14px;padding-right:14px;overflow-wrap:anywhere}
+  html.copa-rinha .teampane {padding:8px}
+  html.copa-rinha .teamlist .team {width:min(350px,100%)}
+  html.copa-rinha .team-controls {margin:4px 0 6px}
+  html.copa-rinha .teamname .textbox {font-size:22px;min-height:40px}
+  html.copa-rinha .team-pad {padding:8px 6px}
+  html.copa-rinha .ps-popup h3 {font-size:21px}
+}
+@media(prefers-reduced-motion:reduce) {
+  html.copa-rinha :where(.button,.option) {transition:none}
+}
+
+html.copa-rinha .copa-quicklinks {display:flex;gap:12px;align-items:center;margin:0 10px 0 0;height:46px;font-size:11px}
+html.copa-rinha .copa-quicklinks a {color:var(--copa-muted);text-decoration:none;border-bottom:1px solid transparent;padding:6px 0;white-space:nowrap}
+html.copa-rinha .copa-quicklinks a:hover {color:var(--copa-cyan);border-color:var(--copa-cyan)}
+html.copa-rinha .header-vertical .copa-quicklinks {height:auto;margin:0 14px 14px;gap:12px;padding-bottom:10px;border-bottom:1px solid var(--copa-line);flex-wrap:wrap}
+html.copa-rinha .header-vertical .copa-quicklinks a {font-size:11px;white-space:normal}
+/* Keep selected room tabs legible in the compact horizontal header. Sidebar keeps both links. */
+@media(max-width:1100px) {html.copa-rinha .header .copa-links-li {display:none}}
+
+html.copa-rinha .header .tabbar .button,
+html.copa-rinha .header-vertical .tablist .button {background:transparent;color:var(--copa-muted);border-color:transparent;text-shadow:none;box-shadow:none}
+html.copa-rinha .header .tabbar .button:hover,
+html.copa-rinha .header-vertical .tablist .button:hover {background:var(--copa-raised);color:var(--copa-text);border-color:var(--copa-line)}
+html.copa-rinha .header .tabbar .button.cur,
+html.copa-rinha .header-vertical .tablist .button.cur {background:#172d3e;color:var(--copa-cyan);border-color:#2a5367}
+html.copa-rinha :where(.chat-log,.battle-log,.userlist) .username {filter:brightness(1.45)}
+html.copa-rinha :where(.ps-room,.ps-popup,.header-vertical) {scrollbar-color:#3c536c transparent;scrollbar-width:thin}
+html.copa-rinha body :where(.ps-room,.ps-popup,.header-vertical)::-webkit-scrollbar-thumb {background-color:#3c536c}
+
+/* Explicit native compound selectors keep room surfaces dark in either PS theme.
+   :where() alone has lower specificity than .ps-room.ps-room-light upstream. */
+html.copa-rinha .ps-room.ps-room-light,
+html.copa-rinha .ps-room.ps-room-opaque {
+  color:var(--copa-text);
+  background:var(--copa-page);
+  border-color:var(--copa-line);
+}
+html.copa-rinha .ps-room .select:not(.battle *),
+html.copa-rinha .ps-popup .select:not(.battle *) {
+  color:var(--copa-text);
+  background:var(--copa-input);
+  border-color:var(--copa-line);
+  box-shadow:none;
+  text-shadow:none;
+  font-family:inherit;
+}
+html.copa-rinha .ps-room .select:not(.battle *):hover,
+html.copa-rinha .ps-popup .select:not(.battle *):hover {
+  background:var(--copa-raised);
+  border-color:#446079;
+}
+html.copa-rinha .ps-room .select:not(.battle *):disabled,
+html.copa-rinha .ps-popup .select:not(.battle *):disabled {
+  color:var(--copa-muted);
+  background:var(--copa-input);
+  border-color:var(--copa-line);
+}
+html.copa-rinha .ps-room .select::after {color:var(--copa-muted)}
+html.copa-rinha .ps-room .teamselect:disabled strong {color:var(--copa-muted)}
+html.copa-rinha .tabbar::after {
+  color:var(--copa-text);
+  background:var(--copa-surface);
+  border-color:var(--copa-line);
+  box-shadow:none;
+}
+html.copa-rinha .ps-room .team-focus-editor,
+html.copa-rinha .ps-room .teameditor-options-menu,
+html.copa-rinha .ps-room .set-import-form {
+  color:var(--copa-text);
+  background:var(--copa-surface);
+  border-color:var(--copa-line);
+}
+html.copa-rinha .ps-room .teameditor .option {
+  color:var(--copa-muted);
+  background:var(--copa-surface);
+  border-color:var(--copa-line);
+  box-shadow:none;
+  text-shadow:none;
+}
+html.copa-rinha .ps-room .teameditor .option:hover {
+  color:var(--copa-cyan);
+  background:var(--copa-raised);
+}
+html.copa-rinha .ps-room .teameditor .option:disabled {color:#71869d;opacity:.65}
+html.copa-rinha .ps-room .table,
+html.copa-rinha .ps-room .table td,
+html.copa-rinha .ps-room .table th {
+  color:var(--copa-text);
+  background:var(--copa-surface);
+  border-color:var(--copa-line);
+}
+html.copa-rinha .ps-room .table th {background:var(--copa-raised);font-weight:500}
+html.copa-rinha .ps-room .table .gray {color:var(--copa-muted)}
+html.copa-rinha .ps-room .details summary {color:var(--copa-text)}
+html.copa-rinha .ps-room .details summary::marker {color:var(--copa-muted)}
+html.copa-rinha .team-focus-editor,
+html.copa-rinha .teameditor-options-menu,
+html.copa-rinha .set-import-form,
+html.copa-rinha .set-stats-form,
+html.copa-rinha .set-details-form {
+  color:var(--copa-text);
+  background:var(--copa-surface);
+  border-color:var(--copa-line);
+}
+html.copa-rinha .ps-room .setdetails,
+html.copa-rinha .ps-room .setstats {
+  color:var(--copa-text);
+  background:var(--copa-input);
+  border-color:var(--copa-line);
+  box-shadow:none;
+}
+html.copa-rinha .ps-room .setdetails:hover,
+html.copa-rinha .ps-room .setstats:hover {background:var(--copa-raised)}
+html.copa-rinha .ps-room .teamselect .team {
+  color:var(--copa-text);
+  background:transparent;
+  border-color:transparent;
+  box-shadow:none;
+  text-shadow:none;
+}
+html.copa-rinha .ps-room .ilink,
+html.copa-rinha .ps-popup .ilink {color:var(--copa-cyan)}
