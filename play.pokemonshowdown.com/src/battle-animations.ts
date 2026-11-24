@@ -743,7 +743,7 @@ export class BattleScene implements BattleSceneStub {
 			}
 			badgehtml += '</span>';
 		}
-		let avatar = Dex.resolveAvatar(side.avatar);
+		let avatar = Dex.resolveAvatar(side.avatar, side.name);
 		let noflip = '';
 		if (posStr.startsWith('near')) {
 			if (avatar.includes('unknown.png')) {

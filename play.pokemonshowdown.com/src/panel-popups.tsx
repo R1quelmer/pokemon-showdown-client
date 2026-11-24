@@ -273,7 +273,7 @@ class UserPanel extends PSRoomPanel<UserRoom> {
 			}
 		}
 
-		const avatar = user.avatar !== '[loading]' ? Dex.resolveAvatar(`${user.avatar || 'unknown'}`) : null;
+		const avatar = user.avatar !== '[loading]' ? Dex.resolveAvatar(`${user.avatar || 'unknown'}`, user.userid) : null;
 		return [<div class="userdetails">
 			{avatar && (room.isSelf ? (
 				<img src={avatar} class="trainersprite yours" data-href="avatars" />
@@ -721,9 +721,10 @@ class OptionsPanel extends PSRoomPanel {
 			<p style="padding-left:50px">
 				<img
 					class="trainersprite yours" width="40" height="40" style={{ float: 'left', marginLeft: '-50px' }}
-					src={Dex.resolveAvatar(`${PS.user.avatar}`)} data-href="avatars"
+					src={Dex.resolveAvatar(`${PS.user.avatar}`, PS.user.name)} data-href="avatars"
 				/> {}
 				<strong>{PS.user.name}</strong>
+				{Config.copaRinhaLocalNames && <small style="display:block">Apelido local · sem autenticação oficial</small>}
 				<StatusEditor />
 			</p>
 
@@ -750,22 +751,24 @@ class OptionsPanel extends PSRoomPanel {
 				</label>
 			</p>
 			<hr />
-			<div class="construction">
-				<p>
-					This is the new client.
-				</p>
-				<label class="label" style="width:auto">{TL.label(TL`Default`)}<select
-					name="defaultclient" class="select" onChange={this.setDefaultClient} value={defaultClient}
-				>
-					<option value="old">Old client</option>
-					<option value="new">New client</option>
-				</select></label>
-				<p>
-					<a class="button" href="/oldclient" style="font-weight: normal">
-						{defaultClient === 'old' ? "Back to old client" : "Use old client temporarily"}
-					</a>
-				</p>
-			</div>
+			{!Config.copaRinhaLocalNames && <>
+				<div class="construction">
+					<p>
+						This is the new client.
+					</p>
+					<label class="label" style="width:auto">{TL.label(TL`Default`)}<select
+						name="defaultclient" class="select" onChange={this.setDefaultClient} value={defaultClient}
+					>
+						<option value="old">Old client</option>
+						<option value="new">New client</option>
+					</select></label>
+					<p>
+						<a class="button" href="/oldclient" style="font-weight: normal">
+							{defaultClient === 'old' ? "Back to old client" : "Use old client temporarily"}
+						</a>
+					</p>
+				</div>
+			</>}
 			<hr />
 			<h3>{TL`Appearance`}</h3>
 			<p>
@@ -1083,6 +1086,10 @@ class AvatarsPanel extends PSRoomPanel {
 		}
 
 		return <PSPanelWrapper room={room} width={1210}><div class="pad">
+			{Config.copaRinhaLocalNames && <p>
+				Os avatares da Copa são associações visuais administradas, sem comprovação de identidade.
+				Os avatares padrão continuam disponíveis.
+			</p>}
 			<label class="optlabel"><strong>Choose an avatar or </strong>
 				<button class="button" data-cmd="/close"> {TL`[Cancel]`}</button>
 			</label>
@@ -1205,6 +1212,13 @@ class ChangePasswordPanel extends PSRoomPanel {
 
 	override render() {
 		const room = this.props.room;
+		if (Config.copaRinhaLocalNames) {
+			return <PSPanelWrapper room={room} width={320}><div class="pad">
+				<h3>Identificação da Copa Rinha</h3>
+				<p>Este client usa apelidos locais e não solicita senhas de contas do Showdown.</p>
+				<button class="button" data-href="login">Escolher nome</button>
+			</div></PSPanelWrapper>;
+		}
 
 		return <PSPanelWrapper room={room} width={280}><div class="pad">
 			<form onSubmit={this.handleChangePassword}>
@@ -1302,6 +1316,13 @@ class RegisterPanel extends PSRoomPanel {
 
 	override render() {
 		const room = this.props.room;
+		if (Config.copaRinhaLocalNames) {
+			return <PSPanelWrapper room={room} width={320}><div class="pad">
+				<h3>Identificação da Copa Rinha</h3>
+				<p>Este client usa apelidos locais e não solicita senhas de contas do Showdown.</p>
+				<button class="button" data-href="login">Escolher nome</button>
+			</div></PSPanelWrapper>;
+		}
 
 		return <PSPanelWrapper room={room} width={280}><div class="pad">
 			<form onSubmit={this.handleRegisterUser}>

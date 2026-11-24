@@ -25,6 +25,7 @@ export const CopaRinhaLocalNames = new class {
 	connect() {
 		if (!Config.copaRinhaLocalNames) return;
 		this.clearPending();
+		void window.CopaRinhaAvatars?.load();
 		PS.user.initializing = false;
 		PS.user.registered = null;
 		const saved = this.read();
@@ -61,7 +62,10 @@ export const CopaRinhaLocalNames = new class {
 		}, 15000);
 	}
 	confirm() {
-		if (!Config.copaRinhaLocalNames || !this.pending || !PS.user.named || PS.user.userid !== toID(this.pending)) return;
+		if (!Config.copaRinhaLocalNames) return;
+		// Local aliases must never inherit a previously cached official account state.
+		PS.user.registered = null;
+		if (!this.pending || !PS.user.named || PS.user.userid !== toID(this.pending)) return;
 		try {
 			localStorage.setItem(this.storageKey(), PS.user.name);
 		} catch {}

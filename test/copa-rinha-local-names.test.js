@@ -82,6 +82,14 @@ describe('Copa Rinha local nicknames', () => {
 		assert.equal(s.PS.user.loggingIn, null); assert.equal(s.timers.size, 0);
 		assert.equal(s.errors.at(-1).error, 'Nome em uso'); assert.equal(s.stored.size, 0);
 	});
+	it('clears official account markers on local updates even without a pending rename', () => {
+		const s = session(); s.PS.user.registered = {name: 'Cached account', userid: 'cachedaccount'};
+		s.names.confirm();
+		assert.equal(s.PS.user.registered, null);
+		const outside = session(false); const registered = {name: 'Official account', userid: 'officialaccount'};
+		outside.PS.user.registered = registered; outside.names.confirm();
+		assert.equal(outside.PS.user.registered, registered);
+	});
 	it('rejects protocol delimiters, controls, empty names and names longer than 18 characters', () => {
 		for (const input of ['', '123', 'a'.repeat(19), 'A\n/logout', 'A\r/trn B', 'A|/trn B', 'A,1,assertion', 'A;B', 'A\0B']) {
 			const s = session(); s.names.choose(input);
@@ -173,4 +181,28 @@ describe('Copa Rinha nickname page isolation', () => {
 		assert.ok(text.includes('Entrar'));
 		assert.ok(text.some(value => value.includes('Outra pessoa') && value.includes('autenticação segura')));
 	});
+	it('does not solicit account passwords from direct registration/password routes in Copa mode', () => {
+		const s = session();
+		Object.assign(s.context, {
+			preact, PSRoomPanel: function (props) { this.props = props; }, PSPanelWrapper: function () {},
+			_inheritsLoose(subclass, superclass) {
+				subclass.prototype = Object.create(superclass.prototype);
+				subclass.prototype.constructor = subclass;
+				Object.setPrototypeOf(subclass, superclass);
+			},
+		});
+		for (const name of ['RegisterPanel', 'ChangePasswordPanel']) {
+			const Panel = vm.runInContext(declaration('js/panel-popups.js', name) + '\n' + name + ';', s.context);
+			const panel = new Panel({room: {}});
+			const types = [];
+			function walk(node) {
+				if (!node || typeof node !== 'object') return;
+				if (Array.isArray(node)) return node.forEach(walk);
+				if (node.type === 'input') types.push(node.props.type);
+				walk(node.props?.children);
+			}
+			walk(panel.render()); assert.deepEqual(types, []);
+		}
+	});
+
 });

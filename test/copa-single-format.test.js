@@ -21,7 +21,7 @@ function parser(file) {
 	return vm.runInThisContext('(' + source.slice(fn.start, fn.end) + ')');
 }
 test('new and legacy format names retain Gen 9 National Dex identity and independent mechanics data', () => {
-	for (const name of [canonical, oldName, 'Copa Rinha II', 'coparinhanationaldexza', 'gen6coparinhanationaldexza']) {
+	for (const name of [canonical, oldName, 'Copa Rinha II', '[Gen 9] Copa Rinha II', 'gen9coparinhaii', 'coparinhanationaldexza', 'gen6coparinhanationaldexza']) {
 		const format = Dex.formats.get(name);
 		assert.equal(format.id, canonical); assert.equal(format.name, 'Copa Rinha II');
 		assert.equal(format.gen, 9); assert.equal(format.isNatDex, true);
@@ -34,7 +34,7 @@ for (const [label, file] of [
 	test(`${label} native parser offers only Copa for search, challenge and teambuilder with old/new servers`, () => {
 		global.PS = {teams: {update() {}}}; global.app = {supports: {}};
 		const parse = parser(file);
-		for (const name of [oldName, 'Copa Rinha II']) {
+		for (const name of [oldName, 'Copa Rinha II', '[Gen 9] Copa Rinha II']) {
 			parse.call({trigger() {}}, ['formats', ',1', 'S/V Singles', '[Gen 9] OU,e', '[Gen 9] Random Battle,f', ',2', 'Copa Rinha', name + ',e']);
 			assert.deepEqual(Object.keys(BattleFormats), [canonical]);
 			const format = BattleFormats[canonical];

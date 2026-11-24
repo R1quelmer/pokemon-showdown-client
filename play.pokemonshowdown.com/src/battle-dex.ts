@@ -558,7 +558,8 @@ export const Dex = new class implements ModdedDex {
 	}
 	/** Upgrade the former Copa Rinha IDs without changing legacy IDs for other formats. */
 	normalizeTeamFormat(format: string): ID {
-		return (format === 'coparinhaii' || format === 'coparinhanationaldexza' || format === 'gen6coparinhanationaldexza' ?
+		return (format === 'coparinhaii' || format === 'gen9coparinhaii' ||
+			format === 'coparinhanationaldexza' || format === 'gen6coparinhanationaldexza' ?
 			'gen9coparinhanationaldexza' : format) as ID;
 	}
 	/** Change only saved format prefixes; preserve every other byte of the team backup. */
@@ -608,7 +609,9 @@ export const Dex = new class implements ModdedDex {
 		return this.mod(this.formats.get(this.normalizeTeamFormat(format)).mod);
 	}
 
-	resolveAvatar(avatar: string): string {
+	resolveAvatar(avatar: string, participant?: string): string {
+		const local = participant && window.CopaRinhaAvatars?.resolve(participant);
+		if (local) return local;
 		if (window.BattleAvatarNumbers && avatar in BattleAvatarNumbers) {
 			avatar = BattleAvatarNumbers[avatar];
 		}
