@@ -473,6 +473,9 @@ export class MainMenuRoom extends PSRoom {
 				}
 			}
 			break;
+		case 'copateamupload':
+			PS.teams.receiveCopaShare(response);
+			break;
 		case 'teamupload':
 			if (PS.teams.uploading) {
 				const team = PS.teams.uploading;

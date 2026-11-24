@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="pt-BR">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>Time compartilhado — Copa Rinha II</title>
+<link rel="stylesheet" href="style/copa-replay.css">
+<link rel="stylesheet" href="style/copa-team.css">
+<main>
+<header class="site-header"><a class="wordmark" href="/copa-rinha.html" aria-label="Voltar à página inicial da Copa Rinha"><img class="brand-logo" src="assets/copa-rinha/logo.png" alt="Copa Rinha" width="3344" height="1882"><span>TIMES</span></a></header>
+<section class="team-heading"><p class="eyebrow">COPA RINHA II</p><h1 id="team-name">Times compartilhados</h1><p id="team-details">Abra um link para visualizar ou importar um time.</p></section>
+<form id="open-team"><label for="team-link">Link ou identificador do time</label><div class="open-fields"><input id="team-link" name="team-link" type="text" autocomplete="off" spellcheck="false" placeholder="Cole o link compartilhado" required><button type="submit">Abrir time</button></div></form>
+<p id="team-status" role="status" aria-live="polite"></p>
+<section id="team-content" hidden>
+<p class="team-privacy">Não listado. Qualquer pessoa com este link pode visualizar e copiar o time.</p>
+<div class="team-actions"><button id="copy-team" type="button" class="primary">Copiar time</button><a id="import-team" class="team-button" href="/copa-rinha.html">Importar no Teambuilder</a><button id="copy-team-link" type="button">Copiar link</button></div>
+<div id="pokemon-list" class="pokemon-list"></div>
+<section class="team-export" aria-labelledby="team-export-title"><h2 id="team-export-title">FORMATO DE IMPORTAÇÃO</h2><textarea id="team-export" readonly spellcheck="false" aria-label="Time no formato de importação do Showdown"></textarea></section>
+</section>
+<footer>COPA RINHA II <a href="/copa-rinha.html">Voltar ao client</a></footer>
+</main>
+<script>window.exports = window; window.Config = {routes: {client: 'play.pokemonshowdown.com'}, testclient: true};</script>
+<script src="js/battledata.js"></script>
+<script src="data/pokedex.js"></script>
+<script src="data/moves.js"></script>
+<script src="data/items.js"></script>
+<script src="data/abilities.js"></script>
+<script src="js/battle.js"></script>
+<script src="js/copa-team-import.js"></script>
+<script src="js/copa-team.js"></script>
+</html>

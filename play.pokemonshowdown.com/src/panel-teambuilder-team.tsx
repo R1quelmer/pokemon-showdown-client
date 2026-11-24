@@ -65,6 +65,7 @@ class TeamRoom extends PSRoom {
 		});
 	}
 	upload(isPrivate: boolean) {
+		if (Dex.isCopaRinha()) return PS.teams.shareCopaTeam(this.team);
 		const team = this.team;
 		const cmd = team.uploaded ? 'update' : 'save';
 		// teamName, formatid, rawPrivacy, rawTeam
@@ -380,7 +381,13 @@ class TeamPanel extends PSRoomPanel<TeamRoom> {
 					<button data-cmd="/validate" class="button"><i class="fa fa-check"></i> {TL`[Validate]`}</button>
 				</p>}
 				{!!(team.packedTeam || team.uploaded) && <p class="infobox" style="padding: 5px 8px">
-					{team.uploadedPackedTeam && !team.uploaded ? <>
+					{Dex.isCopaRinha() ? <>
+						<small>Link não listado: qualquer pessoa com o link pode ver o time. Cada envio cria uma cópia permanente.</small><br />
+						{team.copaShare && <CopyableURLBox url={team.copaShare.url} />}
+						<button class="button" onClick={this.uploadTeam} disabled={PS.teams.uploading === team}>
+							{PS.teams.uploading === team ? 'Enviando...' : team.copaShare ? 'Compartilhar nova cópia' : 'Compartilhar time'}
+						</button>
+					</> : team.uploadedPackedTeam && !team.uploaded ? <>
 						{TL`Uploading...`}
 					</> : team.uploaded ? <>
 						<small>Share URL:</small> {}
@@ -539,6 +546,18 @@ class TeamStoragePanel extends PSRoomPanel {
 		const room = this.props.room;
 
 		const team = this.team();
+		if (Dex.isCopaRinha()) {
+			return <PSPanelWrapper room={room} width={320}><div class="pad">
+				<h3>Time neste navegador</h3>
+				<p>A edição fica salva localmente. Compartilhar cria uma cópia não listada, acessível por quem possuir o link.</p>
+				<button
+					class="button" onClick={() => {
+						PS.teams.shareCopaTeam(team);
+						this.close();
+					}}
+				>Compartilhar time</button>
+			</div></PSPanelWrapper>;
+		}
 		const storage: TeamStorage = team.uploaded?.private ? (
 			'account'
 		) : team.uploaded ? (

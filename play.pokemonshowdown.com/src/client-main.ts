@@ -376,6 +376,8 @@ export interface Team {
 	isBox: boolean;
 	/** uploaded team ID. will not exist for teams that are not uploaded. tracked locally */
 	teamid?: number;
+	/** Immutable Copa share; separate from upstream account-owned numeric IDs. */
+	copaShare?: { id: string, url: string, packedTeam: string };
 	/** `uploaded` will only exist if you're logged into the correct account. otherwise teamid is still tracked */
 	uploaded?: {
 		teamid: number,
@@ -530,6 +532,51 @@ class PSTeams extends PSStreamModel<'team' | 'format'> {
 			isBox,
 			teamid,
 		};
+	}
+	copaShareTimer: ReturnType<typeof setTimeout> | null = null;
+	shareCopaTeam(team: Team) {
+		if (!Dex.isCopaRinha()) return;
+		if (!PS.user.named || !PS.connection?.connected) {
+			PS.alert('Escolha seu apelido e aguarde a conexão para compartilhar.');
+			return;
+		}
+		if (!team.packedTeam) return PS.alert('Adicione um Pokémon ao time antes de compartilhar.');
+		if (this.uploading) return PS.alert('Aguarde o envio do time atual.');
+		const name = team.name.replace(/[,\r\n|]/g, ' ').slice(0, 100);
+		this.uploading = team;
+		team.uploadedPackedTeam = team.packedTeam;
+		this.copaShareTimer = setTimeout(() => {
+			if (this.uploading !== team) return;
+			this.uploading = null;
+			team.uploadedPackedTeam = undefined;
+			this.copaShareTimer = null;
+			PS.rooms[`team-${team.key}`]?.update(null);
+			PS.alert('Não foi possível confirmar o compartilhamento. Tente novamente.');
+		}, 45000);
+		PS.send(`/teams save ${name}, ${team.format}, 0, ${team.packedTeam}`);
+		PS.rooms[`team-${team.key}`]?.update(null);
+	}
+	receiveCopaShare(response: { teamid?: unknown, url?: unknown, requestTeam?: unknown, error?: unknown }): boolean {
+		if (!Dex.isCopaRinha() || !this.uploading) return false;
+		// Never convert the opaque R2 ID into an upstream numeric/account-owned ID.
+		if (typeof response.teamid !== 'string' && !response.error) return false;
+		const team = this.uploading;
+		if (response.requestTeam !== team.uploadedPackedTeam?.trim()) return true;
+		if (this.copaShareTimer) clearTimeout(this.copaShareTimer);
+		this.copaShareTimer = null;
+		const id = response.teamid;
+		const url = typeof id === 'string' && /^[A-Za-z0-9_-]{32}$/.test(id) ?
+			`https://copa-rinha-client.onrender.com/team.html?id=${id}` : '';
+		if (url && response.url === url && !response.error) {
+			team.copaShare = { id: id as string, url, packedTeam: team.uploadedPackedTeam || team.packedTeam };
+		} else {
+			PS.alert('O servidor não confirmou um link válido para este time.');
+		}
+		team.uploadedPackedTeam = undefined;
+		this.uploading = null;
+		PS.rooms[`team-${team.key}`]?.update(null);
+		PS.rooms.teambuilder?.update(null);
+		return true;
 	}
 	loadRemoteTeams() {
 		PSLoginServer.query('getteams').then(data => {
