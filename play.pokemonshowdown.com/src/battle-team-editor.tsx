@@ -18,6 +18,31 @@ import { PSModel } from "./client-core";
 import { Net, PSLoginServer } from "./client-connection";
 import { PSIcon, PSView } from "./panels";
 
+function CopaBuilderSprite({ set }: { set: Dex.PokemonSet }) {
+	const sprite = Dex.getCopaDisplaySprite(set);
+	return <span class="copa-builder-sprite">
+		<PSIcon pokemon={set.species} />
+		<img
+			key={sprite.url} src={sprite.url} alt=""
+			class={sprite.pixelated ? 'pixelated' : ''}
+			onLoad={ev => { (ev.currentTarget as HTMLImageElement).dataset.loaded = 'true'; }}
+			ref={(image: HTMLImageElement | null) => {
+				if (!image) return;
+				image.onerror = () => {
+					delete image.dataset.loaded;
+					const current = image.getAttribute('src');
+					const native = sprite.url.startsWith('/sprites/za/') ? Dex.getCopaDisplaySprite(set, true) : sprite;
+					if (current === sprite.url && native.url !== current) {
+						image.src = native.url;
+					} else if (current !== native.fallback) {
+						image.src = native.fallback;
+					}
+				};
+			}}
+		/>
+	</span>;
+}
+
 type InnerFocusType = 'pokemon' | 'ability' | 'item' | 'move' | 'stats' | 'details' | 'import';
 type TeamEditorMode = 'form' | 'import';
 
@@ -1879,24 +1904,26 @@ class TeamTextbox extends preact.Component<{
 						const prevOffset = i === 0 ? 8 : this.setInfo[i - 1].bottomY;
 						const species = editor.dex.species.get(info.species);
 						const num = Dex.getPokemonIconNum(species.id);
-						if (!num) return null;
+						const copaSprite = Dex.isCopaRinha() && species.exists;
+						if (!num && !copaSprite) return null;
 
 						if (editor.narrow) {
 							return <div style={`top:${prevOffset + 1}px;left:5px;position:absolute;text-align:center;pointer-events:none`}>
-								<div><PSIcon pokemon={species.id} /></div>
+								<div>{copaSprite ? <CopaBuilderSprite set={set} /> : <PSIcon pokemon={species.id} />}</div>
 								{species.types.map(type => <div><PSIcon type={type} /></div>)}
 								<div><PSIcon item={set.item || null} /></div>
 							</div>;
 						}
 						const spriteData = Dex.getTeambuilderSpriteData(set, editor.dex);
 						return [<div
-							class={spriteData.pixelated ? 'pixelated' : ''}
+							class={copaSprite ? 'copa-builder-sprite-overlay' : spriteData.pixelated ? 'pixelated' : ''}
 							style={
 								`top:${prevOffset - 7}px;left:0;position:absolute;text-align:right;` +
 								`width:94px;padding:103px 5px 0 0;min-height:24px;pointer-events:none;` +
-								Dex.getTeambuilderSprite(set, editor.dex)
+								(copaSprite ? '' : Dex.getTeambuilderSprite(set, editor.dex))
 							}
 						>
+							{copaSprite && <CopaBuilderSprite set={set} />}
 							<div>{species.types.map(type => <PSIcon type={type} />)}<PSIcon item={set.item || null} /></div>
 						</div>, <div style={`top:${prevOffset + statsDetailsOffset}px;right:9px;position:absolute`}>
 							{this.renderStats(set, i)}
@@ -2903,8 +2930,9 @@ class TeamEditorForm extends preact.Component<{
 	}
 	renderSet(set: Dex.PokemonSet | undefined, i: number) {
 		const { editor } = this.props;
-		const sprite = Dex.getTeambuilderSprite(set, editor.dex);
-		const spriteClass = set && Dex.getTeambuilderSpriteData(set, editor.dex).pixelated ? ' pixelated' : '';
+		const copaSprite = !!set && Dex.isCopaRinha() && editor.dex.species.get(set.species).exists;
+		const sprite = copaSprite ? '' : Dex.getTeambuilderSprite(set, editor.dex);
+		const spriteClass = !copaSprite && set && Dex.getTeambuilderSpriteData(set, editor.dex).pixelated ? ' pixelated' : '';
 		if (!set) {
 			return <div class="set-form" data-set-index={i}>
 				<div style="text-align:right">
@@ -2971,6 +2999,7 @@ class TeamEditorForm extends preact.Component<{
 				<tr>
 					<td rowSpan={2} class="set-pokemon"><div class="border-collapse">
 						<span class="sprite-inner">
+							{copaSprite && <CopaBuilderSprite set={set} />}
 							<label class="label">
 								<span>{TL`Pokémon`}</span> {}
 								{this.renderInput(i, 'pokemon', set.species)}

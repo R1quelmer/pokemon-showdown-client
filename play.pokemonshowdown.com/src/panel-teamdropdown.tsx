@@ -29,6 +29,31 @@ export class PSTeambuilder {
 		}
 		return buf;
 	}
+	static parsePackedBackup(buffer: string): Team[] | null {
+		const lines = buffer.replace(/^\uFEFF/, '').split(/\r?\n/).filter(line => line.trim());
+		if (!lines.length) return null;
+		const teams: Team[] = [];
+		for (const line of lines) {
+			const header = line.slice(0, line.indexOf('|'));
+			if (!/^(?:(?:\d+\[)?[a-z0-9]+(?:-box)?\])?[^\r\n\t|]+$/i.test(header)) return null;
+			const team = PS.teams.unpackLine(line);
+			if (!team?.name.trim()) return null;
+			for (const set of team.packedTeam ? team.packedTeam.split(']') : []) {
+				const fields = set.split('|');
+				const [name, species, item, ability, moves, nature, evs, gender, ivs, shiny, level, misc] = fields;
+				const stats = /^(?:\d*(?:,\d*){5}|0|)$/;
+				if (fields.length !== 12 || !toID(species || name) || /[\r\n\t]/.test(set) ||
+					!/^[a-z0-9]*$/i.test(species) || !/^[a-z0-9]*$/i.test(item) || !/^[a-z0-9]*$/i.test(ability) ||
+					!/^[a-z0-9,]*$/i.test(moves) || !/^[a-z]*$/i.test(nature) || !stats.test(evs) || !stats.test(ivs) ||
+					!/^[MFN]?$/.test(gender) || !/^S?$/.test(shiny) || !/^\d*$/.test(level) ||
+					!/^\d*(?:,[a-z]*,[a-z0-9]*,G?,\d*,[a-z]*)?$/i.test(misc)) return null;
+			}
+			// Server-side team IDs are scoped to the original account.
+			team.teamid = undefined;
+			teams.push(team);
+		}
+		return teams;
+	}
 	static splitPrefix(buffer: string, delimiter: string, prefixOffset = 0): [string, string] {
 		const delimIndex = buffer.indexOf(delimiter);
 		if (delimIndex < 0) return ['', buffer];

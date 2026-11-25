@@ -978,6 +978,7 @@ export const Dex = new class implements ModdedDex {
 		gender?: Dex.GenderName,
 		afd?: boolean,
 		noScale?: boolean,
+		noCopaSprite?: boolean,
 		mod?: string,
 		dynamax?: boolean,
 	} = { gen: 6 }) {
@@ -1103,7 +1104,8 @@ export const Dex = new class implements ModdedDex {
 		if (!Dex.prefs('noanim') && !Dex.prefs('nogif') && spriteData.gen >= 5) {
 			// These files are served by this client, independently of the official sprite CDN.
 			// Only exact, installed forms qualify; shiny and absent forms use native resolution.
-			const zaSprite = !options.shiny && copaRinhaZASprites[species.id]?.[isFront ? 'front' : 'back'];
+			const zaSprite = !options.noCopaSprite && !options.shiny &&
+				copaRinhaZASprites[species.id]?.[isFront ? 'front' : 'back'];
 			if (zaSprite) {
 				spriteData.url = `/sprites/za/${facing}/${species.id}.gif`;
 				[spriteData.w, spriteData.h] = zaSprite;
@@ -1229,6 +1231,17 @@ export const Dex = new class implements ModdedDex {
 		let fainted = ((pokemon as Pokemon | ServerPokemon)?.fainted ?
 			`;opacity:.3;filter:grayscale(100%) brightness(.5)` : ``);
 		return `background:transparent url(${Dex.resourcePrefix}sprites/pokemonicons-sheet.png?v22) no-repeat scroll -${left}px -${top}px${fainted}`;
+	}
+
+	getCopaDisplaySprite(set: Pick<Dex.PokemonSet, 'species' | 'gender' | 'shiny'>, noCopaSprite = false) {
+		const species = this.species.get(set.species);
+		const gen = window.BattlePokemonSpritesBW?.[species.id]?.front ? 5 : 9;
+		const gender = ['M', 'F', 'N'].includes(set.gender || '') ? set.gender as Dex.GenderName : undefined;
+		const sprite = this.getSpriteData(species.name, true, { gen, shiny: !!set.shiny, gender, noCopaSprite });
+		const fallback = sprite.url.includes('/sprites/za/') ?
+			`${this.resourcePrefix}sprites/gen5${set.shiny ? '-shiny' : ''}/${species.spriteid}.png` :
+			sprite.url.replace(/\/(?:gen5)?ani(-shiny)?\/([^/]+)\.gif$/, '/gen5$1/$2.png');
+		return { ...sprite, fallback };
 	}
 
 	getTeambuilderSpriteData(pokemon: any, dex: ModdedDex = Dex): TeambuilderSpriteData {

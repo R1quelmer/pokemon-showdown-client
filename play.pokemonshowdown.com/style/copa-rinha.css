@@ -384,3 +384,48 @@ html.copa-rinha .copa-home-loading {display:flex;flex-direction:column}
 html.copa-rinha .copa-home-loading>.mainmenu {order:0}
 html.copa-rinha .copa-home-loading>.mainmenu-mini-windows {order:1}
 html.copa-rinha .copa-home-loading>.mainmenufooter {order:2;position:static;padding:16px 20px}
+
+.copa-builder-sprite {
+	display: grid;
+	place-items: center;
+	position: relative;
+	width: 100%;
+	height: 42px;
+}
+.copa-builder-sprite img {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+	visibility: hidden;
+}
+.copa-builder-sprite img[data-loaded] {
+	visibility: visible;
+}
+.copa-builder-sprite:has(img[data-loaded]) > :first-child {
+	visibility: hidden;
+}
+.set-form .sprite-inner:has(.copa-builder-sprite) {
+	position: relative;
+}
+.set-form .copa-builder-sprite, .copa-builder-sprite-overlay .copa-builder-sprite {
+	position: absolute;
+	top: 16px;
+	left: 0;
+	height: 52px;
+}
+.copa-builder-sprite-overlay .copa-builder-sprite {
+	top: 0;
+	height: 103px;
+}
+.copa-team-transfer {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+.copa-team-transfer-input {
+	box-sizing: border-box;
+	width: 100%;
+	min-height: 12em;
+}

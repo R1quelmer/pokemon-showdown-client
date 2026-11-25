@@ -251,6 +251,10 @@ class TeambuilderPanel extends PSRoomPanel<TeambuilderRoom> {
 	}
 	mobileFormatFolderButton: HTMLButtonElement | null = null;
 	backupCopiedTimeout: ReturnType<typeof setTimeout> | null = null;
+	transferMode: 'copy' | 'import' | null = null;
+	transferText = '';
+	transferStatus = '';
+	pendingReplacement: Team[] | null = null;
 	override componentDidUpdate() {
 		super.componentDidUpdate();
 		const room = this.props.room;
@@ -534,6 +538,119 @@ class TeambuilderPanel extends PSRoomPanel<TeambuilderRoom> {
 		}, 3000);
 		this.forceUpdate();
 	};
+	copyAllTeams = () => {
+		const teams = PS.teams.list;
+		if (teams.some(team => team.uploaded?.notLoaded === true)) {
+			this.transferStatus = 'Abra os times salvos na conta antes de copiar o backup.';
+			this.forceUpdate();
+			return;
+		}
+		const backup = PSTeambuilder.exportTeamBackup(teams);
+		this.pendingReplacement = null;
+		const count = teams.length;
+		const manualCopy = () => {
+			this.transferMode = 'copy';
+			this.transferText = backup;
+			this.transferStatus = 'Selecione e copie o backup abaixo.';
+			this.forceUpdate();
+		};
+		if (!navigator.clipboard?.writeText) return manualCopy();
+		void navigator.clipboard.writeText(backup).then(() => {
+			this.transferStatus = count === 1 ? '1 time copiado.' : `${count} times copiados.`;
+			this.forceUpdate();
+		}, manualCopy);
+	};
+	openImport = () => {
+		this.pendingReplacement = null;
+		this.transferMode = 'import';
+		this.transferText = '';
+		this.transferStatus = '';
+		this.forceUpdate();
+		this.base?.querySelector<HTMLTextAreaElement>('.copa-team-transfer-input')?.focus();
+	};
+	closeTransfer = () => {
+		this.pendingReplacement = null;
+		this.transferMode = null;
+		this.transferText = '';
+		this.transferStatus = '';
+		this.forceUpdate();
+	};
+	importAllTeams = (replace: boolean) => {
+		const teams = PSTeambuilder.parsePackedBackup(this.transferText);
+		if (!teams) {
+			this.transferStatus = 'Backup inválido. Cole o texto gerado por “Copiar todos os times”.';
+			this.forceUpdate();
+			return;
+		}
+		if (replace) {
+			this.pendingReplacement = teams;
+			this.forceUpdate();
+			return;
+		}
+		this.saveImportedTeams(teams, false);
+	};
+	replaceAllTeams = () => {
+		const teams = this.pendingReplacement;
+		this.pendingReplacement = null;
+		if (teams) this.saveImportedTeams(teams, true);
+	};
+	saveImportedTeams(teams: Team[], replace: boolean) {
+		try {
+			const count = PS.teams.importBackup(teams, replace);
+			this.closeTransfer();
+			this.transferStatus = count === 1 ? '1 time importado.' : `${count} times importados.`;
+		} catch {
+			this.transferStatus = 'Não foi possível salvar o backup neste navegador.';
+		}
+		this.forceUpdate();
+	}
+	renderTeamTransfer() {
+		return <div>
+			<p class="copa-team-transfer">
+				<button class="button" onClick={this.copyAllTeams} disabled={!PS.teams.list.length}>
+					<i class="fa fa-copy" aria-hidden></i> Copiar todos os times
+				</button>
+				<button class="button" onClick={this.openImport}>
+					<i class="fa fa-upload" aria-hidden></i> Importar todos os times
+				</button>
+			</p>
+			{this.transferMode && <div>
+				<label>
+					{this.transferMode === 'import' ? 'Cole o backup dos times' : 'Backup dos times'}
+					<textarea
+						class="textbox copa-team-transfer-input" value={this.transferText}
+						readOnly={this.transferMode === 'copy' || !!this.pendingReplacement}
+						onInput={ev => {
+							this.transferText = (ev.currentTarget as HTMLTextAreaElement).value;
+							if (this.transferStatus && this.transferMode === 'import') {
+								this.transferStatus = '';
+								this.forceUpdate();
+							}
+						}}
+					/>
+				</label>
+				{this.pendingReplacement ? <div role="group" aria-label="Confirmar substituição">
+					<p>Apagar todos os times deste navegador e substituir pelo backup?</p>
+					<p class="copa-team-transfer">
+						<button class="button" onClick={this.replaceAllTeams}>Substituir todos os times</button>
+						<button
+							class="button" onClick={() => {
+								this.pendingReplacement = null;
+								this.forceUpdate();
+							}}
+						>Cancelar</button>
+					</p>
+				</div> : <p class="copa-team-transfer">
+					{this.transferMode === 'import' && <>
+						<button class="button" onClick={() => void this.importAllTeams(false)}>Adicionar aos existentes</button>
+						<button class="button" onClick={() => void this.importAllTeams(true)}>Substituir todos…</button>
+					</>}
+					<button class="button" onClick={this.closeTransfer}>Cancelar</button>
+				</p>}
+			</div>}
+			<div role="status">{this.transferStatus}</div>
+		</div>;
+	}
 	clearSearch = () => {
 		const target = this.base!.querySelector<HTMLInputElement>('input[type="search"]');
 		if (!target) return;
@@ -938,6 +1055,7 @@ class TeambuilderPanel extends PSRoomPanel<TeambuilderRoom> {
 					style="margin-left:5px;" onKeyUp={this.updateSearch}
 				></input>
 			</p>
+			{Dex.isCopaRinha() && this.renderTeamTransfer()}
 			<ul class="teamlist">
 				{!teams.length ? (
 					<li><em>{TL`you have no teams lol`}</em></li>

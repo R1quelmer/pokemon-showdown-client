@@ -505,6 +505,31 @@ class PSTeams extends PSStreamModel<'team' | 'format'> {
 		} catch {}
 		this.update('team');
 	}
+	importBackup(teams: Team[], replace: boolean) {
+		const existing = replace ? [] : this.list;
+		const signature = (team: Team) => this.packAll([{ ...team, teamid: undefined }]);
+		const seen: Record<string, boolean> = Object.create(null);
+		for (const team of existing) seen[signature(team)] = true;
+		const added = teams.filter(team => {
+			const packed = signature(team);
+			if (seen[packed]) return false;
+			seen[packed] = true;
+			return true;
+		});
+		localStorage.setItem('showdown_teams', this.packAll([...existing, ...added]));
+		if (replace) {
+			for (const team of this.list) {
+				const roomid = `team-${team.key}` as RoomID;
+				if (PS.rooms[roomid]) PS.leave(roomid);
+			}
+			this.list = [];
+			this.byKey = {};
+			this.deletedTeams = [];
+		}
+		for (const team of added) this.push(team);
+		this.update('team');
+		return added.length;
+	}
 	unpackLine(line: string): Team | null {
 		const pipeIndex = line.indexOf('|');
 		if (pipeIndex < 0) return null;
