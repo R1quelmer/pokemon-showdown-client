@@ -1,6 +1,7 @@
 // Native Copa presence UI with synthetic WebSocket replies. No production user,
 // private data or account service is contacted by this regression.
 const assert = require('node:assert/strict');
+const {execFileSync} = require('node:child_process');
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const http = require('node:http');
@@ -20,6 +21,32 @@ const members = [
 	{name: 'Bob', avatar: 'ethan', online: true, battle: publicBattle, rooms: ['Lobby']},
 	{name: 'Alice', avatar: 1, online: true, rooms: ['Lobby']},
 ];
+
+async function measurePairPixels(pair) {
+	const shots = [];
+	for (const selector of [
+		'.copa-profile-sprites img',
+		'.copa-profile-sprites .copa-partner-sprite img',
+		'.copa-profile-sprites .copa-online-avatar img',
+	]) {
+		const shot = await pair.screenshot({style: `${selector}{visibility:hidden!important}`, scale:'css'});
+		shots.push(shot.toString('base64'));
+	}
+	return JSON.parse(execFileSync('python3', ['-c', `
+import base64, io, json, math, sys
+from PIL import Image, ImageChops
+background, trainer, partner = [
+    Image.open(io.BytesIO(base64.b64decode(image))).convert("RGB") for image in json.load(sys.stdin)
+]
+a, b = (ImageChops.difference(background, image).convert("L") for image in (trainer, partner))
+right = [(max(x for x in range(a.width) if a.getpixel((x,y))), y)
+         for y in range(a.height) if a.crop((0,y,a.width,y+1)).getbbox()]
+left = [(min(x for x in range(b.width) if b.getpixel((x,y))), y)
+        for y in range(b.height) if b.crop((0,y,b.width,y+1)).getbbox()]
+gap = min(math.hypot(max(0, bx-ax-1), max(0, abs(ay-by)-1)) for ax,ay in right for bx,by in left)
+print(json.dumps({"gap": gap, "baseDelta": abs(a.getbbox()[3] - b.getbbox()[3])}))
+`], {input:JSON.stringify(shots), encoding:'utf8'}));
+}
 
 (async () => {
 	const server = http.createServer(async (req, res) => {
@@ -282,7 +309,10 @@ const members = [
 			const block = await pair.boundingBox();
 			assert(trainer.height > 75 && pokemon.height > 50);
 			assert(Math.abs(trainer.y + trainer.height - pokemon.y - pokemon.height) <= 1, 'visible bases align');
-			assert(Math.abs(pokemon.x - trainer.x - trainer.width - 4) <= 1, 'visible sprites are close together');
+			const pixels = await measurePairPixels(pair);
+			assert(pixels.gap >= 4 && pixels.gap <= 8, JSON.stringify(pixels));
+			assert(pixels.baseDelta <= 1, JSON.stringify(pixels));
+			console.log(`Visible profile pixels at ${width}px:`, pixels);
 			assert(Math.abs((trainer.x + pokemon.x + pokemon.width) / 2 - (block.x + block.width / 2)) <= 1);
 			assert.equal(await pair.locator('img').evaluateAll(images =>
 				images.every(image => getComputedStyle(image).imageRendering === 'pixelated' && !image.getAnimations().length)), true);

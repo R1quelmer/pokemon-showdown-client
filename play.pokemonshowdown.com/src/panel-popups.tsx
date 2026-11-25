@@ -351,6 +351,29 @@ class UserPanel extends PSRoomPanel<UserRoom> {
 	}
 }
 
+const copaProfileSilhouettes = new window.WeakMap<HTMLElement, { left: number, right: number, y: number }[]>();
+
+function alignCopaProfilePair(frame: HTMLElement) {
+	const pair = frame.parentElement;
+	if (!pair) return;
+	const [trainer, partner] = Array.from(pair.children) as HTMLElement[];
+	if (!partner) return;
+	const trainerRows = copaProfileSilhouettes.get(trainer);
+	const partnerRows = copaProfileSilhouettes.get(partner);
+	if (!trainerRows || !partnerRows) return;
+	const gap = 6;
+	let offset = -Infinity;
+	for (const a of trainerRows) {
+		for (const b of partnerRows) {
+			const dy = a.y - b.y;
+			if (Math.abs(dy) >= gap) continue;
+			offset = Math.max(offset, a.right - b.left + Math.sqrt(gap * gap - dy * dy));
+		}
+	}
+	if (!Number.isFinite(offset)) return;
+	partner.style.marginLeft = `${Math.round(offset - trainer.offsetWidth)}px`;
+}
+
 /** Tighten the enlarged composition using the visible bounds of each static image. */
 function fitCopaProfileSprite(image: HTMLImageElement) {
 	if (image.dataset.profileFit) return;
@@ -374,13 +397,20 @@ function fitCopaProfileSprite(image: HTMLImageElement) {
 			return;
 		}
 		let left = width, right = 0, top = height, bottom = 0;
+		const rows: { left: number, right: number, y: number }[] = [];
 		for (let y = 0; y < height; y++) {
+			let rowLeft = width, rowRight = 0;
 			for (let x = 0; x < width; x++) {
 				if (!pixels[(y * width + x) * 4 + 3]) continue;
-				left = Math.min(left, x);
-				right = Math.max(right, x + 1);
+				rowLeft = Math.min(rowLeft, x);
+				rowRight = x + 1;
 				top = Math.min(top, y);
-				bottom = Math.max(bottom, y + 1);
+				bottom = y + 1;
+			}
+			if (rowRight > rowLeft) {
+				left = Math.min(left, rowLeft);
+				right = Math.max(right, rowRight);
+				rows.push({ left: rowLeft, right: rowRight, y });
 			}
 		}
 		if (right <= left || bottom <= top) return;
@@ -392,6 +422,10 @@ function fitCopaProfileSprite(image: HTMLImageElement) {
 		image.style.left = `${-left * scale}px`;
 		image.style.top = `${-top * scale}px`;
 		frame.dataset.profileTight = 'true';
+		copaProfileSilhouettes.set(frame, rows.map(row => ({
+			left: (row.left - left) * scale, right: (row.right - left) * scale, y: (row.y - bottom + 0.5) * scale,
+		})));
+		alignCopaProfilePair(frame);
 	};
 	source.src = image.src;
 }
