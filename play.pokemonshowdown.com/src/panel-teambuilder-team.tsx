@@ -496,7 +496,7 @@ class ViewTeamPanel extends PSRoomPanel {
 				url={`https://psim.us/t/${team.teamid!}${teamData.private ? '-' + teamData.private : ''}`}
 			/> {}
 			<p>{TL.label(TL`Uploaded by`)}<strong>{teamData.ownerid}</strong></p>
-			<p>{TL.label(TL`Format`)}<strong>{teamData.format}</strong></p>
+			<p>{TL.label(TL`Format`)}<strong>{Dex.copaFormatLabel(teamData.format) ?? teamData.format}</strong></p>
 			<p>{TL.label(TL`Views`)}<strong>{teamData.views}</strong></p>
 			{team.key && <p><a class="button" href={`team-${team.key}`}>{TL`[Edit]`}</a></p>}
 			<TeamEditor team={team} readOnly></TeamEditor>

@@ -31,7 +31,7 @@ async function run() {
 		const open = async (width, clipboard) => {
 			const context = await browser.newContext({viewport: {width, height: 900}});
 			const page = await context.newPage();
-			const errors = [];
+			const errors = [], commands = [];
 			page.on('pageerror', error => errors.push(error.message));
 			await page.addInitScript(hasClipboard => {
 				window.Worker = undefined;
@@ -40,6 +40,7 @@ async function run() {
 				} : undefined});
 			}, clipboard);
 			await page.routeWebSocket(/^wss:\/\/copa-rinha-showdown\.onrender\.com(?::443)?\/showdown\/websocket$/, ws => {
+				ws.onMessage(command => commands.push(command));
 				ws.send('|formats|,1|Copa Rinha|[Gen 9] Copa Rinha II,e\n|updateuser| Copa QA|1|1');
 			});
 			await page.route('**/*', async route => {
@@ -54,7 +55,7 @@ async function run() {
 			await page.goto(origin + '/testclient-new.html?~~copa-rinha-showdown.onrender.com:443&copa-rinha=1');
 			await page.waitForFunction(() => window.PS?.connection?.connected && PS.user.named);
 			await page.evaluate(() => PS.join('teambuilder'));
-			return {page, errors};
+			return {page, errors, commands};
 		};
 		const desktop = await open(1440, true);
 		const mobile = await open(390, false);
@@ -71,6 +72,27 @@ async function run() {
 			['Megas da Copa', 'Rodada 2', copaFormat, 'Greninja-Mega @ Greninjite\nAbility: Protean\n- Surf\n\nClefairy\n- Moonblast'],
 			['Reserva', 'Treino', 'gen9ou', 'Landorus-Therian (M)\nShiny: Yes\nTera Type: Water\n- Earthquake'],
 		]);
+		const teamCard = page.locator('#room-teambuilder .team').filter({hasText: 'Megas da Copa'});
+		assert((await teamCard.textContent()).includes('[Copa Rinha II]'));
+		assert((await page.locator('#room-teambuilder .team').filter({hasText: 'Reserva'}).textContent()).includes('[ou]'));
+		await page.evaluate(() => PS.join(''));
+		const picker = page.locator('[id="room-"] button.teamselect');
+		assert.equal(await picker.getAttribute('data-format'), copaFormat);
+		await picker.click();
+		const popup = page.locator('#room-teamdropdown');
+		await popup.waitFor();
+		assert(!/coparinhanationaldexza/i.test(await popup.innerText()));
+		const choice = popup.locator('button.team').filter({hasText: 'Megas da Copa'});
+		assert((await choice.textContent()).includes('[Copa Rinha II]'));
+		await choice.click();
+		assert((await picker.textContent()).includes('[Copa Rinha II]'));
+		await page.screenshot({path: path.join(screenshots, 'seletor-copa.png')});
+		await page.getByRole('button', {name: /Battle!/}).click();
+		await page.waitForFunction(() => PS.mainmenu.teamSent === 'gen9coparinhanationaldexza');
+		assert(desktop.commands.includes('|/search ' + copaFormat));
+		assert(desktop.commands.some(command => command.startsWith('|/utm Greninja')));
+		assert.equal(await page.evaluate(() => localStorage.getItem('showdown_teams')), original);
+		await page.evaluate(() => { PS.mainmenu.cancelSearch(); PS.join('teambuilder'); });
 		await page.getByRole('button', {name: 'Copiar todos os times'}).click();
 		await page.getByText('2 times copiados.').waitFor();
 		const backup = await page.evaluate(() => window.copiedBackup);
@@ -92,6 +114,7 @@ async function run() {
 		await phone.screenshot({path: path.join(screenshots, 'importacao-mobile.png')});
 		await phone.getByRole('button', {name: 'Adicionar aos existentes'}).click();
 		await phone.getByText('2 times importados.').waitFor();
+		assert((await phone.locator('#room-teambuilder .team').filter({hasText: 'Megas da Copa'}).textContent()).includes('[Copa Rinha II]'));
 		assert.equal(await storage(), seed + '\n' + original);
 		await openImport(backup);
 		await phone.getByRole('button', {name: 'Adicionar aos existentes'}).click();

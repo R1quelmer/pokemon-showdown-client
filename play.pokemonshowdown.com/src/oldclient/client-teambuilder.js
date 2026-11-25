@@ -371,6 +371,7 @@
 				if (formatName === '~') formatName = '';
 				format = 'gen' + newGen + formatName;
 				if (format.length === 4) formatName = '(uncategorized)';
+				else formatName = Dex.copaFormatLabel(format) || formatName;
 				// folders are <div>s rather than <button>s because in theory it has
 				// less weird interactions with HTML5 drag-and-drop
 				buf += '<div class="folder' + (this.curFolder === format ? ' cur"><div class="folderhack3"><div class="folderhack1"></div><div class="folderhack2"></div>' : '">') + '<div class="selectFolder" data-value="' + format + '"><i class="fa ' + (this.curFolder === format ? 'fa-folder-open-o' : 'fa-folder-o') + '"></i>' + formatName + '</div></div>' + (this.curFolder === format ? '</div>' : '');
@@ -489,7 +490,7 @@
 					if (!atLeastOne) atLeastOne = true;
 					var formatText = '';
 					if (team.format) {
-						formatText = '[' + team.format + '] ';
+						formatText = '[' + (Dex.copaFormatLabel(team.format) || team.format) + '] ';
 					}
 					if (team.folder) formatText += team.folder + '/';
 

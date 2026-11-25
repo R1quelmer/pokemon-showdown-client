@@ -52,6 +52,18 @@ const canonical = 'gen9coparinhanationaldexza';
 				const teamFormat = await page.evaluate(old => old ? Storage.teams[0].format : PS.teams.list[0].format, legacy);
 				assert.equal(teamFormat, canonical);
 				assert((await page.locator('button.formatselect').allTextContents()).every(text => text.trim() === 'Copa Rinha II'));
+				await page.evaluate(old => {
+					if (old) {
+						app.rooms.teambuilder.curTeam = null;
+						app.rooms.teambuilder.curFolder = '';
+						app.rooms.teambuilder.update();
+					} else {
+						PS.join('teambuilder');
+					}
+				}, legacy);
+				const card = page.locator('#room-teambuilder .team').first();
+				await card.waitFor();
+				assert((await card.textContent()).includes('[Copa Rinha II]'));
 				assert.deepEqual(errors, []);
 				console.log(`${legacy ? 'Legacy' : 'Modern'} single format picker and new team passed against ${name}`);
 				await page.close();

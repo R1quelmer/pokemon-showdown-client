@@ -1139,7 +1139,8 @@ export class BattleLog {
 	 */
 	static formatName(formatid = '', fixGen6?: boolean): string {
 		if (!formatid) return '';
-		if (Dex.normalizeTeamFormat(toID(formatid)) === 'gen9coparinhanationaldexza') return 'Copa Rinha II';
+		const copaLabel = Dex.copaFormatLabel(toID(formatid));
+		if (copaLabel) return copaLabel;
 
 		let atIndex = formatid.indexOf('@@@');
 		if (atIndex >= 0) {

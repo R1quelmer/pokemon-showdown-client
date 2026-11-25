@@ -88,7 +88,7 @@ class BattlesPanel extends PSRoomPanel<BattlesRoom> {
 		const players = TL`${battle.p1} vs. ${battle.p2}`;
 		return <div key={battle.id}><a href={`/${battle.id}`} class="blocklink">
 			{minEloMessage && <small style="float:right">({minEloMessage})</small>}
-			<small>[{format}]</small><br />
+			<small>[{Dex.copaFormatLabel(format) ?? format}]</small><br />
 			<em>{players}</em>
 		</a></div>;
 	}

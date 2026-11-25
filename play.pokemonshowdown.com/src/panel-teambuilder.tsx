@@ -680,7 +680,7 @@ class TeambuilderPanel extends PSRoomPanel<TeambuilderRoom> {
 		} else {
 			children = [
 				<i class={`fa ${folderOpenIcon}-o`}></i>,
-				value === 'gen9coparinhanationaldexza' ? 'Copa Rinha II' : value.slice(4) || TL`(uncategorized)`,
+				Dex.copaFormatLabel(value) ?? (value.slice(4) || TL`(uncategorized)`),
 			];
 		}
 

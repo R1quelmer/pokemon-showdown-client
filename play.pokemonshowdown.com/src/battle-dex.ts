@@ -562,6 +562,11 @@ export const Dex = new class implements ModdedDex {
 			format === 'coparinhanationaldexza' || format === 'gen6coparinhanationaldexza' ?
 			'gen9coparinhanationaldexza' : format) as ID;
 	}
+	/** Display label only. Keep the canonical ID in team data and protocol messages. */
+	copaFormatLabel(format: string): string | undefined {
+		if (this.normalizeTeamFormat(format) === 'gen9coparinhanationaldexza') return 'Copa Rinha II';
+		return undefined;
+	}
 	/** Change only saved format prefixes; preserve every other byte of the team backup. */
 	migrateTeamFormats(buffer: string): string {
 		return buffer.replace(

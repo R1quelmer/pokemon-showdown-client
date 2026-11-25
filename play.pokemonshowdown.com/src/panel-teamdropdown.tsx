@@ -191,7 +191,7 @@ export function TeamBox(props: {
 			<em>{team.isBox ? TL`(empty box)` : TL`(empty team)`}</em>
 		);
 		let format = team.format as string;
-		if (format.startsWith(Dex.modid)) format = format.slice(4);
+		format = Dex.copaFormatLabel(format) ?? (format.startsWith(Dex.modid) ? format.slice(4) : format);
 		format = (format ? `[${format}] ` : ``) + (team.folder ? `${team.folder}/` : ``);
 		contents = [
 			<strong>{team.isBox && <i class="fa fa-archive"></i>} {format && <span>{format}</span>}{team.name}</strong>,
@@ -320,7 +320,7 @@ class TeamDropdownPanel extends PSRoomPanel {
 					class={'button' + (baseFormat === this.format ? ' disabled' : '')}
 					onClick={this.setFormat} name="format" value={baseFormat}
 				>
-					<i class="fa fa-folder-o" aria-hidden></i> [{baseFormat.slice(0, 4)}] {baseFormat.slice(4)}
+					<i class="fa fa-folder-o" aria-hidden></i> {Dex.copaFormatLabel(baseFormat) ?? `[${baseGen}] ${baseFormat.slice(4)}`}
 				</button>
 			)} {}
 			<button
@@ -353,7 +353,7 @@ class TeamDropdownPanel extends PSRoomPanel {
 			if (folder && (this.gen || this.format)) {
 				teamList.push(<h2>
 					<i class="fa fa-folder-open" aria-hidden></i> {folder} + {}
-					<i class="fa fa-folder-open-o" aria-hidden></i> {this.format || this.gen}
+					<i class="fa fa-folder-open-o" aria-hidden></i> {Dex.copaFormatLabel(this.format || '') ?? (this.format || this.gen)}
 				</h2>);
 			} else if (folder) {
 				teamList.push(<h2>
@@ -361,7 +361,7 @@ class TeamDropdownPanel extends PSRoomPanel {
 				</h2>);
 			} else if (this.gen || this.format) {
 				teamList.push(<h2>
-					<i class="fa fa-folder-open-o" aria-hidden></i> {this.format || this.gen}
+					<i class="fa fa-folder-open-o" aria-hidden></i> {Dex.copaFormatLabel(this.format || '') ?? (this.format || this.gen)}
 				</h2>);
 			} else {
 				teamList.push(<h2>
