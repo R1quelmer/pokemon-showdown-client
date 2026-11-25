@@ -418,6 +418,9 @@ export class MainMenuRoom extends PSRoom {
 	handleQueryResponse(id: ID, response: any) {
 		let fullid: string = id;
 		switch (id) {
+		case 'copapresence':
+			if (Config.copaRinhaLocalNames) window.CopaRinhaPresence?.receive(response);
+			break;
 		case 'userdetails':
 			let userid = response.userid;
 			fullid += ` ${userid}`;

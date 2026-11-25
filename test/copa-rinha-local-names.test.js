@@ -269,7 +269,7 @@ describe('Copa Rinha nickname page isolation', () => {
 			if (!local) assert.ok(written[0].includes('../config/testclient-key.js'));
 		}
 	});
-	it('renders only a nickname field and an impersonation notice, even if a password state was supplied', () => {
+	it('keeps the legacy alias form isolated from official password states and shows the Copa account notice', () => {
 		const s = session();
 		Object.assign(s.context, {
 			preact, PSRoomPanel: function (props) { this.props = props; }, PSPanelWrapper: function () {},
@@ -293,7 +293,7 @@ describe('Copa Rinha nickname page isolation', () => {
 		walk(panel.render());
 		assert.equal(inputs.length, 1); assert.equal(inputs[0].name, 'username'); assert.equal(inputs[0].type, 'text');
 		assert.ok(text.includes('Entrar'));
-		assert.ok(text.some(value => value.includes('Outra pessoa') && value.includes('autenticação segura')));
+		assert.ok(text.some(value => value.includes('exclusiva da Copa Rinha') && value.includes('senha')));
 	});
 	it('does not solicit account passwords from direct registration/password routes in Copa mode', () => {
 		const s = session();

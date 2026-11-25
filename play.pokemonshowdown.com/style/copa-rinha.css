@@ -353,3 +353,16 @@ html.copa-rinha .ps-room .teamselect .team {
 }
 html.copa-rinha .ps-room .ilink,
 html.copa-rinha .ps-popup .ilink {color:var(--copa-cyan)}
+
+/* Presence shares the existing Copa popup chrome. */
+html.copa-rinha .copa-online-counter {cursor:pointer}
+html.copa-rinha .copa-online-summary,html.copa-rinha .copa-online-guests {color:var(--copa-muted)}
+html.copa-rinha .copa-online-list {list-style:none;padding:0;margin:12px 0;max-height:55vh;overflow-y:auto}
+html.copa-rinha .copa-online-list li {display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:10px;align-items:center;border-top:1px solid var(--copa-line);padding:12px 0}
+html.copa-rinha .copa-online-list img {object-fit:contain}
+html.copa-rinha .copa-online-player {min-width:0;overflow-wrap:anywhere}
+html.copa-rinha .copa-online-player small {display:block;color:var(--copa-muted)}
+html.copa-rinha .copa-online-player p {margin:3px 0;font-size:12px}
+html.copa-rinha .copa-online-player .button {max-width:100%;white-space:normal;overflow-wrap:anywhere}
+html.copa-rinha .copa-online>small {color:var(--copa-muted)}
+@media(max-width:420px){html.copa-rinha .copa-online-list li {grid-template-columns:32px minmax(0,1fr);gap:8px}html.copa-rinha .copa-online-list li>button {grid-column:2;justify-self:start}html.copa-rinha .copa-online-list img {width:32px}}

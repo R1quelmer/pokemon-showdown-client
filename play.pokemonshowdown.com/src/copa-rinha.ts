@@ -34,6 +34,11 @@ export const CopaRinhaLocalNames = new class {
 		void window.CopaRinhaAvatars?.load();
 		PS.user.initializing = false;
 		PS.user.registered = null;
+		if (window.CopaAccounts) {
+			void window.CopaAccounts.resume();
+			PS.user.update(null);
+			return;
+		}
 		const saved = this.read();
 		if (saved) {
 			this.choose(saved);
@@ -52,6 +57,7 @@ export const CopaRinhaLocalNames = new class {
 		if (!Config.copaRinhaLocalNames) return;
 		this.clearPending();
 		this.challenge = null;
+		window.CopaAccounts?.disconnect();
 		PS.user.update(null);
 	}
 	choose(input: string) {
@@ -66,6 +72,7 @@ export const CopaRinhaLocalNames = new class {
 			this.reject('Aguarde a conexão com o servidor para escolher seu nome.');
 			return;
 		}
+		if (window.CopaAccounts) { window.CopaAccounts.begin(name); return; }
 		this.clearPending();
 		this.pending = name;
 		// Native /trn silently ignores an exact no-op: no updateuser will follow.

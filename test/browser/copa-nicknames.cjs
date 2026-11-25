@@ -83,6 +83,9 @@ const waitUntil = async (predicate, message) => {
 				});
 				await page.route('**/*', route => {
 					const url = route.request().url();
+					// Isolate the retained raw-alias compatibility path; the account UI
+					// and password/session flows are covered by copa-accounts.cjs.
+					if (url.endsWith('/js/copa-accounts.js')) return route.fulfill({contentType: 'text/javascript', body: ''});
 					if (/\/(?:action\.php|crossdomain\.php|testclient-key\.php)(?:[?#]|$)/.test(new URL(url).pathname)) {
 						fixture.authRequests.push(url); return route.abort();
 					}

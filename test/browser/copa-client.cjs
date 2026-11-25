@@ -37,7 +37,7 @@ const exportText = [
 			const page = await browser.newPage({viewport: {width, height: 900}});
 			const origin = `http://127.0.0.1:${server.address().port}`;
 			const errors = [], authRequests = [], shares = [], renames = [];
-			let connections = 0, currentSocket;
+			let connections = 0, currentSocket, accountName = '';
 			page.on('pageerror', error => { errors.push(error.message); console.error(error.stack); });
 			// Exercise native direct WebSocket fallback, without changing production code.
 			await page.addInitScript(() => { window.Worker = undefined; });
@@ -48,7 +48,7 @@ const exportText = [
 				ws.send(`|formats|,1|Copa Rinha|[Gen 9] Copa Rinha II,e\n|updateuser| Guest 1|0|167\n|challstr|4|synthetic-copa-challenge-${connections}`);
 				ws.onMessage(raw => {
 					const message = String(raw);
-					const rename = /^\|?\/trn ([^,\r\n]+)$/.exec(message);
+					const rename = /^\|?\/trn ([^,\r\n]+)(?:,0,copa)?$/.exec(message);
 					if (rename) {
 						renames.push(rename[1]);
 						ws.send(`|updateuser| ${rename[1]}|1|167`);
@@ -62,6 +62,11 @@ const exportText = [
 			});
 			await page.route('**/*', async route => {
 				const url = route.request().url();
+				if (url.startsWith('https://copa-rinha-showdown.onrender.com/copa-rinha/accounts/')) {
+					const data = route.request().postDataJSON();
+					if (data.name) accountName = data.name;
+					return route.fulfill({json: {name: accountName, token: 'a'.repeat(43), expires: Date.now() + 30 * 86400000}});
+				}
 				if (/\/(?:action\.php|crossdomain\.php|testclient-key\.php)(?:[?#]|$)/.test(new URL(url).pathname)) {
 					authRequests.push(url);
 					return route.abort();
@@ -89,9 +94,10 @@ const exportText = [
 			await page.waitForFunction(() => window.PS?.connection?.connected && !PS.user.initializing);
 			assert(page.url().includes('/testclient-new.html?~~copa-rinha-showdown.onrender.com:443'));
 			assert.equal(await page.evaluate(() => Config.copaRinhaLocalNames), true);
-			assert.equal(await page.locator('input[type=password]').count(), 0);
+			assert.equal(await page.locator('input[name=password]').count(), 0);
 			const name = `QA Local ${width}`;
 			await page.locator('input[name=username]').fill(name);
+			await page.locator('input[name=copapassword]').fill('fixture-copa-exclusive-password');
 			const popup = await page.locator('.ps-popup').last().boundingBox();
 			assert(popup && popup.x >= 0 && popup.x + popup.width <= width, `nickname dialog fits ${width}px`);
 			await overflow('nickname');
@@ -147,7 +153,7 @@ const exportText = [
 			assert.equal(await page.evaluate(() => PS.teams.list.length), 1);
 			assert.equal(await page.evaluate(() => PS.teams.list[0].packedTeam), packed);
 			assert.equal(await page.evaluate(() => PS.teams.list[0].format), canonical);
-			assert.equal(await page.locator('input[type=password]').count(), 0);
+			assert.equal(await page.locator('input[name=password]').count(), 0);
 			await page.evaluate(() => {
 				PS.prefs.set('mute', true);
 				PS.receive('>copaqa\n|init|chat\n|title|Sala de teste Copa\n|users|1, QA\n|c| QA|Mensagem de teste Copa');

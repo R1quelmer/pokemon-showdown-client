@@ -1,44 +1,70 @@
-# Apelidos e avatares locais da Copa Rinha
+# Contas e avatares locais da Copa Rinha
 
-## Identificação local, sem contas novas
+## Contas exclusivas da Copa Rinha
 
-A entrada Copa mantém a camada `CopaRinhaLocalNames` já existente. Ela usa o
-comando nativo `/trn NOME` com o modo de nomes locais já habilitado no servidor.
-Não cria conta, senha, token, assertion, OAuth, endpoint ou serviço de identidade.
-Não depende de autorização da Smogon ou do loginserver oficial. Essa alteração
-não afeta a autenticação do client oficial `*.psim.us`.
+O client usa contas próprias com senha, separadas das contas oficiais do Showdown.
+Não reutilize a senha do Showdown ou de outros sites. Não há OAuth, loginserver
+Smogon nem dependência PostgreSQL no fluxo local. O fluxo oficial do psim.us
+continua usando a verificação nativa de assertions; credenciais locais nunca
+marcam um usuário como oficialmente registrado ou concedem seus privilégios.
 
-O nickname é guardado no localStorage desta origem, com uma chave que inclui
-host, porta e prefixo do servidor, e somente após confirmação do servidor.
-Cada novo `challstr` provoca uma única tentativa de restauração do nome confirmado;
-repetir o mesmo desafio não envia outro comando. Há apenas uma tentativa pendente
-por vez, e respostas com outro nome não cancelam a escolha atual. Uma resposta de
-nome ocupado ou timeout mantém o texto digitado editável, sem retry automático.
-Uma troca manual recusada preserva o nome anterior confirmado; uma restauração
-recusada remove somente esse apelido salvo, evitando novas restaurações dele.
-A desconexão cancela e invalida o timeout pendente, e uma nova escolha aguarda o
-handshake da conexão seguinte. Selecionar o nome atual confirmado não envia o
-`/trn` que o servidor ignora sem responder. Delimitadores do protocolo e caracteres
-de controle são rejeitados antes do comando.
+Nicknames registrados são permanentes. As senhas usam scrypt N=32768, r=8, p=3,
+salt aleatório de16bytes e derivação de64bytes. Aceitam10–128caracteres. O servidor
+limita tentativas por nickname e origem de conexão, além de limitar derivações
+simultâneas. A API não retorna hashes de senha ou segredos de outros usuários.
 
-As proteções nativas do servidor permanecem: até três tentativas de nomes não
-registrados por janela de dois minutos, incluindo tentativas que colidem. Outra
-aba/conexão ativa usando o mesmo apelido continua impedindo sua utilização; não
-há merge forçado ou substituição de usuários. O servidor mantém a decisão sobre
-nomes ocupados, nomes protegidos e limites de troca. Não foi criado cooldown ou
-sistema de autenticação alternativo no client.
+Sessões usam32bytes aleatórios e validade absoluta de30dias; apenas SHA-256 do
+token é gravado. O token opaco fica no localStorage da origem do client; senhas
+nunca são persistidas pelo app. A API recebe credenciais por HTTPS POST, com
+respostas no-store. No WebSocket, o marcador público /trn NOME,0,copa consome uma
+concessão descartável de30segundos vinculada ao desafio aleatório daquela conexão.
+Nenhuma senha, bearer token ou código de recuperação é enviado no chat/protocolo.
 
-Nomes locais **não são contas oficialmente autenticadas**. O client zera o marcador
-`registered` tanto ao iniciar a identificação quanto ao processar suas confirmações.
-A interface explica essa limitação no seletor de nickname e nas configurações.
-Rotas nativas de registro/troca de senha também mostram a identificação local,
-sem campos de senha, quando abertas diretamente no modo Copa.
+Duas abas que provam a posse da mesma conta usam o merge nativo de User e aparecem
+uma única vez online. Sessões gravadas no R2 não mantêm User conectado. Fechar a
+última conexão remove a presença; reabrir o navegador recupera a identidade com
+o token válido. A logo navega internamente sem recarregar a página/conexão.
+Sair revoga a sessão no servidor, remove o token e desconecta as abas da origem.
+Revogações administrativas/expiração também são verificadas nas conexões locais
+a cada30segundos. A falha de armazenamento não concede novas identidades.
 
-Nenhum apelido novo foi reservado a uma pessoa. Quem souber um nome poderá usá-lo
-quando disponível. Use os canais administrativos existentes do torneio para
-conferir a pessoa; nome, cor e avatar nunca constituem prova de identidade.
-Não foi criado mecanismo alternativo de autenticação para tentar solucionar isso.
-Os dados de times do navegador não são apagados nem movidos.
+Riquelme começa reservado e precisa de ativação administrativa. Não foi atribuída
+senha inicial nem criado um token real nesta implementação.
+
+## Administração e recuperação
+
+Página /copa-admin.html: listar contas, reservar/remover reservas em lote,
+desativar/reativar contas e emitir recuperação. Contas registradas não são liberadas
+por expiração de sessão; desativá-las também não libera o nickname. A página exige
+chave administrativa própria e não grava essa chave no navegador. A lista de
+sessões válidas é explicitamente separada da lista de usuários online.
+
+Antes de um deploy aprovado, o administrador deve configurar no servidor a variável
+COPA_RINHA_ADMIN_KEY com um segredo aleatório de pelo menos32bytes, codificado em
+base64url (43caracteres), fora do Git. Sem a variável, a administração nega acesso.
+Não enviar o valor em chat, logs ou URLs. Nenhuma variável foi criada/alterada
+neste ambiente nem no Render por esta implementação.
+
+Para ativar Riquelme: entrar na administração, escolher Emitir recuperação para uma
+conta, informar Riquelme e entregar o código por canal privado ao titular validado.
+Na página /copa-conta.html, o titular informa o código e define uma senha própria.
+O código vale24horas, só pode ser usado uma vez e substituí-lo invalida o anterior.
+A recuperação revoga as sessões antigas. Não precisa alterar código ou redeploy
+para gerenciar outros participantes, inclusive reservas em lote de até100nomes.
+
+## Persistência privada
+
+Registro único copa-accounts/v1/registry.json no bucket R2 privado já configurado,
+usando as quatro variáveis R2 existentes. Escritas condicionais ETag/IfMatch e
+IfNoneMatch evitam sobrescrever alterações concorrentes entre processos. A
+expiração remove sessões/concessões/códigos; nunca remove os registros de contas.
+O registro tem limites de tamanho/capacidade para a Copa:2MiB, até1000contas no
+registro público e4096sessões simultaneamente válidas.
+
+IMPORTANTE antes de publicar: o prefixo copa-accounts/ deve ficar fora de regras de
+lifecycle que apaguem replays temporários. Manter backup/versionamento privado do
+registro. Não tornar o bucket público. Nenhum objeto R2 real, regra de lifecycle,
+credencial, replay ou time existente foi alterado por estes testes locais.
 
 ## Cadastro administrativo de avatares
 
@@ -103,3 +129,38 @@ Os testes de avatares usam somente identidades/arquivos sintéticos em memória:
 manifesto vazio, paths inválidos, falta de imagem/manifesto, isolamento fora da
 Copa, carregamento único, associação exata e fallback do resolvedor nativo.
 Nenhuma credencial real ou endpoint de autenticação é necessário para esses testes.
+
+## Administração e ativação após aprovação
+
+A interface é `/copa-admin.html`. A API permanece fechada até configurar no
+servidor a variável NOVA `COPA_RINHA_ADMIN_KEY` com pelo menos32bytes gerados
+aleatoriamente e codificados em base64url (43caracteres). Não é uma senha de
+participante nem uma credencial R2; nunca deve entrar no repositório ou no build
+do client. Gere e guarde essa chave em um gerenciador de segredos sob seu controle.
+Nenhuma variável foi criada ou alterada nesta implementação local.
+
+Ao publicar futuramente, configure essa chave apenas no serviço do servidor e
+revise o lifecycle do prefixo privado `copa-accounts/`. O restante usa as quatro
+variáveis R2 já existentes. Não há migration PostgreSQL. A criação inicial do
+registro reserva somente `Riquelme`; isso não escreve no bucket antes do primeiro
+uso real após a publicação.
+
+No painel, informe a chave administrativa e escolha: listar; reservar até100
+nicknames por operação; liberar reservas ainda sem senha; desativar/reativar
+contas; ou emitir recuperação para um titular validado. Não é necessário editar
+código ou publicar novamente para essas operações. Contas registradas nunca são
+liberadas por expiração de sessão ou por remover uma reserva.
+
+Para ativar `Riquelme`, o administrador emite recuperação e entrega o código
+privadamente ao titular verificado. O participante abre `/copa-conta.html`, informa
+o código e define sua própria senha Copa. O código vale24horas e é de uso único.
+Emitir recuperação suspende o login anterior e revoga as sessões; definir a nova
+senha reativa a conta. A chave do administrador fica somente na memória do painel.
+
+Sair revoga o token corrente e encerra as abas que compartilham essa sessão.
+Outros dispositivos com sessões diferentes permanecem até saírem ou até o
+administrador revogar/desativar a conta. A invalidação local encerra conexões
+correspondentes imediatamente; uma verificação a cada30segundos também aplica
+expiração/revogação entre instâncias. Fechar o navegador não revoga o token,
+mas fecha as conexões e remove a presença online. Sessão persistente não mantém
+um jogador artificialmente conectado.

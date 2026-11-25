@@ -251,13 +251,18 @@ class RoomsPanel extends PSRoomPanel {
 				<i class="fa fa-caret-right" aria-hidden></i> {TL`[Hide]`}
 			</button>
 			<div class="roomcounters">
-				<a class="button" href="users" title={TL`Find an online user`}>
+				{Config.copaRinhaLocalNames ? <button
+					class="button copa-online-counter" data-href="copaonline"
+					title="Ver usuários online"
+				>
+					<strong>{window.CopaRinhaPresence?.snapshot?.total ?? '–'}</strong> conectados
+				</button> : <a class="button" href="users" title={TL`Find an online user`}>
 					<span
 						class={`pixelated usercount${Dex.afdMode === true ? ' afd' : ''}`}
 						title={TL`Meloetta is PS's mascot! The Aria forme is about using its voice, and represents our chatrooms.`}
 					></span>
 					<strong>{rooms.userCount || '-'}</strong> {TL`users online`}
-				</a> {}
+				</a>} {}
 				<a class="button" href="battles" title={TL`Watch an active battle`}>
 					<span
 						class={`pixelated battlecount${Dex.afdMode ? ' afd' : ''}`}

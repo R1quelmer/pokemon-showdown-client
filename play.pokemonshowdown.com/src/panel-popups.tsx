@@ -335,6 +335,57 @@ class UserPanel extends PSRoomPanel<UserRoom> {
 	}
 }
 
+/** Copa presence uses the native popup, avatar and challenge/profile routes. */
+class CopaOnlinePanel extends PSRoomPanel {
+	static readonly id = 'copaonline';
+	static readonly routes = ['copaonline'];
+	static readonly location = 'modal-popup';
+	override componentDidMount() {
+		super.componentDidMount();
+		window.CopaRinhaPresence?.refresh();
+	}
+	override render() {
+		const presence = window.CopaRinhaPresence;
+		const snapshot = presence?.snapshot;
+		return <PSPanelWrapper room={this.props.room} width={460}><div class="pad copa-online">
+			<h3>Usuários online</h3>
+			{!Config.copaRinhaLocalNames ? <p>Disponível no client Copa Rinha.</p> : <>
+				<p class="copa-online-summary" role="status">
+					{snapshot ? `${snapshot.total} conectados · ${snapshot.users.length} jogadores identificados` :
+					presence?.state === 'offline' ? 'Sem conexão. A lista será atualizada ao reconectar.' :
+					presence?.state === 'unavailable' ? 'Lista indisponível. Tente atualizar novamente.' : 'Atualizando usuários…'}</p>
+				{snapshot && <>
+					<ul class="copa-online-list">{snapshot.users.map(user => {
+						const id = toID(user.name);
+						return <li key={id}>
+							<img src={Dex.resolveAvatar(user.avatar, id)} alt="" width={40} height={40} />
+							<div class="copa-online-player">
+								<button class="button" data-href={`user-${id}`}>{user.name}</button>
+								<small>
+									{user.statusType === 'idle' ? 'Ausente' : user.statusType === 'busy' ? 'Ocupado' : 'Online'}
+									{id === PS.user.userid ? ' · Você' : ''}</small>
+								{user.status && <p>{user.status.replace(/^!/, '')}</p>}
+							</div>
+							<button
+								class="button" data-href={`challenge-${id}`}
+								disabled={!PS.user.named || id === PS.user.userid}
+							>Desafiar</button>
+						</li>;
+					})}</ul>
+					{!snapshot.users.length && <p>Nenhum jogador identificado online.</p>}
+					<p class="copa-online-guests">{snapshot.guests} visitantes anônimos</p>
+					<small>Visitantes representam sessões anônimas; abas diferentes podem pertencer à mesma pessoa.</small>
+				</>}
+				<p class="buttonbar">
+					<button class="button" onClick={() => presence?.refresh()} disabled={presence?.pending}>Atualizar</button>
+					<button class="button" name="closeRoom">Fechar</button>
+				</p>
+			</>}
+		</div></PSPanelWrapper>;
+	}
+}
+PS.addRoomType(CopaOnlinePanel);
+
 const USER_PUNISHMENTS = {
 	mute: { label: 'Mute', duration: '7 minutes', scope: 'room' },
 	hourmute: { label: 'Hourmute', duration: '1 hour', scope: 'room' },
@@ -724,7 +775,7 @@ class OptionsPanel extends PSRoomPanel {
 					src={Dex.resolveAvatar(`${PS.user.avatar}`, PS.user.name)} data-href="avatars"
 				/> {}
 				<strong>{PS.user.name}</strong>
-				{Config.copaRinhaLocalNames && <small style="display:block">Apelido local · sem autenticação oficial</small>}
+				{Config.copaRinhaLocalNames && <small style="display:block">Conta Copa Rinha · autenticação local</small>}
 				<StatusEditor />
 			</p>
 
@@ -958,6 +1009,13 @@ class LoginPanel extends PSRoomPanel {
 	}
 	handleSubmit = (ev: Event) => {
 		ev.preventDefault();
+		if (Config.copaRinhaLocalNames && window.CopaAccounts) {
+			const password = this.base!.querySelector<HTMLInputElement>('input[name=copapassword]')!;
+			void window.CopaAccounts.authenticate('login', this.getUsername(), password.value);
+			password.value = '';
+			return;
+		}
+
 		const passwordBox = this.base!.querySelector<HTMLInputElement>('input[name=password]');
 		if (passwordBox) {
 			PS.user.changeNameWithPassword(this.getUsername(), passwordBox.value);
@@ -993,8 +1051,8 @@ class LoginPanel extends PSRoomPanel {
 		const loginState = room.args as PSLoginState;
 		if (Config.copaRinhaLocalNames) {
 			return <PSPanelWrapper room={room} width={320}><div class="pad">
-				<h3>Escolher nome</h3>
-				<p>Nomes locais não têm autenticação segura. Outra pessoa que conheça o servidor pode usar este nome.</p>
+				<h3>Conta Copa Rinha</h3>
+				<p>Conta exclusiva da Copa Rinha. Não reutilize sua senha do Pokémon Showdown ou de outros sites.</p>
 				<form onSubmit={this.handleSubmit}>
 					{loginState?.error && <p class="error">{loginState.error}</p>}
 					<p><label class="label">
@@ -1004,7 +1062,22 @@ class LoginPanel extends PSRoomPanel {
 							onInput={this.update} onChange={this.update} value={this.getUsername()} disabled={!!PS.user.loggingIn}
 						/>
 					</label></p>
+					{window.CopaAccounts && <p><a href="/copa-conta.html" target="_blank" rel="noopener noreferrer">
+						Recuperação administrativa de conta
+					</a></p>}
+					{window.CopaAccounts && <p><label class="label">Senha Copa Rinha {}
+						<input
+							class="textbox" type="password" name="copapassword" autocomplete="current-password"
+							minLength={10} maxLength={128} required
+						/>
+					</label></p>}
 					<p class="buttonbar">
+						{window.CopaAccounts && <button
+							type="button" class="button" disabled={!!PS.user.loggingIn} onClick={() => {
+								const input = this.base!.querySelector<HTMLInputElement>('input[name=copapassword]')!;
+								void window.CopaAccounts!.authenticate('register', this.getUsername(), input.value); input.value = '';
+							}}
+						>Registrar conta</button>}
 						<button type="submit" class="button" disabled={!!PS.user.loggingIn}>
 							{PS.user.loggingIn ? 'Entrando...' : 'Entrar'}
 						</button> {}
@@ -1224,7 +1297,7 @@ class ChangePasswordPanel extends PSRoomPanel {
 		if (Config.copaRinhaLocalNames) {
 			return <PSPanelWrapper room={room} width={320}><div class="pad">
 				<h3>Identificação da Copa Rinha</h3>
-				<p>Este client usa apelidos locais e não solicita senhas de contas do Showdown.</p>
+				<p>Use sua conta exclusiva da Copa Rinha. Nunca informe aqui sua senha do Showdown.</p>
 				<button class="button" data-href="login">Escolher nome</button>
 			</div></PSPanelWrapper>;
 		}
@@ -1328,7 +1401,7 @@ class RegisterPanel extends PSRoomPanel {
 		if (Config.copaRinhaLocalNames) {
 			return <PSPanelWrapper room={room} width={320}><div class="pad">
 				<h3>Identificação da Copa Rinha</h3>
-				<p>Este client usa apelidos locais e não solicita senhas de contas do Showdown.</p>
+				<p>Use sua conta exclusiva da Copa Rinha. Nunca informe aqui sua senha do Showdown.</p>
 				<button class="button" data-href="login">Escolher nome</button>
 			</div></PSPanelWrapper>;
 		}

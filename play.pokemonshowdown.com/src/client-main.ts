@@ -875,6 +875,7 @@ class PSUser extends PSStreamModel<PSLoginState | null> {
 		}
 	}
 	logOut() {
+		if (Config.copaRinhaLocalNames && window.CopaAccounts) { void window.CopaAccounts.logout(); return; }
 		if (Config.copaRinhaLocalNames) CopaRinhaLocalNames.forget();
 		PSLoginServer.query(
 			'logout', { userid: this.userid }

@@ -183,6 +183,7 @@ export class PSConnection {
 	private markDisconnected() {
 		this.connected = false;
 		if (Config.copaRinhaLocalNames) CopaRinhaLocalNames.disconnect();
+		if (Config.copaRinhaLocalNames) window.CopaRinhaPresence?.disconnect();
 		PS.isOffline = true;
 		this.socket = null;
 		for (const roomid in PS.rooms) {
@@ -207,6 +208,7 @@ export class PSConnection {
 		this.lastReceiveTime = Date.now();
 
 		if (PS.prefs.avatar) PS.send(`/avatar ${PS.prefs.avatar},1`);
+		if (Config.copaRinhaLocalNames) window.CopaRinhaPresence?.refresh();
 		const queue = this.queue;
 		this.queue = [];
 		for (const msg of queue) this.send(msg);
