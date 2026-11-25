@@ -488,3 +488,19 @@ html.copa-rinha .copa-home-loading>.mainmenufooter {order:2;position:static;padd
 	width: 100%;
 	min-height: 12em;
 }
+
+html.copa-rinha .copa-counters {
+  display:grid;
+  grid-template-columns:minmax(28px,46px) repeat(2,minmax(0,118px)) minmax(28px,46px);
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  margin:12px auto 15px;
+}
+html.copa-rinha .copa-counters .button {box-sizing:border-box;width:100%;margin:0}
+html.copa-rinha .copa-mascot {width:100%;height:46px;object-fit:contain;image-rendering:pixelated;touch-action:manipulation}
+html.copa-rinha .mainmenu-left .copa-counters {padding-inline:10px}
+html.copa-rinha .copa-updates ul {list-style:none;margin:6px 0;padding:0}
+html.copa-rinha .copa-updates li + li {margin-top:7px}
+html.copa-rinha .copa-updates time {font-size:11px;color:var(--copa-text)}
+html.copa-rinha .copa-updates summary {cursor:pointer;color:var(--copa-cyan)}

@@ -73,7 +73,7 @@ const wallpaperPath = path.join(root,'fx/client-bg-horizon.jpg');
    assert.equal(await page.evaluate(()=>localStorage.getItem('showdown_bg')),'solidblue');
    assert.equal(await home.evaluate(el=>getComputedStyle(el).backgroundImage),'none');
    for(const href of ['ladder','view-tournaments-all','resources','rooms'])assert.equal(await home.locator(`a[href="${href}"]`).count(),0);
-   for(const href of ['teambuilder','battles','users','copamembers','lobby'])assert.equal(await home.locator(`a[href="${href}"]`).count(),1);
+   for(const href of ['teambuilder','battles','users','copamembers','lobby'])assert.equal(await home.locator(`.menugroup a[href="${href}"]`).count(),1);
    assert.equal(await home.locator('a[href="view-friends-all"]').count(),0);
    assert.equal(await page.locator('#fixture-ad').count(),0);assert.equal(await page.evaluate(()=>!!window.fixtureAdMounted),false);
    assert.deepEqual(await home.locator('.mainmenu-footer a').evaluateAll(links=>links.map(a=>({label:a.textContent,path:new URL(a.href).pathname}))),[{label:'Replays',path:'/replay.html'}]);
@@ -84,12 +84,38 @@ const wallpaperPath = path.join(root,'fx/client-bg-horizon.jpg');
    const minimize=news.locator('.minimizebutton');
    if(width<628)await minimize.click();
    assert.deepEqual(await news.getByRole('heading',{level:4}).allTextContents(),
-    ['Copa Rinha II','Fase de testes','Personalize seu avatar','Treinamento contra bots']);
-   assert.equal(await news.locator('time').getAttribute('datetime'),'2026-12-05T20:00:00-03:00');
+    ['Copa Rinha II','Fase de testes','Personalize seu avatar','Treinamento contra bots','Últimas atualizações']);
+   assert.equal(await news.locator('time').first().getAttribute('datetime'),'2026-12-05T20:00:00-03:00');
    assert.equal(await news.getByRole('link',{name:'Lista de avatares disponíveis'}).getAttribute('href'),
     'https://play.pokemonshowdown.com/sprites/trainers/');
    assert((await news.textContent()).includes('independentes das contas oficiais'));
    assert.equal(await news.getByRole('timer').textContent(),'1 dia · 1 hora · 1 minuto · 5 segundos');
+   const updates=news.locator('.copa-updates');
+   assert.equal(await updates.locator('li:visible').count(),3);
+   await updates.locator('summary').click();
+   assert.equal(await updates.locator('li:visible').count(),6);
+   await updates.locator('summary').click();
+   const counters=home.locator('.copa-counters').or(page.locator('#room-rooms .copa-counters')).locator('visible=true').first();
+   assert.equal(await counters.count(),1);
+   assert(await counters.locator('.copa-mascot').evaluateAll(sprites=>sprites.every(sprite=>sprite.complete&&sprite.naturalWidth)));
+   await page.evaluate(()=>PS.prefs.set('noanim',false));
+   for(const sprite of await counters.locator('.copa-mascot').all()){
+    const hops=await sprite.evaluate((element,mobile)=>{
+     const eventType=mobile?'pointerup':'pointerenter';
+     const event=new PointerEvent(eventType,{pointerType:mobile?'touch':'mouse'});
+     const idle=element.getAnimations().length;
+     element.dispatchEvent(event);
+     const animation=element.getAnimations()[0];
+     const iterations=animation?.effect.getTiming().iterations;
+     animation?.cancel();
+     PS.prefs.set('noanim',true);
+     element.dispatchEvent(event);
+     const disabled=element.getAnimations().length;
+     PS.prefs.set('noanim',false);
+     return [idle,iterations,disabled];
+    },width<628);
+    assert.deepEqual(hops,[0,3,0]);
+   }
    await page.evaluate(()=>PSView.scrollToRoom());
    await news.scrollIntoViewIfNeeded();
    assert.equal(await news.locator('.mini-window-header').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(21, 36, 56)');

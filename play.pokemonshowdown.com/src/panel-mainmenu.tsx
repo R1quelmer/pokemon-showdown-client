@@ -7,6 +7,7 @@
 
 import preact from "../js/lib/preact";
 import { PSLoginServer } from "./client-connection";
+import { COPA_UPDATES } from "./copa-updates";
 import { CopaRinhaLocalNames } from "./copa-rinha";
 import { PSBackground } from "./client-core";
 import {
@@ -453,6 +454,7 @@ export class MainMenuRoom extends PSRoom {
 				response.official = null;
 			}
 			this.roomsCache = response;
+			if (Config.copaRinhaLocalNames) this.update(null);
 			const roomsRoom = PS.rooms[`rooms`] as RoomsRoom;
 			if (roomsRoom) roomsRoom.update(null);
 			break;
@@ -551,6 +553,45 @@ class CopaCountdown extends preact.Component<object, { seconds: number }> {
 	}
 }
 
+function CopaUpdateList({ entries }: { entries: typeof COPA_UPDATES }) {
+	return <ul>{entries.map(({ date, text }) => <li key={text}>
+		<time dateTime={date}>{date.split('-').reverse().join('/')}</time>
+		<div>{text}</div>
+	</li>)}</ul>;
+}
+
+function hopCopaMascot(event: PointerEvent) {
+	if (PS.prefs.noanim || PS.prefs.nogif || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+	const sprite = event.currentTarget as HTMLImageElement;
+	if (sprite.getAnimations().length) return;
+	sprite.animate([
+		{ transform: 'translateY(0)', easing: 'ease-out' },
+		{ transform: 'translateY(-9px)', easing: 'ease-in' },
+		{ transform: 'translateY(0)' },
+	], { duration: 260, iterations: 3 });
+}
+
+function CopaMascot({ name }: { name: 'sylveon' | 'poliwhirl' }) {
+	return <img
+		class="copa-mascot" src={`assets/copa-rinha/mascotes/${name}.png`} alt="" draggable={false}
+		onPointerEnter={event => { if (event.pointerType === 'mouse') hopCopaMascot(event); }}
+		onPointerUp={event => { if (event.pointerType === 'touch' || event.pointerType === 'pen') hopCopaMascot(event); }}
+	/>;
+}
+
+export function CopaCounters() {
+	return <div class="roomcounters copa-counters">
+		<CopaMascot name="sylveon" />
+		<button class="button copa-online-counter" data-href="copaonline" title="Ver usuários online">
+			<strong>{window.CopaRinhaPresence?.snapshot?.total ?? '–'}</strong> conectados
+		</button>
+		<a class="button" href="battles" title={TL`Watch an active battle`}>
+			<strong>{PS.mainmenu.roomsCache.battleCount || '-'}</strong> {TL`active battles`}
+		</a>
+		<CopaMascot name="poliwhirl" />
+	</div>;
+}
+
 function CopaNews() {
 	return <div class="readable-bg copa-news">
 		<section class="newsentry">
@@ -577,6 +618,14 @@ function CopaNews() {
 			<p>
 				Para jogar contra o bot de treinamento, basta marcar a opção de pareamento contra bots e iniciar uma busca de batalha.
 			</p>
+		</section>
+		<section class="newsentry copa-updates">
+			<h4>Últimas atualizações</h4>
+			<CopaUpdateList entries={COPA_UPDATES.slice(0, 3)} />
+			{COPA_UPDATES.length > 3 && <details>
+				<summary>Mais atualizações</summary>
+				<CopaUpdateList entries={COPA_UPDATES.slice(3)} />
+			</details>}
 		</section>
 		<div class="newsentry">
 			<p><small>As contas da Copa Rinha são independentes das contas oficiais do Pokémon Showdown.</small></p>
@@ -851,6 +900,7 @@ class MainMenuPanel extends PSRoomPanel<MainMenuRoom> {
 			{!copa && miniWindows}
 			<div class={`mainmenu${tinyLayout}`}>
 				<div class="mainmenu-left">
+					{copa && !PS.leftPanelWidth && <CopaCounters />}
 					{this.renderGames()}
 
 					{this.renderSearchButton()}

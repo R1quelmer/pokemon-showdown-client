@@ -1,0 +1,3 @@
+Sprites estáticos da pasta gen5 do Pokémon Showdown, com recorte das margens transparentes. Pokémon e seus sprites pertencem aos respectivos titulares.
+
+Fonte dos arquivos originais: https://github.com/MasterTernimus/PokemonShowdown-Client/tree/0d2cfb8f2300eb630b1fc3e47ce1572fed59aa57/play.pokemonshowdown.com/sprites/gen5

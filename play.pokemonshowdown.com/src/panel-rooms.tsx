@@ -7,7 +7,7 @@
 
 import { Config, PS, PSRoom, type RoomID, type RoomOptions } from "./client-main";
 import { PSPanelWrapper, PSRoomPanel } from "./panels";
-import type { RoomInfo } from "./panel-mainmenu";
+import { CopaCounters, type RoomInfo } from "./panel-mainmenu";
 import { Dex, TL, toID } from "./battle-dex";
 
 const ROOM_ALIASES: Record<string, string> = {
@@ -250,19 +250,14 @@ class RoomsPanel extends PSRoomPanel {
 			<button class="button" style="float:right;font-size:10pt;margin-top:3px" onClick={this.hide}>
 				<i class="fa fa-caret-right" aria-hidden></i> {TL`[Hide]`}
 			</button>
-			<div class="roomcounters">
-				{Config.copaRinhaLocalNames ? <button
-					class="button copa-online-counter" data-href="copaonline"
-					title="Ver usuários online"
-				>
-					<strong>{window.CopaRinhaPresence?.snapshot?.total ?? '–'}</strong> conectados
-				</button> : <a class="button" href="users" title={TL`Find an online user`}>
+			{Config.copaRinhaLocalNames ? <CopaCounters /> : <div class="roomcounters">
+				<a class="button" href="users" title={TL`Find an online user`}>
 					<span
 						class={`pixelated usercount${Dex.afdMode === true ? ' afd' : ''}`}
 						title={TL`Meloetta is PS's mascot! The Aria forme is about using its voice, and represents our chatrooms.`}
 					></span>
 					<strong>{rooms.userCount || '-'}</strong> {TL`users online`}
-				</a>} {}
+				</a> {}
 				<a class="button" href="battles" title={TL`Watch an active battle`}>
 					<span
 						class={`pixelated battlecount${Dex.afdMode ? ' afd' : ''}`}
@@ -270,7 +265,7 @@ class RoomsPanel extends PSRoomPanel {
 					></span>
 					<strong>{rooms.battleCount || '-'}</strong> {TL`active battles`}
 				</a>
-			</div>
+			</div>}
 			{!Config.copaRinhaLocalNames && !!PS.leftPanelWidth && Config.includes?.roomlistTopHTML && (
 				<div dangerouslySetInnerHTML={{ __html: Config.includes.roomlistTopHTML }} />
 			)}

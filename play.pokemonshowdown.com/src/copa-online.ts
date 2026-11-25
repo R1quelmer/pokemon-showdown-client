@@ -81,6 +81,7 @@ export const CopaRinhaPresence = new class {
 		return members.sort((a, b) => a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' }));
 	}
 	private notify() {
+		PS.mainmenu.update(null);
 		PS.rooms['rooms']?.update(null);
 		PS.rooms['copaonline']?.update(null);
 		PS.rooms['copamembers']?.update(null);
