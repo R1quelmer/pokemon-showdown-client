@@ -69,11 +69,20 @@ const normalize = name => name.toLowerCase().replace(/[^a-z0-9]/g, '');
   const page=await ctx.newPage();page.on('pageerror',error=>errors.push(error.message));
   await page.goto(origin+'/copa-rinha.html');
   await page.waitForFunction(()=>window.PS?.connection?.connected && !PS.user.initializing);
+  if(process.env.COPA_SCREENSHOTS && !state){
+   await page.locator('input[name=username]').waitFor();
+   await fs.mkdir(process.env.COPA_SCREENSHOTS,{recursive:true});
+   await page.evaluate(()=>document.fonts.ready);
+   await page.screenshot({path:path.join(process.env.COPA_SCREENSHOTS,`accounts-${width}.png`),fullPage:true});
+  }
   return {ctx,page};
  }
- const named=page=>page.waitForFunction(()=>PS.user.name==='Account QA' && !PS.user.loggingIn);
+ const named=page=>page.waitForFunction(()=>window.PS?.user?.name==='Account QA' && !PS.user.loggingIn);
  try {
   const a=await context();
+  if(process.env.COPA_SCREENSHOTS){await fs.mkdir(process.env.COPA_SCREENSHOTS,{recursive:true});await a.page.screenshot({path:path.join(process.env.COPA_SCREENSHOTS,'accounts-1440.png'),fullPage:true});}
+  assert.equal(await a.page.locator('.copa-quicklinks a[href="/team.html"]').count(),0);
+  assert.equal(await a.page.locator('.copa-quicklinks a[href="/replay.html"]').first().getAttribute('target'),'_blank');
   await a.page.locator('input[name=username]').fill('Account QA');
   await a.page.locator('input[name=copapassword]').fill(password);
   await a.page.getByRole('button',{name:'Registrar conta',exact:true}).click();await named(a.page);
@@ -81,6 +90,11 @@ const normalize = name => name.toLowerCase().replace(/[^a-z0-9]/g, '');
   const state=await a.ctx.storageState();assert(state.origins[0].localStorage.some(item=>item.name===key));
   await a.page.evaluate(()=>{window.logoNavigationSentinel=true;PS.join('teambuilder');});
   await a.page.locator('a.copa-brand').first().click();assert(await a.page.evaluate(()=>logoNavigationSentinel && PS.user.name==='Account QA'));
+  // Leaving for a standalone page and returning restores the account from its token.
+  await a.page.goto(origin+'/team.html');
+  await a.page.locator('.wordmark').click();await named(a.page);
+  await a.page.goto(origin+'/replay.html');
+  await a.page.locator('.wordmark').click();await named(a.page);
   const b=await a.ctx.newPage();b.on('pageerror',error=>errors.push(error.message));await b.goto(origin+'/copa-rinha.html');await named(b);
   assert.equal(online.size,1);assert.equal(online.get('accountqa').size,2);
   await a.page.reload();await named(a.page);assert.equal(online.size,1);
@@ -88,7 +102,9 @@ const normalize = name => name.toLowerCase().replace(/[^a-z0-9]/g, '');
   transports.get(oldChallenge.split('|')[1])();
   await a.page.waitForFunction(old=>PS.user.challstr!==old && PS.user.name==='Account QA' && !PS.user.loggingIn,oldChallenge);
   assert.equal(online.size,1,'reconnection keeps one account online');
-  const intruder=await context(undefined,390);await intruder.page.locator('input[name=username]').fill('Account QA');
+  const intruder=await context(undefined,390);
+  if(process.env.COPA_SCREENSHOTS)await intruder.page.screenshot({path:path.join(process.env.COPA_SCREENSHOTS,'accounts-390.png'),fullPage:true});
+  await intruder.page.locator('input[name=username]').fill('Account QA');
   await intruder.page.locator('input[name=copapassword]').fill('wrong-password-value');await intruder.page.getByRole('button',{name:'Entrar',exact:true}).click();
   await intruder.page.getByText('Nickname ou senha incorretos.',{exact:true}).waitFor();assert.equal(await intruder.page.evaluate(()=>PS.user.named),false);
   await intruder.page.getByRole('button',{name:'Registrar conta',exact:true}).click();await intruder.page.getByText('Nickname registrado ou reservado.',{exact:true}).waitFor();
@@ -103,6 +119,14 @@ const normalize = name => name.toLowerCase().replace(/[^a-z0-9]/g, '');
   assert.equal(await resumed.page.evaluate(key=>localStorage.getItem(key),key),null);
   const expired=await context(state);await expired.page.getByText('Sessão inválida ou expirada.',{exact:true}).waitFor();
   assert.equal(await expired.page.evaluate(()=>PS.user.named),false);
+  assert.equal(await expired.page.evaluate(key=>localStorage.getItem(key),key),null,'revoked tokens are discarded');
+  // Logout also works when revocation happened while the browser remained open.
+  await intruder.page.locator('input[name=copapassword]').fill(password);
+  await intruder.page.getByRole('button',{name:'Entrar',exact:true}).click();await named(intruder.page);
+  sessions.clear();
+  await intruder.page.evaluate(()=>PS.user.logOut());
+  await intruder.page.waitForFunction(()=>!PS.connection.connected && !PS.user.named);
+  assert.equal(await intruder.page.evaluate(key=>localStorage.getItem(key),key),null);
   assert(!wire.some(message=>message.includes(password)), 'password never enters Showdown wire');
   for(const token of sessions.keys())assert(!wire.some(message=>message.includes(token)),'session token never enters Showdown wire');
   await expired.page.goto(origin+'/copa-admin.html');

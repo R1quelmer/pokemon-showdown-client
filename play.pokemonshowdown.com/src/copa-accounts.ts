@@ -10,6 +10,10 @@ interface Session {
 	token: string;
 	expires: number;
 }
+class CopaAccountError extends Error {
+	readonly status: number;
+	constructor(message: string, status: number) { super(message); this.status = status; }
+}
 declare global {
 	interface Window {
 		CopaAccounts?: typeof CopaAccounts;
@@ -32,7 +36,7 @@ export const CopaAccounts = new class {
 			body: JSON.stringify(data), signal: AbortSignal.timeout(15000) });
 		const result = await response.json();
 		if (!response.ok)
-			throw new Error(result.error || 'Contas temporariamente indisponíveis.');
+			throw new CopaAccountError(result.error || 'Contas temporariamente indisponíveis.', response.status);
 		return result;
 	}
 	async resume() {
@@ -91,16 +95,25 @@ export const CopaAccounts = new class {
 			CopaRinhaLocalNames.timer = setTimeout(() => CopaRinhaLocalNames.reject('O servidor não confirmou a conta.'), 15000);
 			PS.send(`/trn ${grant.name},0,copa`);
 		} catch (error) {
-			if (generation === this.generation)
+			if (generation === this.generation) {
+				// A rejected token cannot be resumed. Network/storage outages keep it for retry.
+				if (error instanceof CopaAccountError && error.status === 401 && this.read()?.token === session.token) {
+					localStorage.removeItem(storageKey);
+				}
 				CopaRinhaLocalNames.reject(error instanceof Error ? error.message : 'Falha ao recuperar a conta.');
+			}
 		}
 	}
 	disconnect() { this.generation++; }
 	async logout() {
 		const session = this.read();
 		try {
-			if (session)
-				await this.request('logout', {}, session.token);
+			if (session) {
+				try { await this.request('logout', {}, session.token); } catch (error) {
+					// 401 confirms that the server has already invalidated this session.
+					if (!(error instanceof CopaAccountError) || error.status !== 401) throw error;
+				}
+			}
 			localStorage.removeItem(storageKey);
 			CopaRinhaLocalNames.forget();
 			this.disconnect();
