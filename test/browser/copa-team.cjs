@@ -132,6 +132,10 @@ const team = {id, schemaVersion: 1, name: '<img src=x onerror=alert(1)> Shared',
 			assert.equal(await page.locator('.pokemon-build').count(), 6);
 			const images = await assertSpriteElementsLoaded(page, '.pokemon-sprite');
 			assert.equal(images.length, 6);
+			assert(images.every(image => image.url.endsWith('.gif')), 'all six forms use available animations');
+			assert(images.some(image => image.url.includes('/sprites/za/front/')), 'custom ZA retains priority');
+			assert(images.some(image => image.url.includes('/gen5ani/clefairy.gif')), 'BW animations are preferred');
+			assert(images.some(image => image.url.includes('/ani/kingambit.gif')), 'native newer animation is the fallback');
 			assert.deepEqual(await page.locator('.pokemon-export code').allTextContents(), expectedBuilds);
 			assert.equal(await page.locator('.pokemon-build dl, #team-export').count(), 0);
 			assert.equal(await page.locator('.pokemon-build img').count(), 6);
@@ -155,6 +159,22 @@ const team = {id, schemaVersion: 1, name: '<img src=x onerror=alert(1)> Shared',
 				await documentFonts(page);
 			}
 			if (process.env.COPA_SCREENSHOTS) await page.screenshot({path:path.join(process.env.COPA_SCREENSHOTS, `team-${width}.png`), fullPage:true});
+			const variants = await page.evaluate(() => {
+				BattlePokemonSpritesBW.pikachu = {front: {w:40,h:40}, frontf: {w:40,h:40}};
+				return [Dex.getSpriteData('Pikachu',true,{gen:5,shiny:true,gender:'F'}).url,
+					Dex.getSpriteData('Landorus-Therian',true,{gen:5}).url];
+			});
+			assert(variants[0].endsWith('/gen5ani-shiny/pikachu-f.gif'));
+			assert(variants[1].endsWith('/gen5ani/landorus-therian.gif'));
+			if (width === 1440) {
+				const block = route => route.abort();
+				await page.route('**/sprites/gen5ani/clefairy.gif', block);
+				await page.reload();
+				await page.waitForFunction(() => document.getElementById('team-status').textContent === 'Time carregado.');
+				await assertSpriteElementsLoaded(page, '.pokemon-sprite');
+				assert((await page.locator('.pokemon-sprite').nth(3).getAttribute('src')).endsWith('/gen5/clefairy.png'));
+				await page.unroute('**/sprites/gen5ani/clefairy.gif', block);
+			}
 			await page.locator('#import-team').click();
 			await page.waitForFunction(() => window.PS?.teams?.list.length === 1 && location.hash.startsWith('#team-'));
 			assert.equal(await page.evaluate(() => PS.teams.list[0].format), 'gen9coparinhanationaldexza');

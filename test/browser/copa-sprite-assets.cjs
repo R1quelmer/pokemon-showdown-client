@@ -48,6 +48,22 @@ async function loadSprite(relativePath) {
 async function serveNativeSprite(route) {
 	const url = new URL(route.request().url());
 	if (url.hostname !== 'play.pokemonshowdown.com') return false;
+	// Build native sprite metadata from real, hash-verified fixture GIF dimensions.
+	// The production page loads the upstream metadata, just like the native client.
+	if (/^\/data\/pokedex-mini(?:-bw)?\.js$/.test(url.pathname)) {
+		const bw = url.pathname.endsWith('-bw.js');
+		const data = {};
+		for (const relative of Object.keys(manifest.assets)) {
+			if (!relative.startsWith(bw ? 'gen5ani/' : 'ani/') || !relative.endsWith('.gif')) continue;
+			const bytes = await loadSprite(relative);
+			if (bytes.toString('ascii', 0, 3) !== 'GIF') continue;
+			const id = path.basename(relative, '.gif').replace(/[^a-z0-9]/g, '');
+			data[id] = {front: {w: bytes.readUInt16LE(6), h: bytes.readUInt16LE(8)}};
+		}
+		await route.fulfill({contentType: 'text/javascript', body:
+			`window.${bw ? 'BattlePokemonSpritesBW' : 'BattlePokemonSprites'}=${JSON.stringify(data)};`});
+		return true;
+	}
 	const relativePath = decodeURIComponent(url.pathname).replace(/^\/sprites\//, '');
 	if (!url.pathname.startsWith('/sprites/') || !manifest.assets[relativePath]) return false;
 	const body = await loadSprite(relativePath);

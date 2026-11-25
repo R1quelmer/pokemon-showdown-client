@@ -202,6 +202,15 @@
       "source": "https://raw.githubusercontent.com/smogon/sprites/ee5a2c2d23e4455482e5b831aee6041320934c01/src/_uncategorized/canonical/ui/types/gen9/icon/Dark.png",
       "canonicalPath": "src/_uncategorized/canonical/ui/types/gen9/icon/Dark.png",
       "note": "Canonical Gen 9 icon fixture; official CDN bytes cannot be compared in the offline browser environment."
+    },
+    "trainers/lucas.png": {
+      "gitBlob": "5ee64322fd17cbdbe0fd488dddeb5b67f096b334"
+    },
+    "trainers/ethan.png": {
+      "gitBlob": "ae43be886757ca985b1fada3d48a2c2c35e26f56"
+    },
+    "trainers/dawn.png": {
+      "gitBlob": "effe95b70a0bc52ebe01f00d46ad18ce74f1875d"
     }
   }
 }

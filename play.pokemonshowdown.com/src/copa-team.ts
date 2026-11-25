@@ -24,10 +24,21 @@ function renderCopaTeam(shared: CopaSharedTeam) {
 		const article = node('article'); article.className = 'pokemon-build';
 		article.setAttribute('aria-label', `Build de ${species.name}`);
 		const gender = ['M', 'F', 'N'].includes(set.gender || '') ? set.gender as Dex.GenderName : undefined;
-		const sprite = Dex.getSpriteData(species.name, true, { gen: 9, shiny: !!set.shiny, gender });
+		// BW pixel animations first, then the native newer animation/static fallback.
+		const gen = window.BattlePokemonSpritesBW?.[species.id]?.front ? 5 : 9;
+		const sprite = Dex.getSpriteData(species.name, true, { gen, shiny: !!set.shiny, gender });
 		const image = node('img'); image.className = 'pokemon-sprite'; image.src = sprite.url;
 		image.alt = `${species.name}${set.shiny ? ' shiny' : ''}`; image.width = sprite.w; image.height = sprite.h;
 		image.referrerPolicy = 'no-referrer';
+		const fallback = sprite.url.includes('/sprites/za/') ?
+			`${Dex.resourcePrefix}sprites/gen5${set.shiny ? '-shiny' : ''}/${species.spriteid}.png` :
+			sprite.url.replace(/\/(?:gen5)?ani(-shiny)?\/([^/]+)\.gif$/, '/gen5$1/$2.png');
+		image.onerror = () => {
+			// Preserve the resolved form, female suffix and shiny directory on a missing GIF.
+			if (image.src === new URL(fallback, location.href).href) { image.hidden = true; return; }
+			image.onerror = () => { image.hidden = true; };
+			image.src = fallback;
+		};
 		const build = node('pre'), code = node('code');
 		build.className = 'pokemon-export';
 		// The native exporter owns all values, optional fields and line ordering.
