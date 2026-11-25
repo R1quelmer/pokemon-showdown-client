@@ -123,11 +123,12 @@ export const PSBackground = new class extends PSStreamModel<string | null> {
 	attrib: { url: string, title: string, artist: string } | null = null;
 	changeCount = 0;
 	menuColors: string[] | null = null;
+	readonly storageKey = Config.copaRinhaLocalNames ? 'copa-rinha:background' : 'showdown_bg';
 
 	constructor() {
 		super();
 		try {
-			let bg = localStorage.getItem('showdown_bg')?.split('\n') || [''];
+			let bg = localStorage.getItem(this.storageKey)?.split('\n') || [Config.copaRinhaLocalNames ? 'copa-default' : ''];
 			if (bg.length === 1) {
 				// id
 				this.load('', bg[0]);
@@ -142,11 +143,11 @@ export const PSBackground = new class extends PSStreamModel<string | null> {
 	}
 	save(bgUrl: string) {
 		if (this.id !== 'custom') {
-			localStorage.setItem('showdown_bg', this.id);
+			localStorage.setItem(this.storageKey, this.id);
 		} else if (this.menuColors) {
-			localStorage.setItem('showdown_bg', bgUrl + '\n' + this.id + '\n' + this.menuColors.join('\n'));
+			localStorage.setItem(this.storageKey, bgUrl + '\n' + this.id + '\n' + this.menuColors.join('\n'));
 		} else {
-			localStorage.setItem('showdown_bg', bgUrl + '\n' + this.id);
+			localStorage.setItem(this.storageKey, bgUrl + '\n' + this.id);
 		}
 	}
 	set(bgUrl: string, bgid: string) {
@@ -155,6 +156,7 @@ export const PSBackground = new class extends PSStreamModel<string | null> {
 	}
 
 	load(bgUrl: string, bgid: string, menuColors: string[] | null = null) {
+		if (Config.copaRinhaLocalNames && bgid === 'copa-default') bgUrl = '#080f1b';
 		// id
 		this.id = bgid;
 
@@ -332,6 +334,14 @@ export const PSBackground = new class extends PSStreamModel<string | null> {
  *********************************************************************/
 
 PSBackground.subscribe(bgUrl => {
+	if (Config.copaRinhaLocalNames) {
+		if (bgUrl !== null) {
+			const background = bgUrl.startsWith('#') ? bgUrl :
+				`linear-gradient(#080f1bb3, #080f1bb3), url(${JSON.stringify(bgUrl)}) center / cover no-repeat #080f1b`;
+			document.documentElement.style.setProperty('--copa-home-wallpaper', background);
+		}
+		return;
+	}
 	if (!PSBackground.curId) {
 		document.body.style.background = '';
 		document.body.style.backgroundSize = '';

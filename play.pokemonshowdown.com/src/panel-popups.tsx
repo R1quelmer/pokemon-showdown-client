@@ -858,10 +858,13 @@ class OptionsPanel extends PSRoomPanel {
 			<p>
 				<label class="optlabel">
 					{TL.label(TL`Background`)}<button class="button" data-href="changebackground">
-						{TL`[Change background]`}
+						{Config.copaRinhaLocalNames ? 'Papel de parede da página inicial' : TL`[Change background]`}
 					</button>
 				</label>
 			</p>
+			{Config.copaRinhaLocalNames && <p>
+				<a href="/copa-creditos.html" target="_blank" rel="noopener">Créditos e licenças</a>
+			</p>}
 			<p>
 				<label class="checkbox"> <input
 					name="noanim" checked={PS.prefs.noanim || false} type="checkbox" onChange={this.handleOnChange}
@@ -1563,6 +1566,12 @@ class BackgroundListPanel extends PSRoomPanel {
 		const room = this.props.room;
 		const option = (val: string) => val === PSBackground.id ? 'option cur' : 'option';
 		return this.renderUpload() || <PSPanelWrapper room={room} width={480}><div class="pad">
+			{Config.copaRinhaLocalNames && <>
+				<p><strong>Papel de parede da página inicial</strong></p>
+				<p>A imagem fica somente no início e é salva neste navegador. As outras páginas mantêm o fundo escuro.</p>
+				<p><button onClick={this.setBg} value="copa-default" class="button">Restaurar fundo padrão</button></p>
+				<p><a href="/copa-creditos.html" target="_blank" rel="noopener">Créditos e licenças</a></p>
+			</>}
 			<p><strong>{TL`Default`}</strong></p>
 			<div class="bglist">
 				<button onClick={this.setBg} value="" class={option('')}>

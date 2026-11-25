@@ -370,3 +370,17 @@ html.copa-rinha .copa-online>small {color:var(--copa-muted)}
 html.copa-rinha .copa-online-avatar {position:relative;display:grid;place-items:center;width:40px;height:40px;color:var(--copa-muted);font-size:18px}
 html.copa-rinha .copa-online-avatar img {position:absolute;inset:0;background:var(--copa-surface)}
 @media(max-width:420px){html.copa-rinha .copa-online-avatar {width:32px}}
+
+/* Only Home paints the native background preference. Other room surfaces stay opaque. */
+html.copa-rinha [id="room-"] {background:var(--copa-home-wallpaper, var(--copa-page))}
+html.copa-rinha [id="room-"]>.mainmenu {position:relative;min-height:0;padding:0;display:grid;grid-template-columns:300px minmax(0,1fr)}
+html.copa-rinha .mainmenu-left {grid-column:1;grid-row:1;padding-bottom:0}
+html.copa-rinha .mainmenu-right {position:static;grid-column:1;grid-row:2;width:auto;padding-bottom:0}
+html.copa-rinha .mainmenu-mini-windows {position:static;grid-column:2;grid-row:1 / span 2;width:auto;min-height:0;padding:12px}
+html.copa-rinha .mainmenu-footer {position:static;grid-column:1 / -1;padding:16px 20px 22px;font-size:12px;letter-spacing:.5px}
+html.copa-rinha .mainmenu-footer>a {color:var(--copa-cyan)}
+html.copa-rinha .mainmenu.tiny-layout {display:block}
+html.copa-rinha .copa-home-loading {display:flex;flex-direction:column}
+html.copa-rinha .copa-home-loading>.mainmenu {order:0}
+html.copa-rinha .copa-home-loading>.mainmenu-mini-windows {order:1}
+html.copa-rinha .copa-home-loading>.mainmenufooter {order:2;position:static;padding:16px 20px}

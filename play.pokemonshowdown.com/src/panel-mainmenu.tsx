@@ -573,7 +573,7 @@ class MainMenuPanel extends PSRoomPanel<MainMenuRoom> {
 	override componentDidMount() {
 		super.componentDidMount();
 		this.subscribeTo(PSBackground);
-		Config.includes?.htmlDidMount?.();
+		if (!Config.copaRinhaLocalNames) Config.includes?.htmlDidMount?.();
 	}
 	override focus(options?: PSRoomFocusOptions) {
 		if (!options?.preventScroll) PSView.scrollToRoom();
@@ -643,6 +643,7 @@ class MainMenuPanel extends PSRoomPanel<MainMenuRoom> {
 	renderMiniRooms() {
 		return PS.miniRoomList.map(roomid => {
 			const room = PS.rooms[roomid]!;
+			if (Config.copaRinhaLocalNames && roomid === 'news' && !PS.newsHTML.trim()) return null;
 			const notifying = room.notifications.length ? ' notifying' : room.isSubtleNotifying ? ' subtle-notifying' : '';
 			return <div
 				class={`mini-window${room.minimized ? ' collapsed' : ''}${room === PS.room ? ' focused' : ''}`}
@@ -762,13 +763,16 @@ class MainMenuPanel extends PSRoomPanel<MainMenuRoom> {
 	override render() {
 		const onlineButton = ' button' + (PS.isOffline ? ' disabled' : '');
 		const tinyLayout = this.props.room.width < 620 ? ' tiny-layout' : '';
+		const copa = !!Config.copaRinhaLocalNames;
+		const miniRooms = this.renderMiniRooms().filter(Boolean);
+		const miniWindows = (!copa || miniRooms.length > 0) && <div class={`mainmenu-mini-windows${tinyLayout}`}>
+			{!copa && !PS.leftPanelWidth && Config.includes?.mainmenuHTML && (
+				<div dangerouslySetInnerHTML={{ __html: Config.includes.mainmenuHTML }} />
+			)}
+			{miniRooms}
+		</div>;
 		return <PSPanelWrapper room={this.props.room} onDragEnter={this.handleDragEnter}>
-			<div class={`mainmenu-mini-windows${tinyLayout}`}>
-				{!PS.leftPanelWidth && Config.includes?.mainmenuHTML && (
-					<div dangerouslySetInnerHTML={{ __html: Config.includes.mainmenuHTML }} />
-				)}
-				{this.renderMiniRooms()}
-			</div>
+			{!copa && miniWindows}
 			<div class={`mainmenu${tinyLayout}`}>
 				<div class="mainmenu-left">
 					{this.renderGames()}
@@ -777,15 +781,15 @@ class MainMenuPanel extends PSRoomPanel<MainMenuRoom> {
 
 					<div class="menugroup">
 						<p><a class="mainmenu2 mainmenu button" href="teambuilder">{TL`[Teambuilder]`}</a></p>
-						<p><a class={"mainmenu3 mainmenu" + onlineButton} href="ladder">{TL`Ladder`}</a></p>
-						<p><a class={"mainmenu4 mainmenu" + onlineButton} href="view-tournaments-all">{TL`Tournaments`}</a></p>
+						{!copa && <p><a class={"mainmenu3 mainmenu" + onlineButton} href="ladder">{TL`Ladder`}</a></p>}
+						{!copa && <p><a class={"mainmenu4 mainmenu" + onlineButton} href="view-tournaments-all">{TL`Tournaments`}</a></p>}
 					</div>
 
 					<div class="menugroup">
 						<p><a class={"mainmenu4 mainmenu" + onlineButton} href="battles">{TL`Watch a battle`}</a></p>
 						<p><a class={"mainmenu5 mainmenu" + onlineButton} href="users">{TL`Find a user`}</a></p>
 						<p><a class={"mainmenu6 mainmenu" + onlineButton} href="view-friends-all">{TL`Friends`}</a></p>
-						<p><a class={"mainmenu7 mainmenu" + onlineButton} href="resources">{TL`Info & Resources`}</a></p>
+						{!copa && <p><a class={"mainmenu7 mainmenu" + onlineButton} href="resources">{TL`Info & Resources`}</a></p>}
 					</div>
 				</div>
 				<div class="mainmenu-right" style={{ display: PS.leftPanelWidth ? 'none' : 'block' }}>
@@ -796,17 +800,20 @@ class MainMenuPanel extends PSRoomPanel<MainMenuRoom> {
 						)}
 					</div>
 				</div>
+				{copa && miniWindows}
 				<div class="mainmenu-footer">
-					<div class="bgcredit">{this.renderBackgroundCredit()}</div>
-					<small>
-						<a href={`//${Config.routes.dex}/`} target="_blank">{TL`Pokédex`}</a> | {}
-						<a href={`//${Config.routes.replays}/`} target="_blank">{TL`Replays`}</a> | {}
-						<a href="//smogon.com/forums/" target="_blank">{TL`Forum`}</a> | {}
-						<a href={`//${Config.routes.root}/rules`} target="_blank">{TL`Rules`}</a> | {}
-						<a href={`//${Config.routes.root}/credits`} target="_blank">{TL`Credits`}</a> | {}
-						<a href={`//${Config.routes.root}/privacy`} target="_blank">{TL`Privacy`}</a>
-					</small>
-					<CCPAIntercept />
+					{copa ? <a href="/replay.html" target="_blank" rel="noopener">Replays</a> : <>
+						<div class="bgcredit">{this.renderBackgroundCredit()}</div>
+						<small>
+							<a href={`//${Config.routes.dex}/`} target="_blank">{TL`Pokédex`}</a> | {}
+							<a href={`//${Config.routes.replays}/`} target="_blank">{TL`Replays`}</a> | {}
+							<a href="//smogon.com/forums/" target="_blank">{TL`Forum`}</a> | {}
+							<a href={`//${Config.routes.root}/rules`} target="_blank">{TL`Rules`}</a> | {}
+							<a href={`//${Config.routes.root}/credits`} target="_blank">{TL`Credits`}</a> | {}
+							<a href={`//${Config.routes.root}/privacy`} target="_blank">{TL`Privacy`}</a>
+						</small>
+						<CCPAIntercept />
+					</>}
 				</div>
 			</div>
 		</PSPanelWrapper>;

@@ -60,7 +60,7 @@ class RoomsPanel extends PSRoomPanel {
 		this.subscriptions.push(PS.user.subscribe(update => {
 			if (!update && PS.user.named) PS.send(`/cmd rooms`);
 		}));
-		Config.includes?.htmlDidMount?.();
+		if (!Config.copaRinhaLocalNames) Config.includes?.htmlDidMount?.();
 	}
 	override componentDidUpdate() {
 		super.componentDidUpdate();
@@ -271,7 +271,7 @@ class RoomsPanel extends PSRoomPanel {
 					<strong>{rooms.battleCount || '-'}</strong> {TL`active battles`}
 				</a>
 			</div>
-			{!!PS.leftPanelWidth && Config.includes?.roomlistTopHTML && (
+			{!Config.copaRinhaLocalNames && !!PS.leftPanelWidth && Config.includes?.roomlistTopHTML && (
 				<div dangerouslySetInnerHTML={{ __html: Config.includes.roomlistTopHTML }} />
 			)}
 			<div>
@@ -332,7 +332,8 @@ class RoomsPanel extends PSRoomPanel {
 						</div>}
 					</div>)}
 				</div>
-				{sectionCount === 0 && !!PS.leftPanelWidth && Config.includes?.roomlistAfterFirstHTML && (
+				{!Config.copaRinhaLocalNames && sectionCount === 0 && !!PS.leftPanelWidth &&
+					Config.includes?.roomlistAfterFirstHTML && (
 					<div dangerouslySetInnerHTML={{ __html: Config.includes.roomlistAfterFirstHTML }} />
 				)}
 			</>;

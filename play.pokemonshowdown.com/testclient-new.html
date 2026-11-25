@@ -108,7 +108,18 @@
 			Config.defaultserver.host === 'copa-rinha-showdown.onrender.com' && Config.defaultserver.port === 443;
 	</script>
 	<script>
-		if (Config.copaRinhaLocalNames) document.documentElement.classList.add('copa-rinha');
+		if (Config.copaRinhaLocalNames) {
+			document.documentElement.classList.add('copa-rinha');
+			document.getElementById('room-').classList.add('copa-home-loading');
+			var copaFooter = document.querySelector('.mainmenufooter');
+			var copaReplayLink = document.createElement('a');
+			copaReplayLink.href = '/replay.html';
+			copaReplayLink.target = '_blank';
+			copaReplayLink.rel = 'noopener';
+			copaReplayLink.textContent = 'Replays';
+			copaFooter.textContent = '';
+			copaFooter.appendChild(copaReplayLink);
+		}
 	</script>
 	<script nomodule src="/js/lib/ps-polyfill.js"></script>
 	<script>
