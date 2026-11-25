@@ -718,12 +718,16 @@ class MainMenuPanel extends PSRoomPanel<MainMenuRoom> {
 			selectType="search" onSubmit={this.submitSearch}
 		>
 			<p>
-				<label class="checkbox" title={TL`Battles against bots will be unrated.`}>
+				<label
+					class="checkbox" title={Config.copaRinhaLocalNames ?
+						'Batalhas contra bots não contam para a classificação.' : TL`Battles against bots will be unrated.`}
+				>
 					<input
 						name="allowbots" checked={PS.prefs.serversettings.allowLadderBots || false}
 						type="checkbox" onChange={this.handleSearchPrefs}
-					/> {TL`Allow matching into bots`}
+					/> {Config.copaRinhaLocalNames ? 'Permitir pareamento contra bots' : TL`Allow matching into bots`}
 				</label>
+				{Config.copaRinhaLocalNames && <br />}
 				<button class="button small" data-href="battleoptions">
 					{TL`[Battle options]`} <i class="fa fa-caret-down" aria-hidden></i>
 				</button></p>
