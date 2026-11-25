@@ -207,7 +207,7 @@ export class PSConnection {
 		this.nextRetryTime = 0;
 		this.lastReceiveTime = Date.now();
 
-		if (PS.prefs.avatar) PS.send(`/avatar ${PS.prefs.avatar},1`);
+		if (PS.prefs.avatar && !Config.copaRinhaLocalNames) PS.send(`/avatar ${PS.prefs.avatar},1`);
 		if (Config.copaRinhaLocalNames) window.CopaRinhaPresence?.refresh();
 		const queue = this.queue;
 		this.queue = [];

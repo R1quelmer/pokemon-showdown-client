@@ -14,6 +14,13 @@ export interface CopaPresenceSnapshot {
 	total: number;
 	guests: number;
 	users: CopaOnlineUser[];
+	members?: CopaMember[] | null;
+}
+interface CopaMember { name: string; avatar: string; online: boolean; rooms: string[]; battle?: string }
+
+function publicAvatar(value: unknown) {
+	const avatar = typeof value === 'number' && Number.isSafeInteger(value) && value >= 0 ? String(value) : value;
+	return typeof avatar === 'string' && /^#?[a-z0-9][a-z0-9._-]{0,79}$/i.test(avatar) ? avatar : 'unknown';
 }
 
 declare global {
@@ -29,6 +36,7 @@ export const CopaRinhaPresence = new class {
 	private started = false;
 	private poll: ReturnType<typeof setInterval> | null = null;
 	private timeout: ReturnType<typeof setTimeout> | null = null;
+	private requestedMembers = false;
 
 	/** Accept public fields only; never keep unexpected server object properties. */
 	parse(value: unknown): CopaPresenceSnapshot | null {
@@ -46,17 +54,36 @@ export const CopaRinhaPresence = new class {
 			const id = toID(user.name);
 			if (seen.has(id)) continue;
 			seen.add(id);
-			const avatar: unknown = typeof user.avatar === 'number' && Number.isSafeInteger(user.avatar) && user.avatar >= 0 ?
-				String(user.avatar) : user.avatar;
 			users.push({ name: user.name, inBattle: user.inBattle === true, status: user.status, statusType: user.statusType,
-				avatar: typeof avatar === 'string' && /^#?[a-z0-9][a-z0-9._-]{0,79}$/i.test(avatar) ? avatar : 'unknown' });
+				avatar: publicAvatar(user.avatar) });
 		}
 		users.sort((a, b) => a.name.localeCompare(b.name));
-		return { total: users.length + data.guests!, guests: data.guests!, users };
+		const snapshot: CopaPresenceSnapshot = { total: users.length + data.guests!, guests: data.guests!, users };
+		if (data.members !== undefined) snapshot.members = this.parseMembers(data.members);
+		return snapshot;
+	}
+	private parseMembers(rows: unknown): CopaMember[] | null {
+		if (!Array.isArray(rows) || rows.length > 1000) return null;
+		const seen = new Set<string>();
+		const members: CopaMember[] = [];
+		for (const row of rows) {
+			if (!row || typeof row.name !== 'string' || !/^[a-z0-9 ]{1,18}$/i.test(row.name) ||
+				!toID(row.name) || typeof row.online !== 'boolean') return null;
+			const id = toID(row.name);
+			if (seen.has(id)) continue;
+			seen.add(id);
+			const rooms = row.online && Array.isArray(row.rooms) ?
+				row.rooms.filter((room: unknown): room is string => typeof room === 'string' && room.length <= 120) : [];
+			const battle = row.online && typeof row.battle === 'string' && /^battle-[a-z0-9-]{1,100}$/.test(row.battle) ?
+				row.battle : undefined;
+			members.push({ name: row.name, avatar: publicAvatar(row.avatar), online: row.online, rooms, battle });
+		}
+		return members.sort((a, b) => a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' }));
 	}
 	private notify() {
 		PS.rooms['rooms']?.update(null);
 		PS.rooms['copaonline']?.update(null);
+		PS.rooms['copamembers']?.update(null);
 	}
 	private cancelRequest() {
 		if (this.timeout !== null) clearTimeout(this.timeout);
@@ -76,16 +103,20 @@ export const CopaRinhaPresence = new class {
 			return;
 		}
 		this.pending = true;
+		this.requestedMembers = !!PS.rooms['copamembers'];
 		this.timeout = setTimeout(() => this.invalidate('unavailable'), 10000);
-		PS.send('/cmd copapresence');
+		PS.send(this.requestedMembers ? '/cmd copapresence members' : '/cmd copapresence');
 	};
 	receive(value: unknown) {
 		if (!Config.copaRinhaLocalNames || !this.pending || !PS.connection?.connected || document.hidden) return;
 		const snapshot = this.parse(value);
+		const requestedMembers = this.requestedMembers;
+		if (snapshot && requestedMembers && snapshot.members === undefined) snapshot.members = null;
 		this.cancelRequest();
 		this.snapshot = snapshot;
 		this.state = snapshot ? 'ready' : 'unavailable';
 		this.notify();
+		if (!requestedMembers && PS.rooms['copamembers']) this.refresh();
 	}
 	disconnect() {
 		if (!Config.copaRinhaLocalNames) return;

@@ -354,6 +354,12 @@ html.copa-rinha .copa-online>small {color:var(--copa-muted)}
 html.copa-rinha .copa-online-avatar {position:relative;display:grid;place-items:center;width:40px;height:40px;color:var(--copa-muted);font-size:18px}
 html.copa-rinha .copa-online-avatar img {position:absolute;inset:0;background:var(--copa-surface)}
 @media(max-width:420px){html.copa-rinha .copa-online-avatar {width:32px}}
+html.copa-rinha .copa-members {box-sizing:border-box;width:min(320px, calc(100vw - 44px))}
+html.copa-rinha .copa-members input[type="search"] {box-sizing:border-box;width:100%}
+html.copa-rinha .copa-members .copa-online-list li {padding:7px 0}
+html.copa-rinha .copa-members .copa-online-player small.copa-member-connected {color:var(--copa-cyan)}
+html.copa-rinha .copa-members .copa-member-battle {color:var(--copa-cyan);text-decoration:none}
+html.copa-rinha .copa-members .copa-member-battle:is(:hover,:focus-visible) {text-decoration:underline}
 
 /* Only Home paints the native background preference. Other room surfaces stay opaque. */
 html.copa-rinha [id="room-"] {background:var(--copa-home-wallpaper, var(--copa-page))}

@@ -1515,8 +1515,10 @@ export class PSRoom extends PSStreamModel<Args | null> implements RoomOptions {
 			const parts = target.split(',');
 			target = parts[0].toLowerCase().replace(/[^a-z0-9-]+/g, '');
 			const avatar = window.BattleAvatarNumbers?.[target] || target;
-			PS.user.avatar = avatar;
-			PS.prefs.set('avatar', avatar || null);
+			if (!Config.copaRinhaLocalNames) {
+				PS.user.avatar = avatar;
+				PS.prefs.set('avatar', avatar || null);
+			}
 			if (this.type !== 'chat' && this.type !== 'battle') {
 				PS.send(`/avatar ${avatar}`);
 			} else {

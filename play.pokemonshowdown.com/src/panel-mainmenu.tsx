@@ -38,7 +38,7 @@ export class MainMenuRoom extends PSRoom {
 			status?: string,
 			group?: string,
 			customgroup?: string,
-			rooms?: { [roomid: string]: { isPrivate?: true, p1?: string, p2?: string } },
+			rooms?: false | { [roomid: string]: { isPrivate?: true, p1?: string, p2?: string } },
 		},
 	} = {};
 	roomsCache: {
@@ -788,7 +788,9 @@ class MainMenuPanel extends PSRoomPanel<MainMenuRoom> {
 					<div class="menugroup">
 						<p><a class={"mainmenu4 mainmenu" + onlineButton} href="battles">{TL`Watch a battle`}</a></p>
 						<p><a class={"mainmenu5 mainmenu" + onlineButton} href="users">{TL`Find a user`}</a></p>
-						<p><a class={"mainmenu6 mainmenu" + onlineButton} href="view-friends-all">{TL`Friends`}</a></p>
+						<p><a class={"mainmenu6 mainmenu" + onlineButton} href={copa ? 'copamembers' : 'view-friends-all'}>
+							{copa ? 'Membros' : TL`Friends`}
+						</a></p>
 						{!copa && <p><a class={"mainmenu7 mainmenu" + onlineButton} href="resources">{TL`Info & Resources`}</a></p>}
 					</div>
 				</div>

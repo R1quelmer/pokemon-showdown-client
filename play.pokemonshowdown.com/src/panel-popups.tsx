@@ -183,13 +183,14 @@ class UserPanel extends PSRoomPanel<UserRoom> {
 		}
 
 		let roomsList: preact.ComponentChild = null;
-		if (user.rooms) {
+		const rooms = room.args?.copaMember && user.rooms ? undefined : user.rooms;
+		if (rooms) {
 			let battlebuf = [];
 			let chatbuf = [];
 			let privatebuf = [];
-			for (let roomid in user.rooms) {
+			for (let roomid in rooms) {
 				if (roomid === 'global') continue;
-				const curRoom = user.rooms[roomid];
+				const curRoom = rooms[roomid];
 				let roomrank: preact.ComponentChild = null;
 				if (!/[A-Za-z0-9]/.test(roomid.charAt(0))) {
 					roomrank = <small style="color: #888; font-size: 100%">{roomid.charAt(0)}</small>;
@@ -230,7 +231,7 @@ class UserPanel extends PSRoomPanel<UserRoom> {
 			if (battlebuf.length || chatbuf.length || privatebuf.length) {
 				roomsList = <small class="rooms">{battlebuf}{chatbuf}{privatebuf}</small>;
 			}
-		} else if (user.rooms === false) {
+		} else if (rooms === false) {
 			roomsList = <strong class="offline">{TL`OFFLINE`}</strong>;
 		}
 
@@ -336,6 +337,20 @@ class UserPanel extends PSRoomPanel<UserRoom> {
 }
 
 /** Copa presence uses the native popup, avatar and challenge/profile routes. */
+function CopaPresenceAvatar({ name, avatar, participant }: { name: string, avatar: string, participant?: string }) {
+	const url = Dex.resolveAvatar(avatar, participant);
+	return <span class="copa-online-avatar" aria-hidden="true">{name.charAt(0).toUpperCase()}
+		<img
+			key={url} src={url} alt="" width={40} height={40}
+			ref={element => {
+				if (!element) return;
+				const image = element as HTMLImageElement;
+				image.onerror = () => { image.hidden = true; };
+			}}
+		/>
+	</span>;
+}
+
 class CopaOnlinePanel extends PSRoomPanel {
 	static readonly id = 'copaonline';
 	static readonly routes = ['copaonline'];
@@ -358,16 +373,7 @@ class CopaOnlinePanel extends PSRoomPanel {
 					<ul class="copa-online-list">{snapshot.users.map(user => {
 						const id = toID(user.name);
 						return <li key={id}>
-							<span class="copa-online-avatar" aria-hidden="true">{user.name.charAt(0).toUpperCase()}
-								<img
-									src={Dex.resolveAvatar(user.avatar, id)} alt="" width={40} height={40}
-									ref={element => {
-										if (!element) return;
-										const image = element as HTMLImageElement;
-										image.onerror = () => { image.hidden = true; };
-									}}
-								/>
-							</span>
+							<CopaPresenceAvatar name={user.name} avatar={user.avatar} participant={id} />
 							<div class="copa-online-player">
 								<button class="button" data-href={`user-${id}`}>{user.name}</button>
 								<small>
@@ -395,6 +401,72 @@ class CopaOnlinePanel extends PSRoomPanel {
 	}
 }
 PS.addRoomType(CopaOnlinePanel);
+
+class CopaMembersPanel extends PSRoomPanel {
+	static readonly id = 'copamembers';
+	static readonly routes = ['copamembers'];
+	static readonly location = 'modal-popup';
+	query = '';
+	override componentDidMount() {
+		super.componentDidMount();
+		window.CopaRinhaPresence?.refresh();
+	}
+	search = (ev: Event) => {
+		this.query = (ev.currentTarget as HTMLInputElement).value;
+		this.forceUpdate();
+	};
+	override render() {
+		const presence = window.CopaRinhaPresence;
+		const members = presence?.snapshot?.members;
+		const query = toID(this.query);
+		const matching = members?.filter(member => toID(member.name).includes(query));
+		return <PSPanelWrapper room={this.props.room} width={460}><div class="pad copa-online copa-members">
+			<h3>Membros</h3>
+			{Config.copaRinhaLocalNames ? <>
+				<p class="copa-online-summary" role="status">
+					{members ? `${members.length} cadastrados · ${members.filter(member => member.online).length} conectados` :
+					presence?.state === 'offline' ? 'Sem conexão. A lista será atualizada ao reconectar.' :
+					members === null || presence?.state === 'unavailable' ? 'Lista indisponível. Tente atualizar.' :
+					'Atualizando membros…'}
+				</p>
+				{members && <>
+					<input
+						class="textbox" type="search" aria-label="Buscar por nickname"
+						placeholder="Buscar por nickname" value={this.query} onInput={this.search}
+					/>
+					{matching?.length ? <ul class="copa-online-list">{matching.map(member => {
+						const id = toID(member.name);
+						return <li key={id}>
+							<CopaPresenceAvatar name={member.name} avatar={member.avatar} />
+							<div class="copa-online-player">
+								<button
+									class="button" onClick={ev => {
+										ev.stopPropagation();
+										PS.join(`user-${id}` as RoomID, {
+											args: { username: member.name, copaMember: true }, parentElem: ev.currentTarget as HTMLElement,
+										});
+									}}
+								>{member.name}</button>
+								<small class={member.online ? 'copa-member-connected' : ''}>
+									{member.battle ? (
+										<a class="copa-member-battle" href={`/${member.battle}`}>Em batalha pública</a>
+									) : member.online ? 'Online' : 'Offline'}
+									{id === PS.user.userid ? ' · Você' : ''}
+								</small>
+								{!!member.rooms.length && <p>{member.rooms.join(' · ')}</p>}
+							</div>
+						</li>;
+					})}</ul> : <p>{query ? 'Nenhum membro encontrado.' : 'Nenhum membro cadastrado.'}</p>}
+				</>}
+				<p class="buttonbar">
+					<button class="button" onClick={() => presence?.refresh()} disabled={presence?.pending}>Atualizar</button>
+					<button class="button" name="closeRoom">Fechar</button>
+				</p>
+			</> : <p>Disponível no client Copa Rinha.</p>}
+		</div></PSPanelWrapper>;
+	}
+}
+PS.addRoomType(CopaMembersPanel);
 
 const USER_PUNISHMENTS = {
 	mute: { label: 'Mute', duration: '7 minutes', scope: 'room' },
@@ -477,11 +549,11 @@ class UserOptionsPanel extends PSRoomPanel {
 		const canLock = globalGroupOrder <= PS.server.getGroup('%').order;
 
 		return <PSPanelWrapper room={room} width={280}><div class="pad buttonmenu">
-			<p>
+			{!Config.copaRinhaLocalNames && <p>
 				<button data-cmd={`/dm ${targetUser}, /friend add ${targetUser}`} class="button">
 					{TL`[Add friend]`}
 				</button>
-			</p>
+			</p>}
 			<p>
 				{this.isIgnoringUser(targetUser) ? (
 					<button data-cmdpreview={`/unignore ${targetUser}`} onClick={this.handleCommand} class="button">

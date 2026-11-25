@@ -13,6 +13,13 @@ const alice = {name: 'Alice', avatar: 1, status: '', statusType: 'online'};
 const bob = {name: 'Bob', avatar: 'ethan', status: 'Preparando equipe', statusType: 'busy', inBattle: true};
 const carla = {name: 'Carla', avatar: 'dawn', status: 'Disponível', statusType: 'online'};
 const presence = (users, guests) => ({total: users.length + guests, guests, users});
+const publicBattle = 'battle-gen9coparinhanationaldexza-42';
+const members = [
+	{name: 'Davi', avatar: 'ethan', online: false, rooms: []},
+	{name: 'Carla', avatar: 'dawn', online: false, rooms: []},
+	{name: 'Bob', avatar: 'ethan', online: true, battle: publicBattle, rooms: ['Lobby']},
+	{name: 'Alice', avatar: 1, online: true, rooms: ['Lobby']},
+];
 
 (async () => {
 	const server = http.createServer(async (req, res) => {
@@ -50,12 +57,16 @@ const presence = (users, guests) => ({total: users.length + guests, guests, user
 					const message = String(raw); fixture.requests.push(message);
 					const renamed = /^\|?\/trn ([^,\r\n]+)(?:,0,copa)?$/.exec(message);
 					if (renamed) return ws.send(`|updateuser| ${renamed[1]}|1|167`);
-					if (/\/cmd copapresence(?:\s|$)/.test(message)) {
+					if (message.endsWith('/cmd copapresence members')) {
+						ws.send('|queryresponse|copapresence|' + JSON.stringify({...fixture.snapshot, members: fixture.members}));
+					} else if (/\/cmd copapresence(?:\s|$)/.test(message)) {
 						if (fixture.mode !== 'hold') ws.send('|queryresponse|copapresence|' + JSON.stringify(fixture.mode === 'null' ? null : fixture.snapshot));
 					} else if (/\/cmd rooms(?:\s|$)/.test(message)) {
 						ws.send('|queryresponse|rooms|' + JSON.stringify({userCount: 99, battleCount: 0, chat: [], sectionTitles: []}));
 					} else if (/\/cmd userdetails bob(?:\s|$)/.test(message)) {
-						ws.send('|queryresponse|userdetails|' + JSON.stringify({...bob, userid: 'bob', rooms: {}, group: ' '}));
+						ws.send('|queryresponse|userdetails|' + JSON.stringify({
+							...bob, userid: 'bob', rooms: {privatefixture: {isPrivate: true}}, group: ' ',
+						}));
 					} else if (/\/cmd ping(?:\s|$)/.test(message)) {
 						ws.send('|queryresponse|ping|');
 					}
@@ -177,6 +188,59 @@ const presence = (users, guests) => ({total: users.length + guests, guests, user
 			await page.waitForFunction(() => PS.connection.connected && PS.user.name === 'Alice' && !PS.user.loggingIn);
 			await page.clock.fastForward(15050);
 			await list.locator('[data-href="user-carla"]').waitFor({state: 'visible'});
+			fixture.members = members;
+			await page.evaluate(() => {
+				PS.closePopupsAbove(null);
+				PS.leave('dm-bob');
+				PS.leave('news');
+				PS.join('');
+			});
+			await page.locator('a[href="copamembers"]').click();
+			const directory = page.locator('.copa-members');
+			await directory.getByText('4 cadastrados · 2 conectados').waitFor();
+			const nicknames = () => directory.locator('li .copa-online-player button').allTextContents();
+			assert.deepEqual(await nicknames(), ['Alice', 'Bob', 'Carla', 'Davi']);
+			assert.equal(await directory.locator('li').filter({hasText: 'Carla'}).getByText('Offline').count(), 1);
+			const battleLink = directory.getByRole('link', {name: 'Em batalha pública'});
+			assert.equal(await battleLink.getAttribute('href'), '/' + publicBattle);
+			assert.equal(await directory.getByRole('link').count(), 1, 'online and offline statuses are plain text');
+			assert.equal(await directory.getByRole('button', {name: 'Assistir'}).count(), 0);
+			if (width === 1440) {
+				await battleLink.hover();
+				assert.equal(await battleLink.evaluate(link => getComputedStyle(link).textDecorationLine), 'underline');
+			}
+			assert.equal(await directory.getByText('Lobby', {exact: true}).count(), 2);
+			await assertSpriteElementsLoaded(page, '.copa-members img');
+			const directoryBox = await directory.boundingBox();
+			assert(directoryBox.x >= 0 && directoryBox.x + directoryBox.width <= width);
+			if (process.env.COPA_MEMBERS_SCREENSHOTS && [1440, 390].includes(width)) {
+				await fs.mkdir(process.env.COPA_MEMBERS_SCREENSHOTS, {recursive: true});
+				await page.screenshot({path: path.join(process.env.COPA_MEMBERS_SCREENSHOTS, `membros-${width}.png`)});
+			}
+			const search = directory.getByRole('searchbox');
+			await search.fill('CAR');
+			assert.deepEqual(await nicknames(), ['Carla']);
+			await search.fill('ninguem');
+			await directory.getByText('Nenhum membro encontrado.').waitFor();
+			await search.fill('');
+			fixture.members = members.map(member => member.name === 'Carla' ? {...member, online: true} : member);
+			await page.clock.fastForward(15050);
+			await directory.getByText('4 cadastrados · 3 conectados').waitFor();
+			assert.deepEqual(await nicknames(), ['Alice', 'Bob', 'Carla', 'Davi']);
+			await directory.getByRole('button', {name: 'Bob', exact: true}).click();
+			await page.waitForFunction(() => !!PS.rooms['user-bob']?.args?.copaMember);
+			const profile = page.locator('[id="room-user-bob"]');
+			await profile.locator('[data-href="challenge-bob"]').waitFor();
+			assert.equal(await profile.locator('a[href="/privatefixture"]').count(), 0);
+			await profile.locator('[data-href="dm-bob"]').click();
+			await page.waitForFunction(() => !!PS.rooms['dm-bob']);
+			await page.evaluate(() => { PS.closePopupsAbove(null); PS.join('copamembers'); });
+			await directory.getByRole('button', {name: 'Bob', exact: true}).click();
+			await profile.locator('[data-href="challenge-bob"]').click();
+			await page.waitForFunction(() => !!PS.rooms['dm-bob']?.challengeMenuOpen);
+			await page.evaluate(() => { PS.closePopupsAbove(null); PS.join('copamembers'); });
+			await battleLink.click();
+			await page.waitForFunction(id => !!PS.rooms[id], publicBattle);
 			assert.deepEqual(fixture.errors, []); assert.deepEqual(fixture.authRequests, []);
 			assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
 			console.log(`Native presence counter/list, dedup, anonymous/privacy, profile/challenge, automatic updates, visibility/reconnect/errors and layout passed at ${width}px`);
