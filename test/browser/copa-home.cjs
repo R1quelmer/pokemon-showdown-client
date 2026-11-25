@@ -106,10 +106,13 @@ const wallpaperPath = path.join(root,'fx/client-bg-horizon.jpg');
     'https://play.pokemonshowdown.com/sprites/trainers/');
    assert((await news.textContent()).includes('independentes das contas oficiais'));
    assert.equal(await news.getByRole('timer').textContent(),'1 dia · 1 hora · 1 minuto · 5 segundos');
+   const colorOf=locator=>locator.evaluate(el=>getComputedStyle(el).color);
+   assert.equal(await colorOf(news.getByRole('timer')),'rgb(74, 222, 128)');
+   assert.equal(await colorOf(news.getByRole('link',{name:'Lista de avatares disponíveis'})),'rgb(89, 217, 245)');
    const updates=news.locator('.copa-updates');
    assert.equal(await updates.locator('li:visible').count(),3);
    await updates.locator('summary').click();
-   assert.equal(await updates.locator('li:visible').count(),8);
+   assert.equal(await updates.locator('li:visible').count(),9);
    await updates.locator('summary').click();
    const right=page.locator('#room-rooms');
    if(width>=700){
@@ -148,7 +151,12 @@ const wallpaperPath = path.join(root,'fx/client-bg-horizon.jpg');
     if(width>=628){
      await page.waitForTimeout(900);
      assert(await moving(),'hover continues after three hops');
+     await mascot.click();
+     const clickHops=await sprite.evaluate(el=>el.getAnimations().find(a=>!(a instanceof CSSAnimation))?.effect.getTiming().iterations);
+     assert.equal(clickHops,3);
      await page.mouse.move(1,1);
+     assert(await moving(),'click animation continues after leaving hover');
+     await sprite.evaluate(el=>Promise.all(el.getAnimations().map(animation=>animation.finished)));
     }else{
      await page.waitForTimeout(900);
     }
@@ -156,7 +164,11 @@ const wallpaperPath = path.join(root,'fx/client-bg-horizon.jpg');
     await page.evaluate(()=>PS.prefs.set('noanim',true));
     await move();
     assert.equal(await moving(),false);
-    if(width>=628)await page.mouse.move(1,1);
+    if(width>=628){
+     await mascot.click();
+     assert.equal(await moving(),false);
+     await page.mouse.move(1,1);
+    }
     await page.evaluate(()=>PS.prefs.set('noanim',false));
    }
    await page.evaluate(()=>PSView.scrollToRoom());
@@ -167,6 +179,7 @@ const wallpaperPath = path.join(root,'fx/client-bg-horizon.jpg');
    await news.getByText('0 dias · 0 horas · 0 minutos · 1 segundo').waitFor();
    await page.clock.setFixedTime(new Date('2026-12-05T23:00:00Z'));
    await news.getByRole('status').getByText('O campeonato começou!').waitFor();
+   assert.equal(await colorOf(news.getByRole('status')),'rgb(89, 217, 245)');
    await minimize.click();
    await news.getByRole('status').waitFor({state:'hidden'});
    await minimize.click();

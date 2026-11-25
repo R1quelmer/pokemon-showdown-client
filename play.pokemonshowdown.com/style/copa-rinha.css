@@ -119,6 +119,7 @@ html.copa-rinha .copa-news :is(h4,p) + p {margin-top:5px}
 html.copa-rinha .copa-news :is(a,.copa-countdown) {color:var(--copa-cyan)}
 html.copa-rinha .copa-news code {color:var(--copa-text);background:var(--copa-input);border-color:var(--copa-line)}
 html.copa-rinha .copa-countdown {font-variant-numeric:tabular-nums}
+html.copa-rinha .copa-news .copa-countdown[role="timer"] {color:#4ADE80}
 
 /* Inputs and buttons outside the battle field only. Native move/type colors remain meaningful. */
 html.copa-rinha :where(.ps-room,.ps-popup,.header,.header-vertical) .button:not(.battle *) {
@@ -512,3 +513,12 @@ html.copa-rinha .copa-hide-rooms {position:absolute;top:8px;right:12px}
 html.copa-rinha .copa-lobby-panel h2 {margin:20px 0 8px}
 html.copa-rinha .copa-mascot {display:block;touch-action:manipulation}
 html.copa-rinha .copa-mascot img {display:block;width:100%;height:100%;object-fit:contain;image-rendering:pixelated;pointer-events:none}
+
+@keyframes copa-mascot-hop {
+  0% {transform:translateY(0);animation-timing-function:ease-out}
+  50% {transform:translateY(-9px);animation-timing-function:ease-in}
+  100% {transform:translateY(0)}
+}
+@media (any-hover:hover) and (prefers-reduced-motion:no-preference) {
+  html.copa-rinha:not([data-copa-static-mascots]) .copa-mascot:hover img {animation:copa-mascot-hop 260ms infinite}
+}

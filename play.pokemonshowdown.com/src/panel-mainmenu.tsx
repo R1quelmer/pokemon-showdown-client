@@ -560,28 +560,21 @@ function CopaUpdateList({ entries }: { entries: typeof COPA_UPDATES }) {
 	</li>)}</ul>;
 }
 
-function hopCopaMascot(event: PointerEvent, iterations: number) {
+function hopCopaMascot(event: MouseEvent) {
 	if (PS.prefs.noanim || PS.prefs.nogif || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 	const sprite = (event.currentTarget as HTMLElement).querySelector('img')!;
-	for (const animation of sprite.getAnimations()) animation.cancel();
+	for (const animation of sprite.getAnimations()) {
+		if (!(animation instanceof CSSAnimation)) animation.cancel();
+	}
 	sprite.animate([
 		{ transform: 'translateY(0)', easing: 'ease-out' },
 		{ transform: 'translateY(-9px)', easing: 'ease-in' },
 		{ transform: 'translateY(0)' },
-	], { duration: 260, iterations });
+	], { duration: 260, iterations: 3 });
 }
 
 function CopaMascot({ name }: { name: 'sylveon' | 'poliwhirl' }) {
-	return <span
-		class="copa-mascot"
-		onPointerEnter={event => { if (event.pointerType === 'mouse') hopCopaMascot(event, Infinity); }}
-		onPointerLeave={event => {
-			if (event.pointerType !== 'mouse') return;
-			const sprite = (event.currentTarget as HTMLElement).querySelector('img')!;
-			for (const animation of sprite.getAnimations()) animation.cancel();
-		}}
-		onPointerUp={event => { if (event.pointerType !== 'mouse') hopCopaMascot(event, 3); }}
-	>
+	return <span class="copa-mascot" onClick={hopCopaMascot}>
 		<img src={`assets/copa-rinha/mascotes/${name}.png`} alt="" draggable={false} />
 	</span>;
 }

@@ -1387,6 +1387,14 @@ Supported file types:
 		}
 
 		PS.prefs.subscribeAndRun(key => {
+			if (Dex.isCopaRinha() && (!key || key === 'noanim' || key === 'nogif')) {
+				document.documentElement.toggleAttribute('data-copa-static-mascots', !!(PS.prefs.noanim || PS.prefs.nogif));
+				if (PS.prefs.noanim || PS.prefs.nogif) {
+					for (const sprite of document.querySelectorAll('.copa-mascot img')) {
+						for (const animation of sprite.getAnimations()) animation.cancel();
+					}
+				}
+			}
 			if (!key || key === 'theme') {
 				const dark = PS.prefs.theme === 'dark' ||
 					(PS.prefs.theme === 'system' && colorSchemeQuery?.matches);
