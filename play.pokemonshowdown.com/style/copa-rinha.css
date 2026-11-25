@@ -415,6 +415,11 @@ html.copa-rinha .copa-home-loading>.mainmenufooter {order:2;position:static;padd
 	left: 0;
 	height: 52px;
 }
+.set-form .copa-builder-sprite img[src$=".gif"] {
+	/* Stay within the Pokémon column and above the species field. */
+	height: 120%;
+	max-height: 63px;
+}
 .copa-builder-sprite-overlay .copa-builder-sprite {
 	top: 0;
 	height: 103px;
