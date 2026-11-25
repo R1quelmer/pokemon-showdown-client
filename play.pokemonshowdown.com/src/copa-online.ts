@@ -8,6 +8,7 @@ export interface CopaOnlineUser {
 	avatar: string;
 	status: string;
 	statusType: 'online' | 'busy' | 'idle';
+	inBattle?: boolean;
 }
 export interface CopaPresenceSnapshot {
 	total: number;
@@ -45,8 +46,9 @@ export const CopaRinhaPresence = new class {
 			const id = toID(user.name);
 			if (seen.has(id)) continue;
 			seen.add(id);
-			const avatar: unknown = user.avatar;
-			users.push({ name: user.name, status: user.status, statusType: user.statusType,
+			const avatar: unknown = typeof user.avatar === 'number' && Number.isSafeInteger(user.avatar) && user.avatar >= 0 ?
+				String(user.avatar) : user.avatar;
+			users.push({ name: user.name, inBattle: user.inBattle === true, status: user.status, statusType: user.statusType,
 				avatar: typeof avatar === 'string' && /^#?[a-z0-9][a-z0-9._-]{0,79}$/i.test(avatar) ? avatar : 'unknown' });
 		}
 		users.sort((a, b) => a.name.localeCompare(b.name));

@@ -5,11 +5,12 @@ const fs = require('node:fs/promises');
 const path = require('node:path');
 const http = require('node:http');
 const {chromium} = require('playwright');
+const {serveNativeSprite, assertSpriteElementsLoaded} = require('./copa-sprite-assets.cjs');
 
 const root = path.resolve(__dirname, '../../play.pokemonshowdown.com');
 const endpoint = /^wss:\/\/copa-rinha-showdown\.onrender\.com(?::443)?\/showdown\/websocket$/;
-const alice = {name: 'Alice', avatar: 'lucas', status: '', statusType: 'online'};
-const bob = {name: 'Bob', avatar: 'ethan', status: 'Preparando equipe', statusType: 'busy'};
+const alice = {name: 'Alice', avatar: 1, status: '', statusType: 'online'};
+const bob = {name: 'Bob', avatar: 'ethan', status: 'Preparando equipe', statusType: 'busy', inBattle: true};
 const carla = {name: 'Carla', avatar: 'dawn', status: 'Disponível', statusType: 'online'};
 const presence = (users, guests) => ({total: users.length + guests, guests, users});
 
@@ -60,7 +61,7 @@ const presence = (users, guests) => ({total: users.length + guests, guests, user
 					}
 				});
 			});
-			await page.route('**/*', route => {
+			await page.route('**/*', async route => {
 				const url = route.request().url();
 				if (url.startsWith('https://copa-rinha-showdown.onrender.com/copa-rinha/accounts/')) {
 					const data = route.request().postDataJSON();
@@ -72,6 +73,7 @@ const presence = (users, guests) => ({total: users.length + guests, guests, user
 				}
 				if (url.includes('/config/config.js')) return route.fulfill({contentType: 'text/javascript', body:
 					"var Config={customcolors:{},whitelist:[],routes:{client:'play.pokemonshowdown.com'},defaultserver:{id:'showdown',host:'sim3.psim.us',port:443}};"});
+				if (await serveNativeSprite(route)) return;
 				return url.startsWith(origin) ? route.continue() : route.abort();
 			});
 			await page.goto(origin + '/copa-rinha.html');
@@ -101,9 +103,12 @@ const presence = (users, guests) => ({total: users.length + guests, guests, user
 			assert.equal(await list.locator('[data-href="challenge-bob"]').isEnabled(), true);
 			assert.equal(await list.locator('[data-href="challenge-alice"]').isDisabled(), true);
 			assert((await list.textContent()).includes('Preparando equipe'));
+			assert((await list.textContent()).includes('Em batalha'));
 			assert((await list.textContent()).toLowerCase().includes('visitante'));
 			const avatars = await list.locator('img').evaluateAll(images => images.map(image => image.src));
 			assert(avatars.some(url => url.endsWith('/trainers/ethan.png')), 'native avatar resolver is used');
+			assert(avatars.some(url => url.endsWith('/trainers/lucas.png')), 'numeric avatars use the native mapping');
+			await assertSpriteElementsLoaded(page, '.copa-online img');
 			assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'presence fits the viewport');
 			const box = await list.boundingBox();
 			assert(box.x >= 0 && box.x + box.width <= width, `presence modal fits ${width}px`);

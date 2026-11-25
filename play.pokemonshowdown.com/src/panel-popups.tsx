@@ -358,11 +358,21 @@ class CopaOnlinePanel extends PSRoomPanel {
 					<ul class="copa-online-list">{snapshot.users.map(user => {
 						const id = toID(user.name);
 						return <li key={id}>
-							<img src={Dex.resolveAvatar(user.avatar, id)} alt="" width={40} height={40} />
+							<span class="copa-online-avatar" aria-hidden="true">{user.name.charAt(0).toUpperCase()}
+								<img
+									src={Dex.resolveAvatar(user.avatar, id)} alt="" width={40} height={40}
+									ref={element => {
+										if (!element) return;
+										const image = element as HTMLImageElement;
+										image.onerror = () => { image.hidden = true; };
+									}}
+								/>
+							</span>
 							<div class="copa-online-player">
 								<button class="button" data-href={`user-${id}`}>{user.name}</button>
 								<small>
 									{user.statusType === 'idle' ? 'Ausente' : user.statusType === 'busy' ? 'Ocupado' : 'Online'}
+									{user.inBattle ? ' · Em batalha' : ''}
 									{id === PS.user.userid ? ' · Você' : ''}</small>
 								{user.status && <p>{user.status.replace(/^!/, '')}</p>}
 							</div>

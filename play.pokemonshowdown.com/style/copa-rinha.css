@@ -366,3 +366,7 @@ html.copa-rinha .copa-online-player p {margin:3px 0;font-size:12px}
 html.copa-rinha .copa-online-player .button {max-width:100%;white-space:normal;overflow-wrap:anywhere}
 html.copa-rinha .copa-online>small {color:var(--copa-muted)}
 @media(max-width:420px){html.copa-rinha .copa-online-list li {grid-template-columns:32px minmax(0,1fr);gap:8px}html.copa-rinha .copa-online-list li>button {grid-column:2;justify-self:start}html.copa-rinha .copa-online-list img {width:32px}}
+
+html.copa-rinha .copa-online-avatar {position:relative;display:grid;place-items:center;width:40px;height:40px;color:var(--copa-muted);font-size:18px}
+html.copa-rinha .copa-online-avatar img {position:absolute;inset:0;background:var(--copa-surface)}
+@media(max-width:420px){html.copa-rinha .copa-online-avatar {width:32px}}
