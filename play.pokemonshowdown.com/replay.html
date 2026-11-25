@@ -7,14 +7,21 @@
 <link rel="stylesheet" href="style/replay.css">
 <link rel="stylesheet" href="style/utilichart.css">
 <link rel="stylesheet" href="style/copa-replay.css">
+<link rel="stylesheet" href="style/copa-team.css">
+<link rel="stylesheet" href="style/copa-replay-library.css">
 <main>
 <header class="site-header"><a class="wordmark" href="/copa-rinha.html" aria-label="Voltar à página inicial da Copa Rinha"><img class="brand-logo" src="assets/copa-rinha/logo.png" alt="Copa Rinha" width="3344" height="1882"><span>REPLAY</span></a></header>
-<form id="open-replay" hidden><label for="replay-link">Link ou ID do replay</label> <input id="replay-link" type="text" autocomplete="off" required placeholder="Cole o link do replay"><button type="submit">Abrir replay</button></form>
+<form id="open-replay" hidden><label for="replay-link">Link ou ID do replay</label> <input id="replay-link" type="text" autocomplete="off" required placeholder="Cole o link do replay"><button type="submit" class="team-button">Abrir replay</button></form>
 <section class="match-info" aria-label="Informações da partida">
 <div id="metadata"><h1 id="match-players">Replay da Copa Rinha</h1><p id="match-details"></p><p id="match-winner" class="winner"></p></div>
 <button id="copy" class="copy-button" title="Copiar link do replay">Copiar link <span aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m10 13 4-4M8 16l-1 1a4 4 0 0 1-6-6l4-4a4 4 0 0 1 6 0m2 1 1-1a4 4 0 0 1 6 6l-4 4a4 4 0 0 1-6 0"/></svg></span></button><span id="copy-feedback" class="copy-feedback" role="status" hidden></span>
 </section>
 <p id="status" role="status">Carregando replay…</p>
+<section id="replay-library" hidden aria-labelledby="library-heading">
+<div class="team-heading"><p class="eyebrow">COPA RINHA II</p><h1 id="library-heading">Central de replays</h1><p class="team-privacy">Apenas partidas públicas. Replays privados, não listados ou sem visibilidade confirmada ficam fora desta central.</p></div>
+<form id="replay-filter"><label for="replay-player">Nickname do jogador</label><div class="open-fields"><input id="replay-player" maxlength="30" placeholder="Todos os jogadores" autocomplete="off"><button type="submit">Filtrar</button></div></form>
+<p id="library-status" role="status" aria-live="polite"></p><ul id="replay-list"></ul><button id="more-replays" class="team-button" hidden>Carregar mais</button>
+</section>
 <div class="player-shell"><div id="viewport"><div id="arena"><div class="battle"></div></div></div></div>
 <section id="controls" aria-label="Controles do replay" hidden>
 <div class="transport" role="group" aria-label="Reprodução">
@@ -36,7 +43,7 @@
 <p id="turn-position" class="sr-only" role="status"></p>
 </section>
 <section class="log-section" aria-labelledby="log-heading"><div class="section-heading"><h2 id="log-heading">LOG DA BATALHA</h2><span>Registro da partida</span></div><div class="battle-log"></div></section>
-<footer>COPA RINHA <span>REPLAYS</span></footer>
+<footer>COPA RINHA <a href="/copa-rinha.html">Voltar ao client</a></footer>
 </main>
 <script>window.exports = window; window.Config = {routes: {client: 'play.pokemonshowdown.com'}, testclient: true};</script>
 <script src="js/lib/jquery-2.2.4.min.js"></script>
@@ -50,5 +57,6 @@
 <script src="data/graphics.js"></script>
 <script src="js/battle.js"></script>
 <script src="js/battle-tooltips.js"></script>
+<script src="js/copa-replay-library.js"></script>
 <script src="js/copa-replay.js"></script>
 </html>

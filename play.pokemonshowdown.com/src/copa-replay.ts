@@ -2,6 +2,7 @@
 /* eslint-disable no-restricted-syntax, no-restricted-globals */
 /** Standalone Copa Rinha viewer using the native Showdown battle engine. */
 import { Battle } from './battle';
+import { loadCopaReplayLibrary } from './copa-replay-library';
 import type { ID } from './battle-dex';
 
 async function loadCopaReplay() {
@@ -10,9 +11,9 @@ async function loadCopaReplay() {
 	if (!id && document.getElementById('open-replay')) {
 		const form = document.getElementById('open-replay') as HTMLFormElement;
 		form.hidden = false;
-		status.textContent = 'Cole um link de replay da Copa Rinha para assistir.';
+		status.textContent = 'Abra um replay pelo link ou explore as partidas públicas abaixo.';
 		for (const selector of ['.match-info', '.player-shell', '.log-section']) {
-			(document.querySelector(selector) as HTMLElement).style.display = 'none';
+			document.querySelector<HTMLElement>(selector)!.style.display = 'none';
 		}
 		form.onsubmit = event => {
 			event.preventDefault();
@@ -31,6 +32,7 @@ async function loadCopaReplay() {
 			}
 			location.href = `replay.html?id=${target}`;
 		};
+		void loadCopaReplayLibrary();
 		return;
 	}
 	if (!/^[A-Za-z0-9_-]{32}$/.test(id)) {

@@ -1,0 +1,24 @@
+/* Uses the existing team page controls, fonts and palette. */
+#open-replay label { width: 100%; color: var(--muted); font-size: 12px; }
+#open-replay input { flex: 1; min-width: 0; box-sizing: border-box; }
+#open-replay .team-button { background: var(--accent); color: #07131e; font-weight: 600; }
+#open-replay .team-button:hover { background: #8be5fa; }
+#replay-library { min-width: 0; }
+#replay-library .team-heading { padding-top: 12px; }
+#replay-filter label { display: block; color: var(--muted); font-size: 12px; margin-bottom: 7px; }
+#library-status { font-size: 13px; color: var(--muted); overflow-wrap: anywhere; }
+#replay-list { list-style: none; margin: 18px 0; padding: 0; }
+#replay-list li { border-top: 1px solid var(--line); padding: 18px 0; overflow-wrap: anywhere; }
+#replay-list a { color: var(--text); font-size: 18px; font-weight: 600; text-decoration: none; }
+#replay-list a:hover { color: var(--accent); }
+#replay-list a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+#replay-list p { color: var(--muted); font-size: 12px; margin: 6px 0; }
+#replay-list small { color: var(--accent); }
+@media (max-width: 600px) {
+	#open-replay input { flex-basis: 100%; width: 100%; }
+	#open-replay .team-button { width: 100%; }
+	#replay-list a { font-size: 16px; }
+}
+
+#replay-list .replay-actions {display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+#replay-list .team-button {box-sizing:border-box;min-height:40px;font-size:12px;font-weight:500}
