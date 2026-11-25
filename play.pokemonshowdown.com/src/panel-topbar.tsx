@@ -244,7 +244,7 @@ export class PSHeader extends preact.Component {
 	renderBrand(size = 48) {
 		if (Dex.isCopaRinha()) {
 			return <a
-				href="/" data-href="" class="copa-brand"
+				href="/copa-rinha.html" data-href="" class="copa-brand"
 				aria-label="Copa Rinha II, página inicial" onClick={ev => { ev.preventDefault(); PS.join('' as RoomID); }}
 			>
 				<img class="logo" src="assets/copa-rinha/logo.png" alt="Copa Rinha" width="128" height="72" />
@@ -259,8 +259,7 @@ export class PSHeader extends preact.Component {
 	renderCopaLinks() {
 		if (!Dex.isCopaRinha()) return null;
 		return <nav class="copa-quicklinks" aria-label="Compartilhados da Copa Rinha">
-			<a href="/team.html">Times compartilhados</a>
-			<a href="/replay.html">Replays</a>
+			<a href="/replay.html" target="_blank" rel="noopener">Replays</a>
 		</nav>;
 	}
 	renderVertical() {
