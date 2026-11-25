@@ -525,7 +525,17 @@ html.copa-rinha .copa-mascot img {display:block;width:100%;height:100%;object-fi
 
 html.copa-rinha .copa-avatar-link {border:0;padding:0;background:none;color:inherit;cursor:pointer}
 html.copa-rinha .copa-settings-avatar {float:left;margin-left:-50px}
-html.copa-rinha .userdetails>.copa-avatar-link {float:right}
+html.copa-rinha .copa-compact-profile {
+  display:grid;grid-template-columns:64px minmax(0,1fr);gap:8px;align-items:start;
+  box-sizing:border-box;width:min(278px,100%);min-height:0;padding:0;margin:4px 0;
+}
+html.copa-rinha .copa-compact-profile .copa-online-avatar {width:64px;height:64px}
+html.copa-rinha .copa-compact-profile img {width:64px;height:64px;object-fit:contain;float:none;margin:0}
+html.copa-rinha .copa-compact-profile .copa-online-avatar:has(img:not([hidden])) {color:transparent}
+html.copa-rinha .copa-compact-profile-info {min-width:0;overflow-wrap:anywhere}
+html.copa-rinha .copa-compact-profile .statusform {display:flex;flex-wrap:wrap;align-items:center;gap:4px}
+html.copa-rinha .copa-compact-profile textarea.userstatus {box-sizing:border-box;max-width:100%}
+html.copa-rinha .copa-compact-profile-info>div {margin-top:3px}
 html.copa-rinha .copa-member-sprites, html.copa-rinha .copa-profile-sprites {display:flex;align-items:center;gap:4px}
 html.copa-rinha .copa-members .copa-online-list li {grid-template-columns:auto minmax(0,1fr)}
 html.copa-rinha .copa-partner-sprite {display:grid;place-items:center;width:42px;height:42px}

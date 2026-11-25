@@ -1,5 +1,6 @@
 // Add player-facing changes at the top. For entries on the same date, newest goes first.
 export const COPA_UPDATES = [
+	{ date: '2026-11-25', text: 'O perfil compacto mostra o avatar à esquerda e dá mais espaço ao status.' },
 	{ date: '2026-11-25', text: 'No perfil ampliado, treinador e Pokémon parceiro aparecem juntos e alinhados pela base.' },
 	{ date: '2026-11-25', text: 'Os avatares abrem o perfil ampliado. Escolha um Pokémon parceiro nas configurações.' },
 	{ date: '2026-11-25', text: 'O formato aparece como Copa Rinha II nas listas de times, seletores e batalhas.' },

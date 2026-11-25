@@ -278,20 +278,13 @@ class UserPanel extends PSRoomPanel<UserRoom> {
 		}
 
 		const avatar = user.avatar !== '[loading]' ? Dex.resolveAvatar(`${user.avatar || 'unknown'}`, user.userid) : null;
-		return [<div class="userdetails">
-			{avatar && (Config.copaRinhaLocalNames ? (
-				<CopaAvatarLink name={user.name.trim()} avatar={String(user.avatar || 'unknown')} />
-			) : room.isSelf ? (
-				<img src={avatar} class="trainersprite yours" data-href="avatars" />
-			) : (
-				<img src={avatar} class="trainersprite" />
-			))}
+		const details = <>
 			<strong><a
 				href={`//${Config.routes.users}/${user.userid}`} target="_blank"
 				style={`color: ${away ? '#888888' : BattleLog.usernameColor(user.userid)}`}
 			>
 				{user.name}
-			</a></strong><br />
+			</a></strong>{!Config.copaRinhaLocalNames && <br />}
 			{isSelf && !hideInteraction ? (
 				<StatusEditor />
 			) : status ? (
@@ -301,6 +294,23 @@ class UserPanel extends PSRoomPanel<UserRoom> {
 			{globalGroupName && <div class="usergroup globalgroup">{globalGroupName}</div>}
 			{customGroup && <div class="usergroup globalgroup">{customGroup}</div>}
 			{!hideInteraction && roomsList}
+		</>;
+		if (Config.copaRinhaLocalNames) {
+			const member = window.CopaRinhaPresence?.snapshot?.members?.find(row => toID(row.name) === room.userid);
+			const liveAvatar = isSelf ? PS.user.avatar : user.avatar;
+			const avatarId = String((liveAvatar !== '[loading]' && liveAvatar) || member?.avatar || 'unknown');
+			return [<div class="copa-compact-profile userdetails">
+				<CopaAvatarLink name={user.name.trim()} avatar={avatarId} />
+				<div class="copa-compact-profile-info">{details}</div>
+			</div>, buttonbar];
+		}
+		return [<div class="userdetails">
+			{avatar && (room.isSelf ? (
+				<img src={avatar} class="trainersprite yours" data-href="avatars" />
+			) : (
+				<img src={avatar} class="trainersprite" />
+			))}
+			{details}
 		</div>, buttonbar];
 	}
 

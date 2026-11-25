@@ -245,6 +245,28 @@ const members = [
 				await fs.mkdir(process.env.COPA_MEMBERS_SCREENSHOTS, {recursive: true});
 				await page.screenshot({path: path.join(process.env.COPA_MEMBERS_SCREENSHOTS, `membros-${width}.png`)});
 			}
+			await directory.getByRole('button', {name:'Alice',exact:true}).click();
+			const compact = page.locator('#room-user-alice');
+			const addStatus = compact.getByRole('button', {name:'Add status',exact:true});
+			await addStatus.waitFor();
+			const portrait = compact.locator('.copa-online-avatar');
+			const picture = portrait.locator('img');
+			await assertSpriteElementsLoaded(page, '#room-user-alice .copa-online-avatar img');
+			const [portraitBox, pictureBox, statusBox, popupBox] = await Promise.all([
+				portrait.boundingBox(), picture.boundingBox(), addStatus.boundingBox(), compact.boundingBox(),
+			]);
+			assert(Math.abs(portraitBox.x - pictureBox.x) <= 1, 'portrait covers the placeholder initial');
+			assert(statusBox.x >= portraitBox.x + portraitBox.width);
+			assert(statusBox.x + statusBox.width <= popupBox.x + popupBox.width);
+			if (process.env.COPA_MEMBERS_SCREENSHOTS && [1440,390].includes(width)) {
+				await page.screenshot({path: path.join(process.env.COPA_MEMBERS_SCREENSHOTS, `compacto-${width}.png`)});
+			}
+			await addStatus.click();
+			await compact.locator('textarea[name="statustext"]').waitFor({state:'visible'});
+			await compact.getByRole('button', {name:'Cancel',exact:true}).click();
+			await addStatus.waitFor();
+			await page.evaluate(() => PS.leave('user-alice'));
+
 			const ownAvatar = directory.getByRole('button', {name:'Ver perfil de Alice'});
 			const sprite = directory.getByRole('img', {name:'Rotom-Wash · Shiny'});
 			await sprite.waitFor();

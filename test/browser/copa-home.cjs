@@ -113,7 +113,7 @@ const wallpaperPath = path.join(root,'fx/client-bg-horizon.jpg');
    const updates=news.locator('.copa-updates');
    assert.equal(await updates.locator('li:visible').count(),3);
    await updates.locator('summary').click();
-   assert.equal(await updates.locator('li:visible').count(),13);
+   assert.equal(await updates.locator('li:visible').count(),14);
    await updates.locator('summary').click();
    const right=page.locator('#room-rooms');
    if(width>=700){
