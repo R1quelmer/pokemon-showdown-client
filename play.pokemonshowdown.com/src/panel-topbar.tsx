@@ -248,19 +248,12 @@ export class PSHeader extends preact.Component {
 				aria-label="Copa Rinha II, página inicial" onClick={ev => { ev.preventDefault(); PS.join('' as RoomID); }}
 			>
 				<img class="logo" src="assets/copa-rinha/logo.png" alt="Copa Rinha" width="128" height="72" />
-				<span class="copa-edition" aria-hidden>II</span>
 			</a>;
 		}
 		return <img
 			class="logo" src={`https://${Config.routes.client}/iconbeta.png`}
 			alt="Pokémon Showdown! (beta)" width={size} height={size}
 		/>;
-	}
-	renderCopaLinks() {
-		if (!Dex.isCopaRinha()) return null;
-		return <nav class="copa-quicklinks" aria-label="Compartilhados da Copa Rinha">
-			<a href="/replay.html" target="_blank" rel="noopener">Replays</a>
-		</nav>;
 	}
 	renderVertical() {
 		const miniRoomTabs = PSHeader.notifyingMiniRoomTabs();
@@ -271,7 +264,6 @@ export class PSHeader extends preact.Component {
 			<div class="maintabbarbottom"></div>
 			<div class="scrollable-part">
 				{this.renderBrand(50)}
-				{this.renderCopaLinks()}
 				<div class="tablist" role="tablist">
 					<ul>
 						{PSHeader.renderRoomTab(PS.leftRoomList[0], false, false)}
@@ -327,7 +319,6 @@ export class PSHeader extends preact.Component {
 					<li>
 						{this.renderBrand()}
 					</li>
-					{Dex.isCopaRinha() && <li class="copa-links-li">{this.renderCopaLinks()}</li>}
 					{PSHeader.renderRoomTab(PS.leftRoomList[0])}
 					{PS.leftRoomList.slice(1).map(roomid => PSHeader.renderRoomTab(roomid))}
 				</ul>

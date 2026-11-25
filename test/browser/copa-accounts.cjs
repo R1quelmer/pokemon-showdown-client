@@ -81,8 +81,8 @@ const normalize = name => name.toLowerCase().replace(/[^a-z0-9]/g, '');
  try {
   const a=await context();
   if(process.env.COPA_SCREENSHOTS){await fs.mkdir(process.env.COPA_SCREENSHOTS,{recursive:true});await a.page.screenshot({path:path.join(process.env.COPA_SCREENSHOTS,'accounts-1440.png'),fullPage:true});}
-  assert.equal(await a.page.locator('.copa-quicklinks a[href="/team.html"]').count(),0);
-  assert.equal(await a.page.locator('.copa-quicklinks a[href="/replay.html"]').first().getAttribute('target'),'_blank');
+  assert.equal(await a.page.locator('#header a[href="/replay.html"]').count(),0);
+  assert.equal(await a.page.locator('.mainmenu-footer a[href="/replay.html"]').getAttribute('target'),'_blank');
   await a.page.locator('input[name=username]').fill('Account QA');
   await a.page.locator('input[name=copapassword]').fill(password);
   await a.page.getByRole('button',{name:'Registrar conta',exact:true}).click();await named(a.page);

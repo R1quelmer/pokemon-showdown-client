@@ -45,6 +45,22 @@ const wallpaperPath = path.join(root,'fx/client-bg-horizon.jpg');
    const capture=async name=>{if(clockPaused)await page.clock.runFor(200);await page.evaluate(()=>document.fonts.ready);if(!clockPaused)await page.waitForFunction(()=>!window.PSView?.snapFrame);await page.screenshot({path:path.join(screenshots,`${name}-${width}.png`),fullPage:true});};
    await page.goto(entry);await ready();
    const home=page.locator('[id="room-"]');
+   const brand=page.locator('#header a.copa-brand');
+   assert.equal((await brand.textContent()).trim(),'');
+   assert.equal(await page.locator('#header a[href="/replay.html"]').count(),0);
+   await page.evaluate(()=>{window.logoNavigationSentinel=true;PS.join('teambuilder');});
+   await brand.click();
+   await home.waitFor({state:'visible'});
+   assert(await page.evaluate(()=>window.logoNavigationSentinel));
+   if(width===1440){
+    const previous=await page.evaluate(()=>{const layout=PS.prefs.onepanel;PS.prefs.set('onepanel','vertical');PS.update();return layout;});
+    const sidebar=page.locator('#header.header-vertical');
+    await sidebar.waitFor({state:'visible'});
+    assert.equal((await sidebar.locator('a.copa-brand').textContent()).trim(),'');
+    assert.equal(await sidebar.locator('a[href="/replay.html"]').count(),0);
+    await page.evaluate(layout=>{PS.prefs.set('onepanel',layout);PS.update();},previous);
+    await page.locator('#header.header').waitFor({state:'visible'});
+   }
    assert.equal(await page.evaluate(()=>PSBackground.id),'copa-default');
    assert.equal(await page.evaluate(()=>localStorage.getItem('showdown_bg')),'solidblue');
    assert.equal(await home.evaluate(el=>getComputedStyle(el).backgroundImage),'none');

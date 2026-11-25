@@ -48,13 +48,11 @@ html.copa-rinha :where(.header,.header-vertical,.mini-header,.ps-room,.ps-popup)
 html.copa-rinha :where(.header,.header-vertical) .copa-brand {
   display:flex;
   align-items:center;
-  gap:9px;
   width:max-content;
-  max-width:calc(100% - 24px);
-  color:var(--copa-cyan);
+  max-width:calc(100% - 16px);
   text-decoration:none;
   cursor:pointer;
-  margin:0 12px;
+  margin:0 8px;
   padding:0;
 }
 html.copa-rinha .copa-brand img.logo {
@@ -64,15 +62,8 @@ html.copa-rinha .copa-brand img.logo {
   object-fit:contain;
   margin:0;
 }
-html.copa-rinha .copa-brand .copa-edition {
-  padding-left:9px;
-  border-left:1px solid var(--copa-line);
-  font:600 16px/1 "Barlow Condensed","Arial Narrow",sans-serif;
-  letter-spacing:1px;
-}
-html.copa-rinha .header-vertical .copa-brand {margin:12px 14px 14px;gap:11px}
+html.copa-rinha .header-vertical .copa-brand {margin:12px 14px}
 html.copa-rinha .header-vertical .copa-brand img.logo {width:128px}
-html.copa-rinha .header-vertical .copa-brand .copa-edition {font-size:19px}
 html.copa-rinha .header-vertical .userbar {
   padding-top:12px;
   border-top:1px solid var(--copa-line);
@@ -242,13 +233,6 @@ html.copa-rinha .roomlist .blocklink small {color:var(--copa-muted)}
   html.copa-rinha :where(.button,.option) {transition:none}
 }
 
-html.copa-rinha .copa-quicklinks {display:flex;gap:12px;align-items:center;margin:0 10px 0 0;height:46px;font-size:11px}
-html.copa-rinha .copa-quicklinks a {color:var(--copa-muted);text-decoration:none;border-bottom:1px solid transparent;padding:6px 0;white-space:nowrap}
-html.copa-rinha .copa-quicklinks a:hover {color:var(--copa-cyan);border-color:var(--copa-cyan)}
-html.copa-rinha .header-vertical .copa-quicklinks {height:auto;margin:0 14px 14px;gap:12px;padding-bottom:10px;border-bottom:1px solid var(--copa-line);flex-wrap:wrap}
-html.copa-rinha .header-vertical .copa-quicklinks a {font-size:11px;white-space:normal}
-/* Keep selected room tabs legible in the compact horizontal header. Sidebar keeps both links. */
-@media(max-width:1100px) {html.copa-rinha .header .copa-links-li {display:none}}
 
 html.copa-rinha .header .tabbar .button,
 html.copa-rinha .header-vertical .tablist .button {background:transparent;color:var(--copa-muted);border-color:transparent;text-shadow:none;box-shadow:none}
