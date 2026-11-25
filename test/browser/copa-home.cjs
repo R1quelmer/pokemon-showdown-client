@@ -26,7 +26,7 @@ const wallpaperPath = path.join(root,'fx/client-bg-horizon.jpg');
   for(const width of [1440,1000,390,320]){
    const context=await browser.newContext({viewport:{width,height:900},hasTouch:width<628});
    const page=await context.newPage(), errors=[];let socket, connections=0, clockPaused=false;
-   const joins=[];
+   const joins=[], avatarCommands=[];
    await page.clock.install({time:new Date('2026-12-04T21:58:55Z')});
    await page.clock.setFixedTime(new Date('2026-12-04T21:58:55Z'));
    page.on('pageerror',error=>errors.push(error.message));
@@ -35,6 +35,7 @@ const wallpaperPath = path.join(root,'fx/client-bg-horizon.jpg');
     socket=ws;connections++;
     ws.send('|formats|,1|Copa Rinha|[Gen 9] Copa Rinha II,e\n|updateuser| Home QA|1|1');
     ws.onMessage(message=>{
+     if(message.includes('|/avatar'))avatarCommands.push(message);
      if(!message.startsWith('|/join '))return;
      joins.push(message);
      if(message==='|/join lobby')ws.send('>lobby\n|init|chat\n|title|Lobby');
@@ -112,7 +113,7 @@ const wallpaperPath = path.join(root,'fx/client-bg-horizon.jpg');
    const updates=news.locator('.copa-updates');
    assert.equal(await updates.locator('li:visible').count(),3);
    await updates.locator('summary').click();
-   assert.equal(await updates.locator('li:visible').count(),9);
+   assert.equal(await updates.locator('li:visible').count(),10);
    await updates.locator('summary').click();
    const right=page.locator('#room-rooms');
    if(width>=700){
@@ -191,6 +192,36 @@ const wallpaperPath = path.join(root,'fx/client-bg-horizon.jpg');
    assert.deepEqual(joins,['|/join lobby']);
    assert(await page.evaluate(()=>window.logoNavigationSentinel),'opening Lobby does not reload the page');
    await page.locator('#room-lobby .chat-log').waitFor({state:'visible'});
+   const avatar=await page.evaluate(()=>PS.user.avatar);
+   for(const alreadyOpen of [true,false]){
+    await page.evaluate(alreadyOpen=>{
+     if(!alreadyOpen)PS.leave('lobby');
+     PS.join('');
+     PSView.scrollToRoom();
+    },alreadyOpen);
+    await page.waitForFunction(()=>!PSView.snapFrame&&PS.room.id==='');
+    await page.locator('button[data-href="options"]:visible').last().click();
+    const avatarButton=page.getByRole('button',{name:/^Avatar\s*(?:\.\.\.|…)$/});
+    if(width<628)await avatarButton.tap({timeout:3000});
+    else await avatarButton.click({timeout:3000});
+    await page.locator('#room-lobby .chat-log').waitFor({state:'visible'});
+    const hint=page.locator('#room-lobby').getByRole('link',{name:'Lista de avatares',exact:true});
+    await hint.waitFor({timeout:3000});
+    assert.equal(await hint.getAttribute('href'),'https://play.pokemonshowdown.com/sprites/trainers/');
+    assert(await page.evaluate(()=>!PS.rooms.options&&!PS.rooms.avatars&&PS.room.id==='lobby'));
+    await page.waitForFunction(()=>{
+     const entry=PS.rooms.lobby?.textEntry;
+     return entry?.getValue()==="/avatar "&&document.activeElement===(entry.miniedit?.element||entry.textbox);
+    },null,{timeout:5000});
+    assert.deepEqual(await page.evaluate(()=>{
+     const entry=PS.rooms.lobby.textEntry;
+     return [entry.getSelection(),document.activeElement===(entry.miniedit?.element||entry.textbox)];
+    }),[{value:'/avatar ',start:8,end:8},true]);
+    assert.equal(await page.evaluate(()=>PS.user.avatar),avatar);
+    assert.deepEqual(avatarCommands,[]);
+    if(!alreadyOpen)await capture('avatar-lobby');
+   }
+   assert.deepEqual(joins,['|/join lobby','|/join lobby']);
    await page.evaluate(()=>{PS.leave('lobby');PS.join('');});
    await page.evaluate(()=>PS.join('changebackground'));
    await page.locator('.bglist button[value="horizon"]').waitFor({state:'visible'});
@@ -269,6 +300,10 @@ const wallpaperPath = path.join(root,'fx/client-bg-horizon.jpg');
   assert.equal(await page.getByRole('link',{name:'Chat de Lobby'}).count(),0);
   assert.equal(await page.locator('.copa-news').count(),0);
   assert((await page.locator('.mainmenu-footer').textContent()).includes('Pokédex'));
+  await page.evaluate(()=>PS.join('options'));
+  await page.getByRole('button',{name:/^Avatar\s*(?:\.\.\.|…)$/}).click();
+  assert(await page.evaluate(()=>!!PS.rooms.avatars&&!PS.rooms.lobby));
+  await page.evaluate(()=>PS.closePopupsAbove(null));
   assert.equal(await page.locator('html.copa-rinha').count(),0);
   console.log('Non-Copa native menu/footer/background and independent local preferences are unchanged');
   await page.setViewportSize({width:390,height:900});

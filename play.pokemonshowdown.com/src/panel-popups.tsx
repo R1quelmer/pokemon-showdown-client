@@ -839,6 +839,13 @@ class OptionsPanel extends PSRoomPanel {
 		}
 	};
 
+	openCopaAvatar = () => {
+		this.close();
+		PS.join('lobby' as RoomID);
+		const lobby = PS.rooms.lobby as ChatRoom | undefined;
+		lobby?.prepareCopaAvatar();
+	};
+
 	override render() {
 		const room = this.props.room;
 		const serverSettings = PS.prefs.serversettings;
@@ -854,7 +861,9 @@ class OptionsPanel extends PSRoomPanel {
 			<p style="padding-left:50px">
 				<img
 					class="trainersprite yours" width="40" height="40" style={{ float: 'left', marginLeft: '-50px' }}
-					src={Dex.resolveAvatar(`${PS.user.avatar}`, PS.user.name)} data-href="avatars"
+					src={Dex.resolveAvatar(`${PS.user.avatar}`, PS.user.name)}
+					data-href={Config.copaRinhaLocalNames ? undefined : 'avatars'}
+					onClick={Config.copaRinhaLocalNames ? this.openCopaAvatar : undefined}
 				/> {}
 				<strong>{PS.user.name}</strong>
 				{Config.copaRinhaLocalNames && <small style="display:block">Conta Copa Rinha · autenticação local</small>}
@@ -862,7 +871,10 @@ class OptionsPanel extends PSRoomPanel {
 			</p>
 
 			<p style="clear:both">
-				<button class="button" data-href="avatars">{TL`[Avatar...]`}</button>
+				<button
+					class="button" data-href={Config.copaRinhaLocalNames ? undefined : 'avatars'}
+					onClick={Config.copaRinhaLocalNames ? this.openCopaAvatar : undefined}
+				>{TL`[Avatar...]`}</button>
 			</p>
 
 			{PS.user.named && !Config.copaRinhaLocalNames && (PS.user.registered?.userid === PS.user.userid ?

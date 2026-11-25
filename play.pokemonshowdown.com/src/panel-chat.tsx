@@ -43,6 +43,9 @@ export class ChatRoom extends PSRoom {
 	pmTarget: string | null = null;
 	challengeMenuOpen = false;
 	initialSlash = false;
+	textEntry: ChatTextEntry | null = null;
+	copaAvatarDraft = false;
+	private copaAvatarHintShown = false;
 	challenging: Challenge | null = null;
 	/** True after challenge send/accept before server acknowledgement */
 	teamSent: string | null = null;
@@ -70,6 +73,17 @@ export class ChatRoom extends PSRoom {
 		this.updateTarget(this.pmTarget);
 		this.connect();
 	}
+	prepareCopaAvatar() {
+		this.copaAvatarDraft = true;
+		if (!this.copaAvatarHintShown) {
+			this.copaAvatarHintShown = true;
+			this.add('|html|<div class="chat message"><small>Complete o comando com o nome do sprite. ' +
+				'<a href="https://play.pokemonshowdown.com/sprites/trainers/" target="_blank" rel="noopener">' +
+				'Lista de avatares</a></small></div>', true);
+		}
+		this.textEntry?.applyCopaAvatarDraft();
+	}
+
 	override connect() {
 		if (!this.connected && (
 			this.connectMode === 'normal' || this.connectMode === 'pending-reconnect' ||
@@ -957,7 +971,7 @@ export class ChatTextEntry extends preact.Component<{
 	} | null = null;
 	override componentDidMount() {
 		this.subscription = PS.user.subscribe(() => {
-			this.forceUpdate();
+			this.forceUpdate(() => this.applyCopaAvatarDraft());
 		});
 		const textbox = this.base!.querySelector<HTMLElement>('textarea[name=message], pre, input[name=url]')!;
 		if (textbox.tagName === 'TEXTAREA' || textbox.tagName === 'INPUT') {
@@ -976,9 +990,31 @@ export class ChatTextEntry extends preact.Component<{
 			this.props.room.args.initialSlash = false;
 			this.setValue('/', 1);
 		}
-		(this.props.room as any).__textentry = this;
+		this.props.room.textEntry = this;
+		this.applyCopaAvatarDraft();
 	}
+	override componentDidUpdate() {
+		this.applyCopaAvatarDraft();
+	}
+	applyCopaAvatarDraft() {
+		const room = this.props.room;
+		const input = this.miniedit?.element || this.textbox;
+		if (!room.copaAvatarDraft || !input || !PS.user.named || room.connected !== true || PS.room !== room) return;
+		room.copaAvatarDraft = false;
+		const command = '/avatar ';
+		PSView.scrollToRoom();
+		input.focus({ preventScroll: true });
+		this.setValue(command, command.length);
+		requestAnimationFrame(() => {
+			if (PS.room === room && input.isConnected && document.activeElement !== input && this.getValue() === command) {
+				input.focus({ preventScroll: true });
+				this.setSelection(command.length, command.length);
+			}
+		});
+	}
+
 	override componentWillUnmount() {
+		if (this.props.room.textEntry === this) this.props.room.textEntry = null;
 		if (this.subscription) {
 			this.subscription.unsubscribe();
 			this.subscription = null;
