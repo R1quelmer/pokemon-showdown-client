@@ -13,6 +13,9 @@ import { ChatUserList, PSTextarea, type ChatRoom } from "./panel-chat";
 import { PSRoomPanel, PSPanelWrapper, PSView } from "./panels";
 import { PSHeader } from "./panel-topbar";
 
+import type { CopaPartner, CopaProfile } from "./copa-accounts";
+import { parseCopaPartner } from "./copa-online";
+
 const WARNING_SECONDS = 5;
 // a function because it's evaluated before translations have loaded
 function battleLayoutLabel(layout: BattleLayoutPreference): string {
@@ -276,7 +279,9 @@ class UserPanel extends PSRoomPanel<UserRoom> {
 
 		const avatar = user.avatar !== '[loading]' ? Dex.resolveAvatar(`${user.avatar || 'unknown'}`, user.userid) : null;
 		return [<div class="userdetails">
-			{avatar && (room.isSelf ? (
+			{avatar && (Config.copaRinhaLocalNames ? (
+				<CopaAvatarLink name={user.name.trim()} avatar={String(user.avatar || 'unknown')} />
+			) : room.isSelf ? (
 				<img src={avatar} class="trainersprite yours" data-href="avatars" />
 			) : (
 				<img src={avatar} class="trainersprite" />
@@ -351,6 +356,207 @@ function CopaPresenceAvatar({ name, avatar, participant }: { name: string, avata
 	</span>;
 }
 
+function CopaAvatarLink({ name, avatar }: { name: string, avatar: string }) {
+	return <button
+		type="button" class="copa-avatar-link" aria-label={`Ver perfil de ${name}`}
+		onClick={ev => {
+			ev.stopPropagation();
+			PS.join(`copaprofile-${toID(name)}` as RoomID, {
+				args: { name, avatar }, parentElem: ev.currentTarget as HTMLElement,
+			});
+		}}
+	><CopaPresenceAvatar name={name} avatar={avatar} /></button>;
+}
+
+// Local BW artwork for Z-A forms whose sprites are not consistently on the native CDN.
+const COPA_ZA_PARTNER_ART = (
+	'absolmegaz barbaraclemega baxcaliburmega chandeluremega chesnaughtmega chimechomega clefablemega ' +
+	'crabominablemega darkraimega delphoxmega dragalgemega dragonitemega drampamega eelektrossmega emboarmega ' +
+	'excadrillmega falinksmega feraligatrmega floettemega froslassmega garchompmegaz glimmoramega golisopodmega ' +
+	'golurkmega greninjamega hawluchamega heatranmega lucariomegaz magearnamega malamarmega meganiummega ' +
+	'meowsticfmega meowsticmmega pyroarmega raichumegax raichumegay scolipedemega scovillainmega scraftymega ' +
+	'skarmorymega staraptormega starmiemega victreebelmega zeraoramega'
+).split(' ');
+const COPA_ZA_NORMAL_PARTNER_ART = ['tatsugiricurlymega', 'zygardemega'];
+
+function CopaPartnerSprite({ partner }: { partner?: CopaPartner }) {
+	if (!partner) return null;
+	const species = Dex.species.get(partner.species);
+	if (!species.exists) return null;
+	const label = species.name + (partner.shiny ? ' · Shiny' : '');
+	const suffix = partner.shiny ? '-shiny' : '';
+	const local = COPA_ZA_PARTNER_ART.includes(species.id) ||
+		(!partner.shiny && COPA_ZA_NORMAL_PARTNER_ART.includes(species.id));
+	const url = local ? `assets/copa-rinha/partner-za/${species.id}${suffix}.png` :
+		`${Dex.resourcePrefix}sprites/gen5${suffix}/${species.spriteid}.png`;
+	return <span class="copa-partner-sprite" key={url}>
+		<img
+			key={url} src={url} alt={label} title={label} ref={element => {
+				if (!element) return;
+				const image = element as HTMLImageElement;
+				image.onerror = () => {
+					image.hidden = true;
+					image.parentElement?.classList.add('copa-partner-missing');
+				};
+			}}
+		/>
+		<small title="Sprite estático indisponível">{label}</small>
+	</span>;
+}
+
+class CopaProfilePanel extends PSRoomPanel {
+	static readonly id = 'copaprofile';
+	static readonly routes = ['copaprofile-*'];
+	static readonly location = 'modal-popup';
+	static readonly noURL = true;
+	profile?: CopaProfile | null;
+
+	override componentDidMount() {
+		super.componentDidMount();
+		if (!Config.copaRinhaLocalNames) return;
+		const name = this.fallbackName();
+		void window.CopaAccounts?.profile(name).then(profile => {
+			this.profile = profile;
+			this.forceUpdate();
+		}, () => {
+			this.profile = null;
+			this.forceUpdate();
+		});
+	}
+
+	fallbackName() {
+		const room = this.props.room;
+		const name = room.args?.name;
+		return (typeof name === 'string' && name) || room.parentElem?.dataset.profileName ||
+			room.id.slice('copaprofile-'.length);
+	}
+
+	override render() {
+		const args = this.props.room.args;
+		const name = this.profile?.name || this.fallbackName();
+		const member = window.CopaRinhaPresence?.snapshot?.members?.find(row => toID(row.name) === toID(name));
+		const avatar = (typeof args?.avatar === 'string' && args.avatar) ||
+			this.props.room.parentElem?.dataset.profileAvatar || member?.avatar || this.profile?.avatar || 'unknown';
+		const partner = this.profile ? parseCopaPartner(this.profile.partner) : member?.partner;
+		return <PSPanelWrapper room={this.props.room} width={360}><div class="pad copa-profile">
+			{Config.copaRinhaLocalNames && <>
+				<h3>{name}</h3>
+				<div class="copa-profile-sprites">
+					<CopaPresenceAvatar name={name} avatar={avatar} />
+					<CopaPartnerSprite partner={partner} />
+				</div>
+				{partner && <p>{Dex.species.get(partner.species).name}{partner.shiny ? ' · Shiny' : ''}</p>}
+			</>}
+			<button class="button autofocus" data-cmd="/close">Fechar</button>
+		</div></PSPanelWrapper>;
+	}
+}
+
+class CopaPartnerPanel extends PSRoomPanel {
+	static readonly id = 'copapartner';
+	static readonly routes = ['copapartner'];
+	static readonly location = 'modal-popup';
+	static readonly noURL = true;
+	species = '';
+	shiny = false;
+	loading = true;
+	saving = false;
+	error = '';
+
+	override componentDidMount() {
+		super.componentDidMount();
+		if (!Config.copaRinhaLocalNames) return;
+		const accounts = window.CopaAccounts;
+		if (!accounts || !PS.user.named) {
+			this.error = 'Entre com sua conta Copa Rinha.';
+			this.forceUpdate();
+			return;
+		}
+		void accounts.profile(PS.user.name.trim()).then(profile => {
+			if (!profile) throw new Error('Entre com sua conta Copa Rinha.');
+			const partner = parseCopaPartner(profile.partner);
+			this.species = partner ? Dex.species.get(partner.species).name : '';
+			this.shiny = !!partner?.shiny;
+			this.loading = false;
+			this.forceUpdate();
+		}).catch(error => {
+			this.error = error.message;
+			this.forceUpdate();
+		});
+	}
+
+	save = (event: Event) => {
+		event.preventDefault();
+		if (this.loading || this.saving || !window.CopaAccounts) return;
+		const name = this.species.trim();
+		const species = Dex.species.get(name);
+		if (name && !species.exists) {
+			this.error = 'Selecione uma espécie ou forma do National Dex.';
+			this.forceUpdate();
+			return;
+		}
+		this.saving = true;
+		this.error = '';
+		this.forceUpdate();
+		void window.CopaAccounts.savePartner(name ? { species: species.id, shiny: this.shiny } : null).then(() => {
+			this.close();
+		}, error => {
+			this.error = error instanceof Error ? error.message : 'Não foi possível salvar o parceiro.';
+			this.saving = false;
+			this.forceUpdate();
+		});
+	};
+
+	private options?: string[];
+	private speciesOptions() {
+		if (this.options) return this.options;
+		const options: Record<string, string> = {};
+		for (const id of Object.keys(window.BattlePokedex || {})) {
+			const entry = Dex.species.get(id);
+			if (!entry.exists || entry.num <= 0 || entry.isNonstandard === 'CAP' || entry.isNonstandard === 'Custom' ||
+				entry.tags.includes('Pokestar')) continue;
+			options[entry.id] = entry.name;
+			for (const form of entry.cosmeticFormes || []) options[toID(form)] = form;
+		}
+		this.options = Object.values(options).sort((a, b) => a.localeCompare(b));
+		return this.options;
+	}
+
+	override render() {
+		const disabled = this.loading || this.saving;
+		const species = Dex.species.get(this.species);
+		const options = this.loading ? [] : this.speciesOptions();
+		return <PSPanelWrapper room={this.props.room} width={380}><div class="pad copa-partner-picker">
+			{Config.copaRinhaLocalNames && <form onSubmit={this.save}>
+				<h3>Pokémon parceiro</h3>
+				<label>Espécie ou forma<br />
+					<input
+						type="text" class="textbox" list="copa-partner-species" value={this.species}
+						disabled={disabled} onInput={ev => {
+							this.species = (ev.currentTarget as HTMLInputElement).value;
+							this.forceUpdate();
+						}}
+					/>
+				</label>
+				<datalist id="copa-partner-species">{options.map(name => <option value={name} key={name} />)}</datalist>
+				<label class="checkbox">
+					<input
+						type="checkbox" checked={this.shiny} disabled={disabled} onChange={ev => {
+							this.shiny = (ev.currentTarget as HTMLInputElement).checked;
+							this.forceUpdate();
+						}}
+					/> Shiny
+				</label>
+				{species.exists && <CopaPartnerSprite partner={{ species: species.id, shiny: this.shiny }} />}
+				{this.error && <p class="error" role="alert">{this.error}</p>}
+				<p><small>Para remover o parceiro, deixe o campo em branco.</small></p>
+				<button class="button" type="submit" disabled={disabled}>Salvar</button> {}
+				<button class="button" type="button" onClick={() => this.close()}>Cancelar</button>
+			</form>}
+		</div></PSPanelWrapper>;
+	}
+}
+
 class CopaOnlinePanel extends PSRoomPanel {
 	static readonly id = 'copaonline';
 	static readonly routes = ['copaonline'];
@@ -373,7 +579,7 @@ class CopaOnlinePanel extends PSRoomPanel {
 					<ul class="copa-online-list">{snapshot.users.map(user => {
 						const id = toID(user.name);
 						return <li key={id}>
-							<CopaPresenceAvatar name={user.name} avatar={user.avatar} participant={id} />
+							<CopaAvatarLink name={user.name} avatar={user.avatar} />
 							<div class="copa-online-player">
 								<button class="button" data-href={`user-${id}`}>{user.name}</button>
 								<small>
@@ -437,7 +643,10 @@ class CopaMembersPanel extends PSRoomPanel {
 					{matching?.length ? <ul class="copa-online-list">{matching.map(member => {
 						const id = toID(member.name);
 						return <li key={id}>
-							<CopaPresenceAvatar name={member.name} avatar={member.avatar} />
+							<div class="copa-member-sprites">
+								<CopaAvatarLink name={member.name} avatar={member.avatar} />
+								<CopaPartnerSprite partner={member.partner} />
+							</div>
 							<div class="copa-online-player">
 								<button
 									class="button" onClick={ev => {
@@ -859,12 +1068,14 @@ class OptionsPanel extends PSRoomPanel {
 		const defaultClient = /(?:^|;\s*)preactalpha=1(?:;|$)/.test(document.cookie) ? 'new' : 'old';
 		return <PSPanelWrapper room={room} width={380}><div class="pad">
 			<p style="padding-left:50px">
-				<img
+				{Config.copaRinhaLocalNames ? (
+					<span class="copa-settings-avatar">
+						<CopaAvatarLink name={PS.user.name.trim()} avatar={String(PS.user.avatar)} />
+					</span>
+				) : <img
 					class="trainersprite yours" width="40" height="40" style={{ float: 'left', marginLeft: '-50px' }}
-					src={Dex.resolveAvatar(`${PS.user.avatar}`, PS.user.name)}
-					data-href={Config.copaRinhaLocalNames ? undefined : 'avatars'}
-					onClick={Config.copaRinhaLocalNames ? this.openCopaAvatar : undefined}
-				/> {}
+					src={Dex.resolveAvatar(`${PS.user.avatar}`, PS.user.name)} data-href="avatars"
+				/>} {}
 				<strong>{PS.user.name}</strong>
 				{Config.copaRinhaLocalNames && <small style="display:block">Conta Copa Rinha · autenticação local</small>}
 				<StatusEditor />
@@ -874,7 +1085,8 @@ class OptionsPanel extends PSRoomPanel {
 				<button
 					class="button" data-href={Config.copaRinhaLocalNames ? undefined : 'avatars'}
 					onClick={Config.copaRinhaLocalNames ? this.openCopaAvatar : undefined}
-				>{TL`[Avatar...]`}</button>
+				>{TL`[Avatar...]`}</button> {}
+				{Config.copaRinhaLocalNames && <button class="button" data-href="copapartner">Pokémon parceiro</button>}
 			</p>
 
 			{PS.user.named && !Config.copaRinhaLocalNames && (PS.user.registered?.userid === PS.user.userid ?
@@ -2341,6 +2553,8 @@ class RulesPanel extends PSRoomPanel<PopupRoom> {
 
 PS.addRoomType(
 	UserPanel,
+	CopaProfilePanel,
+	CopaPartnerPanel,
 	UserOptionsPanel,
 	UserListPanel,
 	VolumePanel,

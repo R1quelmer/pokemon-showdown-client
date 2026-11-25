@@ -1,6 +1,7 @@
 /* eslint-disable no-restricted-globals */
 /* eslint-disable no-restricted-syntax */
 /** Accounts are exclusive to Copa Rinha. No Showdown passwords or assertions. */
+import { toID } from './battle-dex';
 import { Config, PS } from './client-main';
 import { CopaRinhaLocalNames } from './copa-rinha';
 const endpoint = 'https://copa-rinha-showdown.onrender.com/copa-rinha/accounts/';
@@ -10,6 +11,8 @@ interface Session {
 	token: string;
 	expires: number;
 }
+export interface CopaPartner { species: string; shiny: boolean }
+export interface CopaProfile { name: string; avatar: string; partner?: CopaPartner }
 class CopaAccountError extends Error {
 	readonly status: number;
 	constructor(message: string, status: number) { super(message); this.status = status; }
@@ -39,6 +42,18 @@ export const CopaAccounts = new class {
 			throw new CopaAccountError(result.error || 'Contas temporariamente indisponíveis.', response.status);
 		return result;
 	}
+	async profile(name: string): Promise<CopaProfile | null> {
+		return (await this.request('profile', { name })).member;
+	}
+	async savePartner(partner: CopaPartner | null) {
+		const session = this.read();
+		if (!Config.copaRinhaLocalNames || !session || toID(session.name) !== PS.user.userid) {
+			throw new Error('Entre com sua conta Copa Rinha para salvar o parceiro.');
+		}
+		await this.request('partner', { partner }, session.token);
+		window.CopaRinhaPresence?.refresh();
+	}
+
 	async resume() {
 		if (!Config.copaRinhaLocalNames)
 			return;

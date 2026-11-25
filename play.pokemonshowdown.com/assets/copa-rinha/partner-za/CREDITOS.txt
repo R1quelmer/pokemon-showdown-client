@@ -1,0 +1,8 @@
+Sprites estáticos BW das formas Mega de Legends: Z-A, recortados nas margens transparentes.
+
+Versões normais e shiny: diretórios sprites/gen5 e sprites/gen5-shiny do fork National Dex Champions, revisão 0d2cfb8f2300eb630b1fc3e47ce1572fed59aa57.
+https://github.com/MasterTernimus/PokemonShowdown-Client/tree/0d2cfb8f2300eb630b1fc3e47ce1572fed59aa57/play.pokemonshowdown.com/sprites
+Créditos da coleção: https://champsnatdex.dedyn.io/credits.html
+
+As formas sem PNG na origem que têm arquivo de animação local usam um quadro estático de Aronousqui20.
+Créditos e permissão de reutilização: ../../../sprites/za/CREDITS.md

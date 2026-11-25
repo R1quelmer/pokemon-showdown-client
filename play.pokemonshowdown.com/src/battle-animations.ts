@@ -754,10 +754,16 @@ export class BattleScene implements BattleSceneStub {
 				noflip = ' noflip';
 			}
 		}
+		const profileName = BattleLog.escapeHTML(side.name);
+		const profileLink = document.documentElement.classList.contains('copa-rinha') && !this.battle.isReplay ?
+			`<button type="button" class="copa-battle-avatar-link" aria-label="Ver perfil de ${profileName}" ` +
+			`data-href="copaprofile-${toID(side.name)}" data-profile-name="${profileName}" ` +
+			`data-profile-avatar="${BattleLog.escapeHTML(String(side.avatar))}"></button>` : '';
+
 		return (
 			`<div class="trainer trainer-${posStr}"${faded}><strong>${BattleLog.escapeHTML(side.name)}</strong>` +
 			`<div class="trainersprite${noflip}"${ratinghtml} style="background-image:url(${avatar})">` +
-			`</div>${badgehtml}${pokemonhtml}</div>`
+			`${profileLink}</div>${badgehtml}${pokemonhtml}</div>`
 		);
 	}
 	updateSidebar(side: Side) {

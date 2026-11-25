@@ -1,3 +1,4 @@
+import type { CopaPartner } from './copa-accounts';
 /* eslint-disable no-restricted-globals */
 /** Public presence over the native Showdown query transport, only in the Copa entry. */
 import { Config, PS } from './client-main';
@@ -16,7 +17,17 @@ export interface CopaPresenceSnapshot {
 	users: CopaOnlineUser[];
 	members?: CopaMember[] | null;
 }
-interface CopaMember { name: string; avatar: string; online: boolean; rooms: string[]; battle?: string }
+export function parseCopaPartner(input: unknown): CopaPartner | undefined {
+	const value = input as Partial<CopaPartner> | undefined;
+	if (typeof value?.species === 'string' && /^[a-z0-9]{1,32}$/.test(value.species) && typeof value.shiny === 'boolean') {
+		return { species: value.species, shiny: value.shiny };
+	}
+	return undefined;
+}
+
+interface CopaMember {
+	name: string; avatar: string; online: boolean; rooms: string[]; battle?: string; partner?: CopaPartner;
+}
 
 function publicAvatar(value: unknown) {
 	const avatar = typeof value === 'number' && Number.isSafeInteger(value) && value >= 0 ? String(value) : value;
@@ -76,7 +87,8 @@ export const CopaRinhaPresence = new class {
 				row.rooms.filter((room: unknown): room is string => typeof room === 'string' && room.length <= 120) : [];
 			const battle = row.online && typeof row.battle === 'string' && /^battle-[a-z0-9-]{1,100}$/.test(row.battle) ?
 				row.battle : undefined;
-			members.push({ name: row.name, avatar: publicAvatar(row.avatar), online: row.online, rooms, battle });
+			const partner = parseCopaPartner(row.partner);
+			members.push({ name: row.name, avatar: publicAvatar(row.avatar), online: row.online, rooms, battle, partner });
 		}
 		return members.sort((a, b) => a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' }));
 	}

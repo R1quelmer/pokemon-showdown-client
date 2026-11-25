@@ -42,7 +42,7 @@ const members = [
 			const page = await context.newPage();
 			const fixture = {snapshot: presence([alice, bob], 2), requests: [], errors: [], authRequests: [],
 				mode: 'normal', socket: null, connections: 0, holdHandshake: false};
-			let accountName = '';
+			let accountName = '', partner;
 			page.on('pageerror', error => fixture.errors.push(error.message));
 			await page.addInitScript(() => { window.Worker = undefined; });
 			await page.clock.install();
@@ -76,6 +76,15 @@ const members = [
 				const url = route.request().url();
 				if (url.startsWith('https://copa-rinha-showdown.onrender.com/copa-rinha/accounts/')) {
 					const data = route.request().postDataJSON();
+					if (url.endsWith('/partner')) {
+						assert.equal(route.request().headers().authorization, 'Bearer ' + 'a'.repeat(43));
+						partner = data.partner;
+						return route.fulfill({json: {partner}});
+					}
+					if (url.endsWith('/profile')) {
+						const row = members.find(member => member.name === data.name);
+						return route.fulfill({json: {member: row ? {...row, partner: data.name === 'Alice' ? partner : undefined} : null}});
+					}
 					if (data.name) accountName = data.name;
 					return route.fulfill({json: {name: accountName, token: 'a'.repeat(43), expires: Date.now() + 30 * 86400000}});
 				}
@@ -102,7 +111,7 @@ const members = [
 				assert.equal(fixture.connections, connections, 'logo preserves the connection');
 			}
 			await page.evaluate(() => PS.join('rooms'));
-			const counter = page.locator('[data-href="copaonline"]');
+			const counter = page.locator('#room-rooms [data-href="copaonline"]');
 			await counter.waitFor({state: 'visible'});
 			await page.waitForFunction(() => document.querySelector('[data-href="copaonline"]')?.textContent.includes('4'));
 			await counter.click();
@@ -188,7 +197,26 @@ const members = [
 			await page.waitForFunction(() => PS.connection.connected && PS.user.name === 'Alice' && !PS.user.loggingIn);
 			await page.clock.fastForward(15050);
 			await list.locator('[data-href="user-carla"]').waitFor({state: 'visible'});
-			fixture.members = members;
+			await page.evaluate(() => { PS.closePopupsAbove(null); PS.join('options'); });
+			await page.getByRole('button', {name: 'Pokémon parceiro'}).click();
+			const settings = page.locator('.copa-partner-picker');
+			const species = settings.getByRole('combobox', {name: 'Espécie ou forma'});
+			await species.fill('Greninja-Mega');
+			await settings.getByRole('checkbox', {name:'Shiny'}).check();
+			const mega = settings.getByRole('img', {name:'Greninja-Mega · Shiny'});
+			assert((await mega.getAttribute('src')).endsWith('/partner-za/greninjamega-shiny.png'));
+			await assertSpriteElementsLoaded(page, '.copa-partner-picker .copa-partner-sprite img');
+			await species.fill('Rotom-Wash');
+						await settings.getByRole('button', {name:'Salvar'}).click();
+			await settings.waitFor({state:'hidden'});
+			assert.deepEqual(partner, {species:'rotomwash', shiny:true});
+			await page.evaluate(() => { PS.closePopupsAbove(null); PS.join('options'); });
+			await page.getByRole('button', {name: 'Pokémon parceiro'}).click();
+			await species.waitFor();
+			await page.waitForFunction(() => document.querySelector('.copa-partner-picker input[type=text]')?.value === 'Rotom-Wash');
+			assert(await settings.getByRole('checkbox', {name:'Shiny'}).isChecked());
+			await settings.getByRole('button', {name:'Cancelar'}).click();
+			fixture.members = members.map(member => member.name === 'Alice' ? {...member, partner} : member);
 			await page.evaluate(() => {
 				PS.closePopupsAbove(null);
 				PS.leave('dm-bob');
@@ -217,6 +245,19 @@ const members = [
 				await fs.mkdir(process.env.COPA_MEMBERS_SCREENSHOTS, {recursive: true});
 				await page.screenshot({path: path.join(process.env.COPA_MEMBERS_SCREENSHOTS, `membros-${width}.png`)});
 			}
+			const ownAvatar = directory.getByRole('button', {name:'Ver perfil de Alice'});
+			const sprite = directory.getByRole('img', {name:'Rotom-Wash · Shiny'});
+			await sprite.waitFor();
+			assert((await sprite.getAttribute('src')).endsWith('/gen5-shiny/rotom-wash.png'));
+			await ownAvatar.click();
+			const enlarged = page.locator('.copa-profile');
+			await enlarged.getByRole('img', {name:'Rotom-Wash · Shiny'}).waitFor({timeout:5000});
+			assert.equal(await page.locator('#room-avatars').count(),0);
+			assert((await enlarged.locator('.copa-online-avatar').boundingBox()).width > 80);
+			if (process.env.COPA_MEMBERS_SCREENSHOTS && [1440, 390].includes(width)) {
+				await page.screenshot({path: path.join(process.env.COPA_MEMBERS_SCREENSHOTS, `perfil-${width}.png`)});
+			}
+			await enlarged.getByRole('button', {name:'Fechar'}).click();
 			const search = directory.getByRole('searchbox');
 			await search.fill('CAR');
 			assert.deepEqual(await nicknames(), ['Carla']);
@@ -241,6 +282,15 @@ const members = [
 			await page.evaluate(() => { PS.closePopupsAbove(null); PS.join('copamembers'); });
 			await battleLink.click();
 			await page.waitForFunction(id => !!PS.rooms[id], publicBattle);
+			if (width === 1440) {
+				await page.evaluate(id => {
+					PS.prefs.set("mute",true);
+					PS.receive('>' + id + '\n|init|battle\n|title|Bob vs. Alice\n|gametype|singles\n|gen|9\n' +
+						'|player|p1|Alice|167\n|player|p2|Bob|ethan\n|start\n|turn|1');
+				},publicBattle);
+				await page.getByRole('button', {name:'Ver perfil de Bob'}).click({timeout:8000});
+				await page.locator('.copa-profile').getByRole('heading', {name:'Bob'}).waitFor();
+			}
 			assert.deepEqual(fixture.errors, []); assert.deepEqual(fixture.authRequests, []);
 			assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
 			console.log(`Native presence counter/list, dedup, anonymous/privacy, profile/challenge, automatic updates, visibility/reconnect/errors and layout passed at ${width}px`);

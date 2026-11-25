@@ -522,3 +522,20 @@ html.copa-rinha .copa-mascot img {display:block;width:100%;height:100%;object-fi
 @media (any-hover:hover) and (prefers-reduced-motion:no-preference) {
   html.copa-rinha:not([data-copa-static-mascots]) .copa-mascot:hover img {animation:copa-mascot-hop 260ms infinite}
 }
+
+html.copa-rinha .copa-avatar-link {border:0;padding:0;background:none;color:inherit;cursor:pointer}
+html.copa-rinha .copa-settings-avatar {float:left;margin-left:-50px}
+html.copa-rinha .userdetails>.copa-avatar-link {float:right}
+html.copa-rinha .copa-member-sprites, html.copa-rinha .copa-profile-sprites {display:flex;align-items:center;gap:4px}
+html.copa-rinha .copa-members .copa-online-list li {grid-template-columns:auto minmax(0,1fr)}
+html.copa-rinha .copa-partner-sprite {display:grid;place-items:center;width:42px;height:42px}
+html.copa-rinha .copa-partner-sprite img {width:100%;height:100%;object-fit:contain;image-rendering:pixelated}
+html.copa-rinha .copa-partner-sprite small {display:none}
+html.copa-rinha .copa-partner-missing small {display:block;font-size:9px;overflow-wrap:anywhere}
+html.copa-rinha .copa-profile {text-align:center}
+html.copa-rinha .copa-profile-sprites {justify-content:center;gap:15px}
+html.copa-rinha .copa-profile-sprites :is(.copa-online-avatar,.copa-online-avatar img,.copa-partner-sprite) {width:104px;height:104px}
+html.copa-rinha .copa-profile-sprites .copa-online-avatar img {object-fit:contain;image-rendering:pixelated}
+html.copa-rinha .copa-partner-picker .textbox {display:block;box-sizing:border-box;width:100%;margin:5px 0 10px}
+html.copa-rinha .trainer .trainersprite:has(.copa-battle-avatar-link) {position:relative}
+html.copa-rinha .copa-battle-avatar-link {position:absolute;inset:0;border:0;padding:0;background:none;cursor:pointer}

@@ -1,5 +1,6 @@
 // Add player-facing changes at the top. For entries on the same date, newest goes first.
 export const COPA_UPDATES = [
+	{ date: '2026-11-25', text: 'Os avatares abrem o perfil ampliado. Escolha um Pokémon parceiro nas configurações.' },
 	{ date: '2026-11-25', text: 'O formato aparece como Copa Rinha II nas listas de times, seletores e batalhas.' },
 	{ date: '2026-11-25', text: 'O botão Avatar abre o Lobby com o comando pronto para você completar.' },
 	{ date: '2026-11-25', text: 'A contagem regressiva ficou verde e os mascotes respondem ao mouse, clique e toque.' },
