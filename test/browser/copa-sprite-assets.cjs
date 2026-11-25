@@ -67,7 +67,10 @@ async function serveNativeSprite(route) {
 	const relativePath = decodeURIComponent(url.pathname).replace(/^\/sprites\//, '');
 	if (!url.pathname.startsWith('/sprites/') || !manifest.assets[relativePath]) return false;
 	const body = await loadSprite(relativePath);
-	await route.fulfill({body, contentType: relativePath.endsWith('.gif') ? 'image/gif' : 'image/png'});
+	await route.fulfill({
+		body, contentType: relativePath.endsWith('.gif') ? 'image/gif' : 'image/png',
+		headers: {'access-control-allow-origin': '*'},
+	});
 	return true;
 }
 

@@ -341,16 +341,64 @@ class UserPanel extends PSRoomPanel<UserRoom> {
 	}
 }
 
+/** Tighten the enlarged composition using the visible bounds of each static image. */
+function fitCopaProfileSprite(image: HTMLImageElement) {
+	if (image.dataset.profileFit) return;
+	image.dataset.profileFit = 'true';
+	const source = new Image();
+	source.crossOrigin = 'anonymous';
+	source.onload = () => {
+		const { naturalWidth: width, naturalHeight: height } = source;
+		const frame = image.parentElement;
+		if (!frame || !width || !height) return;
+		const canvas = document.createElement('canvas');
+		canvas.width = width;
+		canvas.height = height;
+		const context = canvas.getContext('2d');
+		if (!context) return;
+		context.drawImage(source, 0, 0);
+		let pixels: Uint8ClampedArray;
+		try {
+			pixels = context.getImageData(0, 0, width, height).data;
+		} catch {
+			return;
+		}
+		let left = width, right = 0, top = height, bottom = 0;
+		for (let y = 0; y < height; y++) {
+			for (let x = 0; x < width; x++) {
+				if (!pixels[(y * width + x) * 4 + 3]) continue;
+				left = Math.min(left, x);
+				right = Math.max(right, x + 1);
+				top = Math.min(top, y);
+				bottom = Math.max(bottom, y + 1);
+			}
+		}
+		if (right <= left || bottom <= top) return;
+		const scale = 104 / Math.max(width, height);
+		frame.style.width = `${(right - left) * scale}px`;
+		frame.style.height = `${(bottom - top) * scale}px`;
+		image.style.width = `${width * scale}px`;
+		image.style.height = `${height * scale}px`;
+		image.style.left = `${-left * scale}px`;
+		image.style.top = `${-top * scale}px`;
+		frame.dataset.profileTight = 'true';
+	};
+	source.src = image.src;
+}
+
 /** Copa presence uses the native popup, avatar and challenge/profile routes. */
-function CopaPresenceAvatar({ name, avatar, participant }: { name: string, avatar: string, participant?: string }) {
+function CopaPresenceAvatar({ name, avatar, participant, profile }: {
+	name: string, avatar: string, participant?: string, profile?: boolean,
+}) {
 	const url = Dex.resolveAvatar(avatar, participant);
-	return <span class="copa-online-avatar" aria-hidden="true">{name.charAt(0).toUpperCase()}
+	return <span class="copa-online-avatar" aria-hidden="true" key={url}>{name.charAt(0).toUpperCase()}
 		<img
 			key={url} src={url} alt="" width={40} height={40}
 			ref={element => {
 				if (!element) return;
 				const image = element as HTMLImageElement;
 				image.onerror = () => { image.hidden = true; };
+				if (profile) fitCopaProfileSprite(image);
 			}}
 		/>
 	</span>;
@@ -379,7 +427,7 @@ const COPA_ZA_PARTNER_ART = (
 ).split(' ');
 const COPA_ZA_NORMAL_PARTNER_ART = ['tatsugiricurlymega', 'zygardemega'];
 
-function CopaPartnerSprite({ partner }: { partner?: CopaPartner }) {
+function CopaPartnerSprite({ partner, profile }: { partner?: CopaPartner, profile?: boolean }) {
 	if (!partner) return null;
 	const species = Dex.species.get(partner.species);
 	if (!species.exists) return null;
@@ -398,6 +446,7 @@ function CopaPartnerSprite({ partner }: { partner?: CopaPartner }) {
 					image.hidden = true;
 					image.parentElement?.classList.add('copa-partner-missing');
 				};
+				if (profile) fitCopaProfileSprite(image);
 			}}
 		/>
 		<small title="Sprite estático indisponível">{label}</small>
@@ -442,8 +491,8 @@ class CopaProfilePanel extends PSRoomPanel {
 			{Config.copaRinhaLocalNames && <>
 				<h3>{name}</h3>
 				<div class="copa-profile-sprites">
-					<CopaPresenceAvatar name={name} avatar={avatar} />
-					<CopaPartnerSprite partner={partner} />
+					<CopaPresenceAvatar name={name} avatar={avatar} profile />
+					<CopaPartnerSprite partner={partner} profile />
 				</div>
 				{partner && <p>{Dex.species.get(partner.species).name}{partner.shiny ? ' · Shiny' : ''}</p>}
 			</>}

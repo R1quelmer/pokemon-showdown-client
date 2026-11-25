@@ -253,7 +253,17 @@ const members = [
 			const enlarged = page.locator('.copa-profile');
 			await enlarged.getByRole('img', {name:'Rotom-Wash · Shiny'}).waitFor({timeout:5000});
 			assert.equal(await page.locator('#room-avatars').count(),0);
-			assert((await enlarged.locator('.copa-online-avatar').boundingBox()).width > 80);
+			await enlarged.locator('[data-profile-tight]').nth(1).waitFor();
+			const pair = enlarged.locator('.copa-profile-sprites');
+			const trainer = await pair.locator('.copa-online-avatar').boundingBox();
+			const pokemon = await pair.locator('.copa-partner-sprite').boundingBox();
+			const block = await pair.boundingBox();
+			assert(trainer.height > 75 && pokemon.height > 50);
+			assert(Math.abs(trainer.y + trainer.height - pokemon.y - pokemon.height) <= 1, 'visible bases align');
+			assert(Math.abs(pokemon.x - trainer.x - trainer.width - 4) <= 1, 'visible sprites are close together');
+			assert(Math.abs((trainer.x + pokemon.x + pokemon.width) / 2 - (block.x + block.width / 2)) <= 1);
+			assert.equal(await pair.locator('img').evaluateAll(images =>
+				images.every(image => getComputedStyle(image).imageRendering === 'pixelated' && !image.getAnimations().length)), true);
 			if (process.env.COPA_MEMBERS_SCREENSHOTS && [1440, 390].includes(width)) {
 				await page.screenshot({path: path.join(process.env.COPA_MEMBERS_SCREENSHOTS, `perfil-${width}.png`)});
 			}
