@@ -514,13 +514,83 @@ export class MainMenuRoom extends PSRoom {
 	}
 }
 
+const COPA_START = '2026-12-05T20:00:00-03:00';
+const COPA_START_TIME = Date.parse(COPA_START);
+
+function copaSecondsRemaining() {
+	return Math.max(0, Math.ceil((COPA_START_TIME - Date.now()) / 1000));
+}
+
+class CopaCountdown extends preact.Component<object, { seconds: number }> {
+	override state = { seconds: copaSecondsRemaining() };
+	private timer?: ReturnType<typeof setInterval>;
+
+	private tick = () => {
+		const seconds = copaSecondsRemaining();
+		this.setState({ seconds });
+		if (!seconds) clearInterval(this.timer);
+		return seconds;
+	};
+	override componentDidMount() {
+		if (this.tick()) this.timer = setInterval(this.tick, 1000);
+	}
+	override componentWillUnmount() {
+		clearInterval(this.timer);
+	}
+	override render() {
+		const { seconds } = this.state;
+		if (!seconds) return <p class="copa-countdown" role="status">O campeonato começou!</p>;
+		const days = Math.floor(seconds / 86400);
+		const hours = Math.floor(seconds / 3600) % 24;
+		const minutes = Math.floor(seconds / 60) % 60;
+		const remainingSeconds = seconds % 60;
+		const units = [[days, 'dia'], [hours, 'hora'], [minutes, 'minuto'], [remainingSeconds, 'segundo']] as const;
+		return <p class="copa-countdown" role="timer">
+			{units.map(([value, unit]) => `${value} ${unit}${value === 1 ? '' : 's'}`).join(' · ')}
+		</p>;
+	}
+}
+
+function CopaNews() {
+	return <div class="readable-bg copa-news">
+		<section class="newsentry">
+			<h4>Copa Rinha II</h4>
+			<p><time dateTime={COPA_START}>5 de dezembro de 2026, às 20h, horário de Brasília.</time></p>
+			<CopaCountdown />
+		</section>
+		<section class="newsentry">
+			<h4>Fase de testes</h4>
+			<p>
+				Testem as batalhas, compartilhem times e salvem replays para avaliarmos a estabilidade do client.
+				Avisem caso encontrem bugs ou problemas de desempenho.
+			</p>
+		</section>
+		<section class="newsentry">
+			<h4>Personalize seu avatar</h4>
+			<p>Entre no Lobby e utilize o comando <code>/avatar nome-do-sprite</code>.</p>
+			<p><a href="https://play.pokemonshowdown.com/sprites/trainers/" target="_blank" rel="noopener">
+				Lista de avatares disponíveis
+			</a></p>
+		</section>
+		<section class="newsentry">
+			<h4>Treinamento contra bots</h4>
+			<p>
+				Para jogar contra o bot de treinamento, basta marcar a opção de pareamento contra bots e iniciar uma busca de batalha.
+			</p>
+		</section>
+		<div class="newsentry">
+			<p><small>As contas da Copa Rinha são independentes das contas oficiais do Pokémon Showdown.</small></p>
+		</div>
+	</div>;
+}
+
 class NewsPanel extends PSRoomPanel {
 	static readonly id = 'news';
 	static readonly routes = ['news'];
 	static readonly title = 'News';
 	static readonly location = 'mini-window';
 	static getTitle() {
-		return TL`News`;
+		return Config.copaRinhaLocalNames ? 'Notícias' : TL`News`;
 	}
 	override componentDidMount() {
 		super.componentDidMount();
@@ -534,6 +604,7 @@ class NewsPanel extends PSRoomPanel {
 			return;
 		}
 
+		if (Config.copaRinhaLocalNames) return;
 		const readNewsId = Number(PS.prefs.newsid);
 		if (!readNewsId) return;
 		let hasUnread = false;
@@ -557,7 +628,9 @@ class NewsPanel extends PSRoomPanel {
 	};
 	override render() {
 		return <PSPanelWrapper room={this.props.room} fullSize>
-			<div class="readable-bg" onClick={this.markAsRead} dangerouslySetInnerHTML={{ __html: PS.newsHTML }}></div>
+			{Config.copaRinhaLocalNames ? <CopaNews /> : (
+				<div class="readable-bg" onClick={this.markAsRead} dangerouslySetInnerHTML={{ __html: PS.newsHTML }}></div>
+			)}
 		</PSPanelWrapper>;
 	}
 }
@@ -643,7 +716,6 @@ class MainMenuPanel extends PSRoomPanel<MainMenuRoom> {
 	renderMiniRooms() {
 		return PS.miniRoomList.map(roomid => {
 			const room = PS.rooms[roomid]!;
-			if (Config.copaRinhaLocalNames && roomid === 'news' && !PS.newsHTML.trim()) return null;
 			const notifying = room.notifications.length ? ' notifying' : room.isSubtleNotifying ? ' subtle-notifying' : '';
 			return <div
 				class={`mini-window${room.minimized ? ' collapsed' : ''}${room === PS.room ? ' focused' : ''}`}
@@ -798,11 +870,11 @@ class MainMenuPanel extends PSRoomPanel<MainMenuRoom> {
 						{!copa && <p><a class={"mainmenu7 mainmenu" + onlineButton} href="resources">{TL`Info & Resources`}</a></p>}
 					</div>
 				</div>
-				<div class="mainmenu-right" style={{ display: PS.leftPanelWidth ? 'none' : 'block' }}>
+				<div class="mainmenu-right" style={{ display: !copa && PS.leftPanelWidth ? 'none' : 'block' }}>
 					<div class="menugroup">
-						<p><a class={"mainmenu1 mainmenu" + onlineButton} href="rooms">{TL`Chat rooms`}</a></p>
-						{PS.server.id !== 'showdown' && (
-							<p><a class={"mainmenu2 mainmenu" + onlineButton} href="lobby">{TL`Lobby chat`}</a></p>
+						{!copa && <p><a class={"mainmenu1 mainmenu" + onlineButton} href="rooms">{TL`Chat rooms`}</a></p>}
+						{(copa || PS.server.id !== 'showdown') && (
+							<p><a class={"mainmenu2 mainmenu" + onlineButton} href="lobby">{copa ? 'Chat de Lobby' : TL`Lobby chat`}</a></p>
 						)}
 					</div>
 				</div>

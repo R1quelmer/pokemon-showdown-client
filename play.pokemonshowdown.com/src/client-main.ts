@@ -2231,7 +2231,7 @@ export const PS = new class extends PSModel {
 		});
 		this.rightPanel = this.rooms['rooms']!;
 
-		if (this.newsHTML) {
+		if (Config.copaRinhaLocalNames || this.newsHTML) {
 			this.addRoom({
 				id: 'news' as RoomID,
 				title: "News",

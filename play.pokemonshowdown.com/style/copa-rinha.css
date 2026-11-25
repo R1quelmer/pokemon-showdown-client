@@ -111,6 +111,14 @@ html.copa-rinha .mini-window-header a {color:var(--copa-text)}
 html.copa-rinha :where(.mini-window-contents,.newsentry,.readable-bg) {color:var(--copa-muted);background:var(--copa-surface);backdrop-filter:none}
 html.copa-rinha .newsentry h4 {color:var(--copa-text)}
 html.copa-rinha .newsentry small {color:var(--copa-muted)}
+html.copa-rinha .mini-window[data-roomid="news"].focused .mini-window-header {color:var(--copa-text);background:var(--copa-raised)}
+html.copa-rinha .copa-news .newsentry {padding:9px 12px;line-height:1.45}
+html.copa-rinha .copa-news .newsentry + .newsentry {border-color:var(--copa-line)}
+html.copa-rinha .copa-news :is(h4,p) {margin:0}
+html.copa-rinha .copa-news :is(h4,p) + p {margin-top:5px}
+html.copa-rinha .copa-news :is(a,.copa-countdown) {color:var(--copa-cyan)}
+html.copa-rinha .copa-news code {color:var(--copa-text);background:var(--copa-input);border-color:var(--copa-line)}
+html.copa-rinha .copa-countdown {font-variant-numeric:tabular-nums}
 
 /* Inputs and buttons outside the battle field only. Native move/type colors remain meaningful. */
 html.copa-rinha :where(.ps-room,.ps-popup,.header,.header-vertical) .button:not(.battle *) {
