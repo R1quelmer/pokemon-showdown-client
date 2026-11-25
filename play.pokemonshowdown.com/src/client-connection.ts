@@ -6,6 +6,7 @@
  */
 
 import { Config, PS } from "./client-main";
+import { CopaRinhaLocalNames } from "./copa-rinha";
 import { TL } from "./battle-dex";
 
 declare const SockJS: any;
@@ -181,6 +182,7 @@ export class PSConnection {
 
 	private markDisconnected() {
 		this.connected = false;
+		if (Config.copaRinhaLocalNames) CopaRinhaLocalNames.disconnect();
 		PS.isOffline = true;
 		this.socket = null;
 		for (const roomid in PS.rooms) {

@@ -10,9 +10,23 @@ não afeta a autenticação do client oficial `*.psim.us`.
 
 O nickname é guardado no localStorage desta origem, com uma chave que inclui
 host, porta e prefixo do servidor, e somente após confirmação do servidor.
-Cada novo `challstr` provoca uma nova tentativa de restauração do nome confirmado.
-Uma resposta de nome ocupado ou timeout permite escolher outro. Delimitadores do
-protocolo e caracteres de controle são rejeitados antes do comando.
+Cada novo `challstr` provoca uma única tentativa de restauração do nome confirmado;
+repetir o mesmo desafio não envia outro comando. Há apenas uma tentativa pendente
+por vez, e respostas com outro nome não cancelam a escolha atual. Uma resposta de
+nome ocupado ou timeout mantém o texto digitado editável, sem retry automático.
+Uma troca manual recusada preserva o nome anterior confirmado; uma restauração
+recusada remove somente esse apelido salvo, evitando novas restaurações dele.
+A desconexão cancela e invalida o timeout pendente, e uma nova escolha aguarda o
+handshake da conexão seguinte. Selecionar o nome atual confirmado não envia o
+`/trn` que o servidor ignora sem responder. Delimitadores do protocolo e caracteres
+de controle são rejeitados antes do comando.
+
+As proteções nativas do servidor permanecem: até três tentativas de nomes não
+registrados por janela de dois minutos, incluindo tentativas que colidem. Outra
+aba/conexão ativa usando o mesmo apelido continua impedindo sua utilização; não
+há merge forçado ou substituição de usuários. O servidor mantém a decisão sobre
+nomes ocupados, nomes protegidos e limites de troca. Não foi criado cooldown ou
+sistema de autenticação alternativo no client.
 
 Nomes locais **não são contas oficialmente autenticadas**. O client zera o marcador
 `registered` tanto ao iniciar a identificação quanto ao processar suas confirmações.

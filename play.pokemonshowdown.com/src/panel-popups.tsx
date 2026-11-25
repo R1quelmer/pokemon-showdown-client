@@ -926,6 +926,7 @@ class LoginPanel extends PSRoomPanel {
 	static readonly routes = ['login'];
 	static readonly location = 'modal-popup';
 	declare state: { passwordShown?: boolean };
+	private copaName: string | null = null;
 
 	override componentDidMount() {
 		super.componentDidMount();
@@ -942,6 +943,10 @@ class LoginPanel extends PSRoomPanel {
 		}));
 	}
 	getUsername() {
+		if (Config.copaRinhaLocalNames) {
+			return this.copaName ?? PS.user.loggingIn ?? (this.props.room.args?.name as string | undefined) ??
+				(PS.user.named ? PS.user.name : '');
+		}
 		const loginName = PS.user.loggingIn || this.props.room.args?.name as string;
 		if (loginName) return loginName;
 
@@ -961,6 +966,10 @@ class LoginPanel extends PSRoomPanel {
 		}
 	};
 	update = () => {
+		if (Config.copaRinhaLocalNames) {
+			this.copaName = this.base!.querySelector<HTMLInputElement>('input[name=username]')!.value;
+			this.props.room.args = null;
+		}
 		this.forceUpdate();
 	};
 	override focus(_options?: PSRoomFocusOptions) {

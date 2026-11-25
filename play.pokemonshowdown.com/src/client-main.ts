@@ -2480,7 +2480,7 @@ export const PS = new class extends PSModel {
 				continue;
 			} case 'nametaken': {
 				if (Config.copaRinhaLocalNames) {
-					CopaRinhaLocalNames.reject(args[2] || 'Este nome já está em uso. Escolha outro nickname.');
+					CopaRinhaLocalNames.reject(args[2] || 'Este nome já está em uso. Escolha outro nickname.', args[1]);
 					break;
 				}
 				PS.join('login' as RoomID, { args: { error: `Someone is already using the name ${args[1]}.` } });

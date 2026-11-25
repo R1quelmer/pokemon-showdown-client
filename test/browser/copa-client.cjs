@@ -45,7 +45,7 @@ const exportText = [
 				currentSocket = ws;
 				connections++;
 				// Use the server's actual Gen 9 wire name, not an invented local format list.
-				ws.send('|formats|,1|Copa Rinha|[Gen 9] Copa Rinha II,e\n|updateuser| Guest 1|0|167\n|challstr|4|synthetic-copa-challenge');
+				ws.send(`|formats|,1|Copa Rinha|[Gen 9] Copa Rinha II,e\n|updateuser| Guest 1|0|167\n|challstr|4|synthetic-copa-challenge-${connections}`);
 				ws.onMessage(raw => {
 					const message = String(raw);
 					const rename = /^\|?\/trn ([^,\r\n]+)$/.exec(message);
