@@ -15,7 +15,7 @@ const wallpaperPath = path.join(root,'fx/client-bg-horizon.jpg');
  const server = http.createServer(async (req,res) => {
   const file = path.resolve(root,'.'+new URL(req.url,'http://localhost').pathname);
   if(!file.startsWith(root+path.sep))return res.writeHead(403).end();
-  try {const body=await fs.readFile(file);res.writeHead(200,{'Content-Type':{'.html':'text/html','.js':'text/javascript','.css':'text/css','.png':'image/png','.json':'application/json','.woff2':'font/woff2','.txt':'text/plain'}[path.extname(file)]||'application/octet-stream'}).end(body);}
+  try {const body=await fs.readFile(file);res.writeHead(200,{'Content-Type':{'.html':'text/html','.js':'text/javascript','.css':'text/css','.png':'image/png','.jpg':'image/jpeg','.json':'application/json','.woff2':'font/woff2','.txt':'text/plain'}[path.extname(file)]||'application/octet-stream'}).end(body);}
   catch {res.writeHead(404).end();}
  });
  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
@@ -71,7 +71,23 @@ const wallpaperPath = path.join(root,'fx/client-bg-horizon.jpg');
    }
    assert.equal(await page.evaluate(()=>PSBackground.id),'copa-default');
    assert.equal(await page.evaluate(()=>localStorage.getItem('showdown_bg')),'solidblue');
-   assert.equal(await home.evaluate(el=>getComputedStyle(el).backgroundImage),'none');
+   const checkDefaultWallpaper=async()=>{
+    const [image,size,position]=await home.evaluate(el=>{
+     const css=getComputedStyle(el);
+     return [css.backgroundImage,css.backgroundSize,css.backgroundPosition];
+    });
+    assert(image.includes('poliwhirl-wallpaper.jpg')&&image.includes('linear-gradient'));
+    assert.equal(size,'auto, cover');
+    assert.equal(position,'0% 0%, 50% 28%');
+    await page.evaluate(async url=>{
+     const sprite=new Image();
+     sprite.src=url;
+     await sprite.decode();
+    },image.match(/url\("([^"]+)"\)/)[1]);
+   };
+   await checkDefaultWallpaper();
+   await page.evaluate(()=>PSView.scrollToRoom());
+   await capture('wallpaper-default');
    for(const href of ['ladder','view-tournaments-all','resources','rooms'])assert.equal(await home.locator(`a[href="${href}"]`).count(),0);
    for(const href of ['teambuilder','battles','users','copamembers','lobby'])assert.equal(await home.locator(`.menugroup a[href="${href}"]`).count(),1);
    assert.equal(await home.locator('a[href="view-friends-all"]').count(),0);
@@ -93,7 +109,7 @@ const wallpaperPath = path.join(root,'fx/client-bg-horizon.jpg');
    const updates=news.locator('.copa-updates');
    assert.equal(await updates.locator('li:visible').count(),3);
    await updates.locator('summary').click();
-   assert.equal(await updates.locator('li:visible').count(),6);
+   assert.equal(await updates.locator('li:visible').count(),7);
    await updates.locator('summary').click();
    const counters=home.locator('.copa-counters').or(page.locator('#room-rooms .copa-counters')).locator('visible=true').first();
    assert.equal(await counters.count(),1);
@@ -186,8 +202,14 @@ const wallpaperPath = path.join(root,'fx/client-bg-horizon.jpg');
    await page.evaluate(()=>PS.join('changebackground'));
    await page.getByRole('button',{name:'Restaurar fundo padrão',exact:true}).click();
    await page.evaluate(()=>PS.closePopupsAbove(null));
-   assert.equal(await home.evaluate(el=>getComputedStyle(el).backgroundImage),'none');
+   await checkDefaultWallpaper();
    assert.equal(await page.evaluate(()=>localStorage.getItem('copa-rinha:background')),'copa-default');
+   await page.evaluate(()=>PS.join('changebackground'));
+   await page.getByRole('button',{name:'Azul fosco',exact:true}).click();
+   await page.reload();await ready();
+   assert.equal(await page.evaluate(()=>PSBackground.id),'copa-matte-blue');
+   assert.equal(await home.evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(8, 15, 27)');
+   assert.equal(await home.evaluate(el=>getComputedStyle(el).backgroundImage),'none');
    assert.equal(await page.evaluate(()=>localStorage.getItem('showdown_bg')),'solidblue');
    assert.deepEqual(errors,[]);
    console.log(`Copa news countdown and controls, direct Lobby and Home regressions passed at ${width}px`);

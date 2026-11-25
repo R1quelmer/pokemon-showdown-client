@@ -156,7 +156,10 @@ export const PSBackground = new class extends PSStreamModel<string | null> {
 	}
 
 	load(bgUrl: string, bgid: string, menuColors: string[] | null = null) {
-		if (Config.copaRinhaLocalNames && bgid === 'copa-default') bgUrl = '#080f1b';
+		if (Config.copaRinhaLocalNames) {
+			if (bgid === 'copa-default') bgUrl = new URL('assets/copa-rinha/poliwhirl-wallpaper.jpg', location.href).href;
+			if (bgid === 'copa-matte-blue') bgUrl = '#080f1b';
+		}
 		// id
 		this.id = bgid;
 
@@ -265,7 +268,7 @@ export const PSBackground = new class extends PSStreamModel<string | null> {
 		}
 		this.attrib = attrib;
 		this.menuColors = menuColors;
-		if (!menuColors) {
+		if (!Config.copaRinhaLocalNames && !menuColors) {
 			this.extractMenuColors(bgUrl);
 		}
 		this.update(bgUrl);
@@ -336,8 +339,9 @@ export const PSBackground = new class extends PSStreamModel<string | null> {
 PSBackground.subscribe(bgUrl => {
 	if (Config.copaRinhaLocalNames) {
 		if (bgUrl !== null) {
+			const position = PSBackground.id === 'copa-default' ? 'center 28%' : 'center';
 			const background = bgUrl.startsWith('#') ? bgUrl :
-				`linear-gradient(#080f1bb3, #080f1bb3), url(${JSON.stringify(bgUrl)}) center / cover no-repeat #080f1b`;
+				`linear-gradient(#080f1bb3, #080f1bb3), url(${JSON.stringify(bgUrl)}) ${position} / cover no-repeat #080f1b`;
 			document.documentElement.style.setProperty('--copa-home-wallpaper', background);
 		}
 		return;

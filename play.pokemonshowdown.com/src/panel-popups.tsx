@@ -1641,7 +1641,10 @@ class BackgroundListPanel extends PSRoomPanel {
 			{Config.copaRinhaLocalNames && <>
 				<p><strong>Papel de parede da página inicial</strong></p>
 				<p>A imagem fica somente no início e é salva neste navegador. As outras páginas mantêm o fundo escuro.</p>
-				<p><button onClick={this.setBg} value="copa-default" class="button">Restaurar fundo padrão</button></p>
+				<p>
+					<button onClick={this.setBg} value="copa-default" class="button">Restaurar fundo padrão</button> {}
+					<button onClick={this.setBg} value="copa-matte-blue" class="button">Azul fosco</button>
+				</p>
 				<p><a href="/copa-creditos.html" target="_blank" rel="noopener">Créditos e licenças</a></p>
 			</>}
 			<p><strong>{TL`Default`}</strong></p>
