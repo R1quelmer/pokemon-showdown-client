@@ -416,9 +416,65 @@ html.copa-rinha .copa-home-loading>.mainmenufooter {order:2;position:static;padd
 	height: 52px;
 }
 .set-form .copa-builder-sprite img[src$=".gif"] {
-	/* Stay within the Pokémon column and above the species field. */
-	height: 120%;
-	max-height: 63px;
+	/* The visible gap below Nickname is at least 67px in the compact form. */
+	height: 66px;
+	pointer-events: none;
+}
+@supports (width: 1cqw) {
+	.set-form .copa-builder-sprite {
+		container-type: inline-size;
+	}
+	.set-form .copa-builder-sprite img:is(
+		[src="/sprites/za/front/baxcaliburmega.gif"],
+		[src="/sprites/za/front/floettemega.gif"],
+		[src="/sprites/za/front/heatranmega.gif"],
+		[src="/sprites/za/front/raichumegay.gif"],
+		[src="/sprites/za/front/zeraoramega.gif"]
+	) {
+		/* Scale the full canvas, but fit and center the union of all visible frames. */
+		--visible-width: calc(var(--canvas-width) - var(--pad-left, 0) - var(--pad-right, 0));
+		--visible-height: calc(var(--canvas-height) - var(--pad-top, 0) - var(--pad-bottom, 0));
+		inset: 33px auto auto 50%;
+		width: auto;
+		height: min(
+			78px,
+			calc(125cqw * var(--canvas-height) / var(--canvas-width)),
+			calc(100cqw * var(--canvas-height) / var(--visible-width)),
+			calc(66px * var(--canvas-height) / var(--visible-height))
+		);
+		transform: translate(
+			calc(-50% - 50% * (var(--pad-left, 0) - var(--pad-right, 0)) / var(--canvas-width)),
+			calc(-50% - 50% * (var(--pad-top, 0) - var(--pad-bottom, 0)) / var(--canvas-height))
+		);
+	}
+	/* Canvas dimensions and transparent padding shared by every frame. */
+	.set-form .copa-builder-sprite img[src="/sprites/za/front/baxcaliburmega.gif"] {
+		--canvas-width: 132;
+		--canvas-height: 119;
+		--pad-left: 9;
+	}
+	.set-form .copa-builder-sprite img[src="/sprites/za/front/floettemega.gif"] {
+		--canvas-width: 127;
+		--canvas-height: 139;
+		--pad-top: 35;
+	}
+	.set-form .copa-builder-sprite img[src="/sprites/za/front/heatranmega.gif"] {
+		--canvas-width: 153;
+		--canvas-height: 125;
+		--pad-top: 14;
+	}
+	.set-form .copa-builder-sprite img[src="/sprites/za/front/raichumegay.gif"] {
+		--canvas-width: 114;
+		--canvas-height: 93;
+		--pad-bottom: 1;
+	}
+	.set-form .copa-builder-sprite img[src="/sprites/za/front/zeraoramega.gif"] {
+		--canvas-width: 144;
+		--canvas-height: 140;
+		--pad-left: 23;
+		--pad-right: 6;
+		--pad-top: 37;
+	}
 }
 .copa-builder-sprite-overlay .copa-builder-sprite {
 	top: 0;
