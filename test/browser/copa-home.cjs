@@ -24,7 +24,7 @@ const wallpaperPath = path.join(root,'fx/client-bg-horizon.jpg');
  await fs.mkdir(screenshots,{recursive:true});
  try {
   for(const width of [1440,1000,390,320]){
-   const context=await browser.newContext({viewport:{width,height:900}});
+   const context=await browser.newContext({viewport:{width,height:900},hasTouch:width<628});
    const page=await context.newPage(), errors=[];let socket, connections=0, clockPaused=false;
    const joins=[];
    await page.clock.install({time:new Date('2026-12-04T21:58:55Z')});
@@ -109,28 +109,55 @@ const wallpaperPath = path.join(root,'fx/client-bg-horizon.jpg');
    const updates=news.locator('.copa-updates');
    assert.equal(await updates.locator('li:visible').count(),3);
    await updates.locator('summary').click();
-   assert.equal(await updates.locator('li:visible').count(),7);
+   assert.equal(await updates.locator('li:visible').count(),8);
    await updates.locator('summary').click();
-   const counters=home.locator('.copa-counters').or(page.locator('#room-rooms .copa-counters')).locator('visible=true').first();
-   assert.equal(await counters.count(),1);
-   assert(await counters.locator('.copa-mascot').evaluateAll(sprites=>sprites.every(sprite=>sprite.complete&&sprite.naturalWidth)));
-   await page.evaluate(()=>PS.prefs.set('noanim',false));
-   for(const sprite of await counters.locator('.copa-mascot').all()){
-    const hops=await sprite.evaluate((element,mobile)=>{
-     const eventType=mobile?'pointerup':'pointerenter';
-     const event=new PointerEvent(eventType,{pointerType:mobile?'touch':'mouse'});
-     const idle=element.getAnimations().length;
-     element.dispatchEvent(event);
-     const animation=element.getAnimations()[0];
-     const iterations=animation?.effect.getTiming().iterations;
-     animation?.cancel();
-     PS.prefs.set('noanim',true);
-     element.dispatchEvent(event);
-     const disabled=element.getAnimations().length;
-     PS.prefs.set('noanim',false);
-     return [idle,iterations,disabled];
-    },width<628);
-    assert.deepEqual(hops,[0,3,0]);
+   const right=page.locator('#room-rooms');
+   if(width>=700){
+    const [leftBox,rightBox]=await Promise.all([home.boundingBox(),right.boundingBox()]);
+    assert(Math.abs(leftBox.width-rightBox.width)<=1);
+    assert.equal(await right.getByRole('heading',{name:'Chat de Lobby'}).count(),1);
+    assert.equal(await right.locator('input[name=roomsearch], select[name=sections]').count(),0);
+    const newsBox=await news.boundingBox();
+    assert(newsBox.x+newsBox.width<=leftBox.x+leftBox.width);
+   }else{
+    assert.equal(await page.evaluate(()=>PS.leftPanelWidth),null);
+   }
+   assert(await home.evaluate(el=>el.scrollWidth<=el.clientWidth));
+   await page.evaluate(()=>PSView.scrollToRoom());
+   const counters=width<700?home.locator('.copa-counters'):right.locator('.copa-counters');
+   await counters.scrollIntoViewIfNeeded();
+   assert(await counters.locator('.copa-mascot img').evaluateAll(sprites=>sprites.every(sprite=>sprite.complete&&sprite.naturalWidth)));
+   for(const mascot of await counters.locator('.copa-mascot').all()){
+    const sprite=mascot.locator('img');
+    const moving=()=>sprite.evaluate(el=>getComputedStyle(el).transform!=='none');
+    const move=()=>width<628?mascot.tap():mascot.hover();
+    assert.equal(await moving(),false);
+    await move();
+    await sprite.evaluate(el=>el.getAnimations()[0].ready);
+    const timing=await sprite.evaluate(el=>el.getAnimations()[0].effect.getTiming().iterations);
+    assert.equal(timing,width<628?3:Infinity);
+    await sprite.evaluate(el=>new Promise((resolve,reject)=>{
+     let frames=0;
+     function check(){
+      if(new DOMMatrixReadOnly(getComputedStyle(el).transform).m42<-4)return resolve();
+      if(++frames>60)return reject(new Error('Mascot did not visibly move'));
+      requestAnimationFrame(check);
+     }
+     check();
+    }));
+    if(width>=628){
+     await page.waitForTimeout(900);
+     assert(await moving(),'hover continues after three hops');
+     await page.mouse.move(1,1);
+    }else{
+     await page.waitForTimeout(900);
+    }
+    assert.equal(await moving(),false);
+    await page.evaluate(()=>PS.prefs.set('noanim',true));
+    await move();
+    assert.equal(await moving(),false);
+    if(width>=628)await page.mouse.move(1,1);
+    await page.evaluate(()=>PS.prefs.set('noanim',false));
    }
    await page.evaluate(()=>PSView.scrollToRoom());
    await news.scrollIntoViewIfNeeded();

@@ -2580,6 +2580,9 @@ export const PS = new class extends PSModel {
 		// right room, and also want to show both if they fit
 
 		const available = document.documentElement.clientWidth;
+		if (Config.copaRinhaLocalNames && !this.leftPanel.id && this.rightPanel.id === 'rooms') {
+			return Math.floor((available - 1) / 2);
+		}
 		const left = this.getWidthFor(this.leftPanel);
 		const right = this.getWidthFor(this.rightPanel);
 

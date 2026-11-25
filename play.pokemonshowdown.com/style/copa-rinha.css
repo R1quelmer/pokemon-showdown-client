@@ -498,9 +498,17 @@ html.copa-rinha .copa-counters {
   margin:12px auto 15px;
 }
 html.copa-rinha .copa-counters .button {box-sizing:border-box;width:100%;margin:0}
-html.copa-rinha .copa-mascot {width:100%;height:46px;object-fit:contain;image-rendering:pixelated;touch-action:manipulation}
+html.copa-rinha .copa-mascot {width:100%;height:46px}
 html.copa-rinha .mainmenu-left .copa-counters {padding-inline:10px}
 html.copa-rinha .copa-updates ul {list-style:none;margin:6px 0;padding:0}
 html.copa-rinha .copa-updates li + li {margin-top:7px}
 html.copa-rinha .copa-updates time {font-size:11px;color:var(--copa-text)}
 html.copa-rinha .copa-updates summary {cursor:pointer;color:var(--copa-cyan)}
+
+html.copa-rinha .mainmenu-mini-windows {min-width:0}
+html.copa-rinha .mainmenu-mini-windows .mini-window {box-sizing:border-box;max-width:100%}
+html.copa-rinha .copa-lobby-panel {position:relative;text-align:center;padding:45px 12px 20px}
+html.copa-rinha .copa-hide-rooms {position:absolute;top:8px;right:12px}
+html.copa-rinha .copa-lobby-panel h2 {margin:20px 0 8px}
+html.copa-rinha .copa-mascot {display:block;touch-action:manipulation}
+html.copa-rinha .copa-mascot img {display:block;width:100%;height:100%;object-fit:contain;image-rendering:pixelated;pointer-events:none}

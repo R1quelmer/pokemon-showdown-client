@@ -243,6 +243,16 @@ class RoomsPanel extends PSRoomPanel {
 		if (this.hidden) {
 			return <PSPanelWrapper room={this.props.room}>{null}</PSPanelWrapper>;
 		}
+		if (Config.copaRinhaLocalNames) {
+			return <PSPanelWrapper room={this.props.room}><div class="pad copa-lobby-panel">
+				<button class="button copa-hide-rooms" onClick={this.hide}>
+					<i class="fa fa-caret-right" aria-hidden></i> {TL`[Hide]`}
+				</button>
+				<CopaCounters />
+				<h2>Chat de Lobby</h2>
+				<a class="button" href="/lobby"><i class="fa fa-comment-o" aria-hidden></i> Entrar no Lobby</a>
+			</div></PSPanelWrapper>;
+		}
 		const rooms = PS.mainmenu.roomsCache;
 		this.updateRoomList();
 
@@ -250,7 +260,7 @@ class RoomsPanel extends PSRoomPanel {
 			<button class="button" style="float:right;font-size:10pt;margin-top:3px" onClick={this.hide}>
 				<i class="fa fa-caret-right" aria-hidden></i> {TL`[Hide]`}
 			</button>
-			{Config.copaRinhaLocalNames ? <CopaCounters /> : <div class="roomcounters">
+			<div class="roomcounters">
 				<a class="button" href="users" title={TL`Find an online user`}>
 					<span
 						class={`pixelated usercount${Dex.afdMode === true ? ' afd' : ''}`}
@@ -265,8 +275,8 @@ class RoomsPanel extends PSRoomPanel {
 					></span>
 					<strong>{rooms.battleCount || '-'}</strong> {TL`active battles`}
 				</a>
-			</div>}
-			{!Config.copaRinhaLocalNames && !!PS.leftPanelWidth && Config.includes?.roomlistTopHTML && (
+			</div>
+			{ !!PS.leftPanelWidth && Config.includes?.roomlistTopHTML && (
 				<div dangerouslySetInnerHTML={{ __html: Config.includes.roomlistTopHTML }} />
 			)}
 			<div>

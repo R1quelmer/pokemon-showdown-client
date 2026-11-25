@@ -1,5 +1,6 @@
 // Add player-facing changes at the top. For entries on the same date, newest goes first.
 export const COPA_UPDATES = [
+	{ date: '2026-11-25', text: 'Painéis equilibrados, acesso direto ao Lobby e mascotes que pulam na página inicial.' },
 	{ date: '2026-11-25', text: 'Poliwhirl é o novo papel de parede padrão. O fundo azul fosco segue como opção.' },
 	{ date: '2026-11-25', text: 'Sylveon e Poliwhirl chegaram à página inicial, e as notícias ganharam um histórico.' },
 	{ date: '2026-11-25', text: 'O quadro de notícias ganhou a contagem regressiva e o atalho agora abre o Lobby direto.' },
