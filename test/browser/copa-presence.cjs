@@ -15,6 +15,7 @@ const bob = {name: 'Bob', avatar: 'ethan', status: 'Preparando equipe', statusTy
 const carla = {name: 'Carla', avatar: 'dawn', status: 'Disponível', statusType: 'online'};
 const presence = (users, guests) => ({total: users.length + guests, guests, users});
 const publicBattle = 'battle-gen9coparinhanationaldexza-42';
+const wan = {name:'Wan', avatar:'lusamine-masters', online:false, rooms:[], partner:{species:'metagross',shiny:true}};
 const members = [
 	{name: 'Davi', avatar: 'ethan', online: false, rooms: []},
 	{name: 'Carla', avatar: 'dawn', online: false, rooms: []},
@@ -24,7 +25,7 @@ const members = [
 
 async function measurePairPixels(pair) {
 	const shots = [];
-	const scopes = ['.copa-profile-sprites', '.copa-battle-pair', '.copa-compact-profile .copa-directory-pair'];
+	const scopes = ['.copa-profile-sprites', '.copa-battle-pair', '.copa-directory-pair'];
 	for (const selector of [
 		'img', '.copa-partner-sprite img', '.copa-online-avatar img',
 	]) {
@@ -44,7 +45,7 @@ right = [(max(x for x in range(a.width) if a.getpixel((x,y))), y)
 left = [(min(x for x in range(b.width) if b.getpixel((x,y))), y)
         for y in range(b.height) if b.crop((0,y,b.width,y+1)).getbbox()]
 gap = min(math.hypot(max(0, bx-ax-1), max(0, abs(ay-by)-1)) for ax,ay in right for bx,by in left)
-print(json.dumps({"gap": gap, "baseDelta": abs(a.getbbox()[3] - b.getbbox()[3])}))
+print(json.dumps({"gap": gap, "baseDelta": abs(a.getbbox()[3] - b.getbbox()[3]), "partnerWidth": b.getbbox()[2] - b.getbbox()[0]}))
 `], {input:JSON.stringify(shots), encoding:'utf8'}));
 }
 
@@ -110,8 +111,12 @@ print(json.dumps({"gap": gap, "baseDelta": abs(a.getbbox()[3] - b.getbbox()[3])}
 						partner = data.partner;
 						return route.fulfill({json: {partner}});
 					}
-					if (url.endsWith('/trainer')) return route.fulfill({json:{trainer:null}});
+					if (url.endsWith('/trainer')) {
+						const trainer = data.name === 'wan' ? {...wan, badges:[]} : null;
+						return route.fulfill({json:{trainer}});
+					}
 					if (url.endsWith('/profile')) {
+						if (data.name.toLowerCase() === 'wan') return route.fulfill({json:{member:wan}});
 						const row = members.find(member => member.name.toLowerCase() === data.name.toLowerCase());
 						return route.fulfill({json: {member: row ? {...row, partner: row.name === 'Alice' ? partner : {species:'sylveon',shiny:false}} : null}});
 					}
@@ -496,6 +501,44 @@ print(json.dumps({"gap": gap, "baseDelta": abs(a.getbbox()[3] - b.getbbox()[3])}
 						images.every(image => image.naturalWidth && getComputedStyle(image).visibility === 'visible');
 				}));
 			}
+			fixture.members = [...fixture.members, wan];
+			await page.evaluate(() => {
+				PS.closePopupsAbove(null);
+				PS.join('copamembers');
+				window.CopaRinhaPresence.refresh();
+			});
+			await page.clock.fastForward(15050);
+			const wanAvatar = directory.getByRole('button',{name:'Ver perfil de Wan'});
+			await wanAvatar.waitFor();
+			const compactWan = wanAvatar.locator('.copa-directory-pair');
+			await compactWan.locator('[data-profile-tight]').nth(1).waitFor();
+			await assertSpriteElementsLoaded(page, 'button[aria-label="Ver perfil de Wan"] img');
+			const compactPixels = await measurePairPixels(compactWan);
+			assert(compactPixels.partnerWidth >= 36 && compactPixels.gap <= 5 && compactPixels.baseDelta <= 1,
+				JSON.stringify(compactPixels));
+			const wanScreenshots = [1440, 390].includes(width) && process.env.COPA_WAN_SCREENSHOTS;
+			if (wanScreenshots) {
+				await fs.mkdir(wanScreenshots, {recursive:true});
+				await wanAvatar.locator('xpath=ancestor::li[1]').screenshot({
+					path:path.join(wanScreenshots, `compacto-${width}.png`),
+				});
+			}
+			await wanAvatar.click();
+			const expandedWan = page.locator('#room-copaprofile-wan .copa-profile-sprites');
+			await expandedWan.locator('[data-profile-tight]').nth(1).waitFor();
+			await assertSpriteElementsLoaded(page, '#room-copaprofile-wan img');
+			const expandedPixels = await measurePairPixels(expandedWan);
+			assert(expandedPixels.partnerWidth >= 100 && expandedPixels.gap <= 8 && expandedPixels.baseDelta <= 1,
+				JSON.stringify(expandedPixels));
+			const wanProfile = page.locator('#room-copaprofile-wan');
+			if (wanScreenshots) await wanProfile.screenshot({path:path.join(wanScreenshots, `ampliado-${width}.png`)});
+			await wanProfile.getByRole('button',{name:'Fechar',exact:true}).click();
+			await directory.getByRole('link',{name:'Wan', exact:true}).click();
+			const trainerWan = page.locator('#room-copatrainer-wan .copa-trainer-duo');
+			await trainerWan.locator('[data-profile-tight]').nth(1).waitFor();
+			assert.match(await trainerWan.getByRole('img',{name:'Metagross · Shiny'}).getAttribute('src'), /profile-partners/);
+			console.log(`Wan's visible Metagross at ${width}px:`, {compactPixels, expandedPixels});
+
 			assert.deepEqual(fixture.errors, []); assert.deepEqual(fixture.authRequests, []);
 			assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
 			console.log(`Native presence counter/list, dedup, anonymous/privacy, profile/challenge, automatic updates, visibility/reconnect/errors and layout passed at ${width}px`);

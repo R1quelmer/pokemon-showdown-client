@@ -1,5 +1,6 @@
 // Add player-facing changes at the top. For entries on the same date, newest goes first.
 export const COPA_UPDATES = [
+	{ date: '2026-11-26', text: 'O Metagross shiny do Wan aparece maior e mais perto do treinador no perfil.' },
 	{ date: '2026-11-26', text: 'O comando /avatar sugere sprites com prévia, incluindo trajes alternativos.' },
 	{ date: '2026-11-26', text: 'Abra seu perfil nas configurações pelo botão Meu perfil ou pelo seu nickname.' },
 	{ date: '2026-11-26', text: 'Abra o perfil de treinador pelo nickname sem sair da tela atual.' },

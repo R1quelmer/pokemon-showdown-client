@@ -418,7 +418,7 @@ function fitCopaProfileSprite(image: HTMLImageElement, size = 104) {
 	if (image.dataset.profileFit) return;
 	image.dataset.profileFit = 'true';
 	const path = new URL(image.src).pathname;
-	const key = path.replace(/^.*\/sprites\//, '').replace(/^.*\/partner-za\//, 'partner-za/');
+	const key = path.replace(/^.*\/sprites\//, '').replace(/^.*\/(partner-za|profile-partners)\//, '$1/');
 	copaProfileCrops ||= window.fetch('/assets/copa-rinha/profile-crops.json').then(response => (
 		response.ok ? response.json() as Promise<Record<string, CopaSpriteCrop>> : Promise.reject(new Error('Sprite crops'))
 	)).catch(() => {
@@ -491,8 +491,8 @@ const COPA_ZA_PARTNER_ART = (
 ).split(' ');
 const COPA_ZA_NORMAL_PARTNER_ART = ['tatsugiricurlymega', 'zygardemega'];
 
-function CopaPartnerSprite({ partner, profile, size, battle }: {
-	partner?: CopaPartner, profile?: boolean, size?: number, battle?: boolean,
+function CopaPartnerSprite({ partner, profile, size, battle, trainer }: {
+	partner?: CopaPartner, profile?: boolean, size?: number, battle?: boolean, trainer?: string,
 }) {
 	if (!partner) return null;
 	const species = Dex.species.get(partner.species);
@@ -501,8 +501,11 @@ function CopaPartnerSprite({ partner, profile, size, battle }: {
 	const suffix = partner.shiny ? '-shiny' : '';
 	const local = COPA_ZA_PARTNER_ART.includes(species.id) ||
 		(!partner.shiny && COPA_ZA_NORMAL_PARTNER_ART.includes(species.id));
-	const url = local ? `assets/copa-rinha/partner-za/${species.id}${suffix}.png` :
+	const wanMetagross = !battle && trainer === 'wan' && species.id === 'metagross' && partner.shiny;
+	const url = wanMetagross ? '/assets/copa-rinha/profile-partners/metagross-shiny.png' :
+		local ? `assets/copa-rinha/partner-za/${species.id}${suffix}.png` :
 		`${Dex.resourcePrefix}sprites/gen5${suffix}/${species.spriteid}.png`;
+	const portraitSize = wanMetagross ? (profile ? 132 : 48) : size;
 	return <span class="copa-partner-sprite" key={url}>
 		<img
 			key={url} src={url} alt={label} title={label} ref={element => {
@@ -528,7 +531,7 @@ function CopaPartnerSprite({ partner, profile, size, battle }: {
 					}
 					image.parentElement?.classList.add('copa-partner-missing');
 				};
-				if (profile || size) fitCopaProfileSprite(image, size);
+				if (profile || portraitSize) fitCopaProfileSprite(image, portraitSize);
 			}}
 		/>
 		<small title="Sprite estático indisponível">{label}</small>
@@ -540,7 +543,7 @@ function CopaCompactPair({ name, avatar, partner, battle }: {
 }) {
 	return <span class={battle ? 'copa-battle-pair' : 'copa-directory-pair'}>
 		<CopaPresenceAvatar name={name} avatar={avatar} participant={toID(name)} size={battle ? 104 : 40} />
-		<CopaPartnerSprite partner={partner} size={battle ? 104 : 38} battle={battle} />
+		<CopaPartnerSprite partner={partner} size={battle ? 104 : 38} battle={battle} trainer={toID(name)} />
 	</span>;
 }
 
@@ -624,7 +627,7 @@ class CopaProfilePanel extends PSRoomPanel {
 				<h3>{name}</h3>
 				<div class="copa-profile-sprites">
 					<CopaPresenceAvatar name={name} avatar={avatar} profile />
-					<CopaPartnerSprite partner={partner} profile />
+					<CopaPartnerSprite partner={partner} profile trainer={toID(name)} />
 				</div>
 				{partner && <p>{Dex.species.get(partner.species).name}{partner.shiny ? ' · Shiny' : ''}</p>}
 			</>}
@@ -945,7 +948,7 @@ class CopaTrainerPanel extends PSRoomPanel {
 								name={trainer.name} avatar={ownsProfile ? String(PS.user.avatar) : trainer.avatar}
 								participant={toID(trainer.name)} profile
 							/>
-							<CopaPartnerSprite partner={parseCopaPartner(trainer.partner)} profile />
+							<CopaPartnerSprite partner={parseCopaPartner(trainer.partner)} profile trainer={toID(trainer.name)} />
 						</div>
 					</header>
 					<section class="copa-trainer-dream" aria-label="Dream Team">
