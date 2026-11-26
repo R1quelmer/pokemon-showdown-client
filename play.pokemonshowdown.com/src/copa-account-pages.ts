@@ -25,6 +25,7 @@ if (copaAdminForm)
 		copaAccountStatus.textContent = 'Processando…';
 		void copaAccountRequest('admin', {
 			action: copaInput('action').value,
+			region: copaInput('badge-region').value,
 			names: copaInput('names').value.split(/[\n,]/).map(name => name.trim()).filter(Boolean),
 		}, copaInput('admin-key').value).then(value => {
 			result.textContent = value.recovery ?
@@ -34,8 +35,10 @@ if (copaAdminForm)
 					registered: boolean,
 					disabled: boolean,
 					sessions: number,
+					badges?: string[],
 				}) => `${account.name} · ${account.registered ? 'registrado' : 'reservado'} · ` +
-					`${account.disabled ? 'desativado' : 'ativo'} · ${account.sessions} sessões válidas`).join('\n') : 'Operação concluída.';
+					`${account.disabled ? 'desativado' : 'ativo'} · ${account.sessions} sessões válidas` +
+					(account.badges?.length ? ` · Insígnias: ${account.badges.join(', ')}` : '')).join('\n') : 'Operação concluída.';
 			copaAccountStatus.textContent = 'Concluído.';
 		}).catch(error => { copaAccountStatus.textContent = error.message; }).then(() => { button.disabled = false; });
 	};

@@ -1,5 +1,8 @@
 // Add player-facing changes at the top. For entries on the same date, newest goes first.
 export const COPA_UPDATES = [
+	{ date: '2026-11-26', text: 'O Dream Team fica no topo do perfil e as insígnias ganharam uma aba própria.' },
+	{ date: '2026-11-26', text: 'O perfil de treinador agora exibe as dez insígnias regionais da Copa Rinha.' },
+	{ date: '2026-11-26', text: 'Personalize seu perfil de treinador com Dream Team, região e replays públicos.' },
 	{ date: '2026-11-26', text: 'O Pokémon parceiro aparece no perfil aberto pela busca, lista de membros ou chat.' },
 	{ date: '2026-11-26', text: 'Parceiros nas batalhas e uma lista com partidas públicas e seus treinos privados.' },
 	{ date: '2026-11-25', text: 'A dupla mantém a mesma composição do perfil ao mudar a escala da batalha.' },

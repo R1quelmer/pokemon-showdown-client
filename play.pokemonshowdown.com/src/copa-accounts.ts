@@ -13,6 +13,23 @@ interface Session {
 }
 export interface CopaPartner { species: string; shiny: boolean }
 export interface CopaProfile { name: string; avatar: string; partner?: CopaPartner }
+export const COPA_REGIONS = [
+	'Kanto', 'Johto', 'Hoenn', 'Sinnoh', 'Unova', 'Kalos', 'Alola', 'Galar', 'Hisui', 'Paldea',
+] as const;
+export type CopaRegion = typeof COPA_REGIONS[number];
+export interface CopaTrainerCard {
+	bio: string;
+	region: CopaRegion | '';
+	dreamTeam: (CopaPartner | null)[];
+	banner: string;
+}
+export interface CopaTrainer extends CopaProfile {
+	online: boolean;
+	registeredAt?: string;
+	card?: CopaTrainerCard;
+	badges: CopaRegion[];
+	stats?: { total: number, wins: number, losses: number };
+}
 class CopaAccountError extends Error {
 	readonly status: number;
 	constructor(message: string, status: number) { super(message); this.status = status; }
@@ -44,6 +61,19 @@ export const CopaAccounts = new class {
 	}
 	async profile(name: string): Promise<CopaProfile | null> {
 		return (await this.request('profile', { name })).member;
+	}
+	async trainer(name: string): Promise<CopaTrainer | null> {
+		return (await this.request('trainer', { name })).trainer;
+	}
+	ownsProfile(name: string) {
+		const session = this.read();
+		return !!(Config.copaRinhaLocalNames && session && toID(session.name) === toID(name) &&
+			toID(session.name) === PS.user.userid && PS.user.named);
+	}
+	async saveTrainer(card: CopaTrainerCard): Promise<CopaTrainerCard> {
+		const session = this.read();
+		if (!session || !this.ownsProfile(session.name)) throw new Error('Entre com sua conta Copa Rinha.');
+		return (await this.request('edit-trainer', { card }, session.token)).card;
 	}
 	async savePartner(partner: CopaPartner | null) {
 		const session = this.read();

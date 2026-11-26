@@ -255,12 +255,12 @@ print(json.dumps({"gap": gap, "baseDelta": abs(a.getbbox()[3] - b.getbbox()[3])}
 			await page.locator('a[href="copamembers"]').click();
 			const directory = page.locator('.copa-members');
 			await directory.getByText('4 cadastrados · 2 conectados').waitFor();
-			const nicknames = () => directory.locator('li .copa-online-player button').allTextContents();
+			const nicknames = () => directory.locator('li .copa-online-player a[href^=copatrainer-]').allTextContents();
 			assert.deepEqual(await nicknames(), ['Alice', 'Bob', 'Carla', 'Davi']);
 			assert.equal(await directory.locator('li').filter({hasText: 'Carla'}).getByText('Offline').count(), 1);
 			const battleLink = directory.getByRole('link', {name: 'Em batalha pública'});
 			assert.equal(await battleLink.getAttribute('href'), '/' + publicBattle);
-			assert.equal(await directory.getByRole('link').count(), 1, 'online and offline statuses are plain text');
+			assert.equal(await directory.locator('.copa-online-player small a').count(), 1, 'online and offline statuses are plain text');
 			assert.equal(await directory.getByRole('button', {name: 'Assistir'}).count(), 0);
 			if (width === 1440) {
 				await battleLink.hover();
@@ -274,7 +274,7 @@ print(json.dumps({"gap": gap, "baseDelta": abs(a.getbbox()[3] - b.getbbox()[3])}
 				await fs.mkdir(process.env.COPA_MEMBERS_SCREENSHOTS, {recursive: true});
 				await page.screenshot({path: path.join(process.env.COPA_MEMBERS_SCREENSHOTS, `membros-${width}.png`)});
 			}
-			await directory.getByRole('button', {name:'Alice',exact:true}).click();
+			await directory.getByRole('button', {name:'Interagir com Alice',exact:true}).click();
 			const compact = page.locator('#room-user-alice');
 			const addStatus = compact.getByRole('button', {name:'Add status',exact:true});
 			await addStatus.waitFor();
@@ -359,7 +359,7 @@ print(json.dumps({"gap": gap, "baseDelta": abs(a.getbbox()[3] - b.getbbox()[3])}
 			await page.clock.fastForward(15050);
 			await directory.getByText('4 cadastrados · 3 conectados').waitFor();
 			assert.deepEqual(await nicknames(), ['Alice', 'Bob', 'Carla', 'Davi']);
-			await directory.getByRole('button', {name: 'Bob', exact: true}).click();
+			await directory.getByRole('button', {name: 'Interagir com Bob', exact: true}).click();
 			await page.waitForFunction(() => !!PS.rooms['user-bob']?.args?.copaMember);
 			const profile = page.locator('[id="room-user-bob"]');
 			const verifyBobPair = async (popup, entry) => {
@@ -396,13 +396,13 @@ print(json.dumps({"gap": gap, "baseDelta": abs(a.getbbox()[3] - b.getbbox()[3])}
 			await page.locator('#room-lobby .chat-log .username').filter({hasText:'Bob'}).click();
 			await verifyBobPair(profile, 'chat');
 			await page.evaluate(() => { PS.closePopupsAbove(null); PS.join('copamembers'); });
-			await directory.getByRole('button', {name: 'Bob', exact: true}).click();
+			await directory.getByRole('button', {name: 'Interagir com Bob', exact: true}).click();
 			await profile.locator('[data-href="challenge-bob"]').waitFor();
 			assert.equal(await profile.locator('a[href="/privatefixture"]').count(), 0);
 			await profile.locator('[data-href="dm-bob"]').click();
 			await page.waitForFunction(() => !!PS.rooms['dm-bob']);
 			await page.evaluate(() => { PS.closePopupsAbove(null); PS.join('copamembers'); });
-			await directory.getByRole('button', {name: 'Bob', exact: true}).click();
+			await directory.getByRole('button', {name: 'Interagir com Bob', exact: true}).click();
 			await profile.locator('[data-href="challenge-bob"]').click();
 			await page.waitForFunction(() => !!PS.rooms['dm-bob']?.challengeMenuOpen);
 			await page.evaluate(() => { PS.closePopupsAbove(null); PS.join('copamembers'); });

@@ -598,3 +598,72 @@ html.copa-rinha .copa-compact-profile:has(.copa-directory-pair) {grid-template-c
 html.copa-rinha .copa-compact-profile .copa-directory-pair .copa-online-avatar,
 html.copa-rinha .copa-compact-profile .copa-directory-pair .copa-online-avatar img {width:40px;height:40px}
 html.copa-rinha .copa-compact-profile .copa-directory-pair .copa-partner-sprite img {width:38px;height:38px}
+
+html.copa-rinha .copa-trainer {
+  box-sizing:border-box;max-width:860px;margin:16px auto;padding:0 14px 24px;color:#e8f1fb;container-type:inline-size;
+}
+html.copa-rinha .copa-trainer h1 {font-size:clamp(23px,5vw,38px);margin:0 0 6px;overflow-wrap:anywhere}
+html.copa-rinha .copa-trainer h2 {font-size:16px;margin:0 0 10px}
+html.copa-rinha .copa-trainer h3 {font-size:15px}
+html.copa-rinha .copa-trainer a {color:#71def4}
+html.copa-rinha .copa-trainer-header {
+  display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:6px;
+  padding:20px clamp(12px,4vw,34px);border:1px solid #30465f;border-radius:12px 12px 0 0;
+  background:#101d32 center 46% / cover no-repeat;
+}
+html.copa-rinha .copa-trainer-details p {font-size:13px;margin:3px 0;color:#d1deed}
+html.copa-rinha .copa-trainer-details .copa-trainer-online {color:#7ce3a1}
+html.copa-rinha .copa-trainer-actions {display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+html.copa-rinha .copa-trainer-actions .button {white-space:normal}
+html.copa-rinha .copa-trainer .copa-trainer-duo {min-width:0;margin-inline:0}
+html.copa-rinha :is(.copa-trainer-dream,.copa-trainer-body,.copa-trainer-editor) {
+  background:#0d1828;border:1px solid #2b4057;border-top:0;padding:13px;
+}
+html.copa-rinha .copa-trainer-badges h2 small {color:#70def4;font-size:12px;margin-left:6px}
+html.copa-rinha .copa-trainer-badges > div {display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:5px}
+html.copa-rinha .copa-trainer-badges button {
+  display:grid;place-items:center;gap:3px;min-height:44px;padding:4px 0;border:1px solid #273b50;
+  border-radius:5px;background:#111f31;color:#94a7ba;font-size:13px;font-weight:bold;cursor:pointer;
+}
+html.copa-rinha .copa-trainer-badges button.earned {border-color:#367589;background:#143341;color:#9eefff}
+html.copa-rinha .copa-trainer-badges button span {font-size:10px}
+html.copa-rinha .copa-trainer-badges img {width:36px;max-width:100%;height:36px;object-fit:contain;image-rendering:pixelated}
+html.copa-rinha .copa-trainer-badges .locked img {filter:grayscale(1) brightness(.5)}
+html.copa-rinha .copa-trainer-badges p {font-size:12px;margin:7px 0 0}
+html.copa-rinha .copa-trainer-tabs {display:grid;grid-template-columns:repeat(3,1fr);background:#101d30;border-inline:1px solid #2b4057}
+html.copa-rinha .copa-trainer-tabs button {
+  border:0;border-bottom:2px solid #2b4057;background:none;color:#b5c6d8;min-height:40px;padding:5px;cursor:pointer;
+}
+html.copa-rinha .copa-trainer-tabs button[aria-pressed="true"] {border-color:#6adff4;color:#8aeaff;background:#14283b;font-weight:bold}
+html.copa-rinha .copa-trainer :is(button,a,input,textarea,select):focus-visible {outline:2px solid #78eaff;outline-offset:2px}
+html.copa-rinha .copa-trainer-team {
+  margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:7px;
+}
+html.copa-rinha .copa-trainer-team li {
+  min-height:100px;min-width:0;display:grid;place-content:center;justify-items:center;gap:4px;
+  text-align:center;padding:4px;background:#122237;border:1px solid #283e55;border-radius:7px;
+}
+html.copa-rinha .copa-trainer-team strong {font-size:11px;overflow-wrap:anywhere}
+html.copa-rinha .copa-trainer-team .empty {background:none;border-style:dashed;color:#60758b}
+html.copa-rinha .copa-trainer-team .copa-partner-sprite {width:68px;height:68px}
+html.copa-rinha .copa-trainer-stats {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+html.copa-rinha .copa-trainer-stats div {padding:6px;background:#122237;border-radius:5px;text-align:center}
+html.copa-rinha .copa-trainer-stats dt {font-size:11px;overflow-wrap:anywhere}
+html.copa-rinha .copa-trainer-stats dd {color:#8aebff;font-size:20px;margin:4px 0 0}
+html.copa-rinha .copa-trainer-bio {white-space:pre-wrap;overflow-wrap:anywhere}
+html.copa-rinha .copa-trainer-replays {list-style:none;padding:0;margin:0 0 8px}
+html.copa-rinha .copa-trainer-replays li {display:flex;justify-content:space-between;align-items:center;padding:8px;border-bottom:1px solid #25384c}
+html.copa-rinha .copa-trainer-replays small {display:block;color:#a8bdd2}
+html.copa-rinha .copa-trainer-editor fieldset {border:0;margin:0;padding:0;min-width:0}
+html.copa-rinha .copa-trainer-editor fieldset > label {display:grid;gap:4px;max-width:480px;margin-bottom:10px}
+html.copa-rinha .copa-trainer-editor :is(input,textarea,select) {box-sizing:border-box;max-width:100%}
+html.copa-rinha .copa-trainer-fields {padding:0;list-style:none;display:grid;gap:5px}
+html.copa-rinha .copa-trainer-fields li {display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;align-items:center;gap:5px;max-width:480px}
+@container (max-width:590px) {
+  html.copa-rinha .copa-trainer-team {grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:520px) {
+  html.copa-rinha .copa-trainer {margin:8px auto;padding-inline:7px}
+  html.copa-rinha .copa-trainer-header {padding:12px 10px}
+  html.copa-rinha .copa-trainer-badges > div {grid-template-columns:repeat(5,minmax(0,1fr))}
+}

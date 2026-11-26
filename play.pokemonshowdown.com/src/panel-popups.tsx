@@ -13,7 +13,9 @@ import { ChatUserList, PSTextarea, type ChatRoom } from "./panel-chat";
 import { PSRoomPanel, PSPanelWrapper, PSView } from "./panels";
 import { PSHeader } from "./panel-topbar";
 
-import type { CopaPartner, CopaProfile } from "./copa-accounts";
+import {
+	COPA_REGIONS, type CopaPartner, type CopaProfile, type CopaRegion, type CopaTrainer, type CopaTrainerCard,
+} from "./copa-accounts";
 import { parseCopaPartner } from "./copa-online";
 
 const WARNING_SECONDS = 5;
@@ -296,7 +298,8 @@ class UserPanel extends PSRoomPanel<UserRoom> {
 		const avatar = user.avatar !== '[loading]' ? Dex.resolveAvatar(`${user.avatar || 'unknown'}`, user.userid) : null;
 		const details = <>
 			<strong><a
-				href={`//${Config.routes.users}/${user.userid}`} target="_blank"
+				href={Config.copaRinhaLocalNames ? `copatrainer-${user.userid}` : `//${Config.routes.users}/${user.userid}`}
+				target={Config.copaRinhaLocalNames ? undefined : '_blank'}
 				style={`color: ${away ? '#888888' : BattleLog.usernameColor(user.userid)}`}
 			>
 				{user.name}
@@ -630,6 +633,376 @@ class CopaProfilePanel extends PSRoomPanel {
 	}
 }
 
+let copaSpeciesOptions: string[] | undefined;
+function copaProfileSpeciesOptions() {
+	if (copaSpeciesOptions) return copaSpeciesOptions;
+	const options: Record<string, string> = {};
+	for (const id of Object.keys(window.BattlePokedex || {})) {
+		const entry = Dex.species.get(id);
+		if (!entry.exists || entry.num <= 0 || entry.isNonstandard === 'CAP' || entry.isNonstandard === 'Custom' ||
+			entry.tags.includes('Pokestar')) continue;
+		options[entry.id] = entry.name;
+		for (const form of entry.cosmeticFormes || []) options[toID(form)] = form;
+	}
+	const names = Object.values(options).sort((a, b) => a.localeCompare(b));
+	if (names.length) copaSpeciesOptions = names;
+	return names;
+}
+
+const COPA_TRAINER_TABS = ['Insígnias', 'Visão geral', 'Replays'] as const;
+const copaDate = (value: string) => new Date(value).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+interface CopaTrainerReplay {
+	id: string;
+	createdAt: string;
+	players: { name: string, userid: string }[];
+	winner: string;
+}
+
+class CopaTrainerPanel extends PSRoomPanel {
+	static readonly id = 'copatrainer';
+	static readonly routes = ['copatrainer-*'];
+	static readonly location = 'left';
+	private trainer?: CopaTrainer | null;
+	private tab = 0;
+	private badge?: CopaRegion;
+	private draft?: CopaTrainerCard;
+	private saving = false;
+	private preparingBanner = false;
+	private error = '';
+	private replayError = '';
+	private replayLoading = false;
+	private replays: CopaTrainerReplay[] = [];
+	private cursor: string | null | undefined;
+
+	private userid() { return this.props.room.id.slice('copatrainer-'.length); }
+
+	override componentDidMount() {
+		super.componentDidMount();
+		this.load();
+	}
+
+	private load() {
+		if (!Config.copaRinhaLocalNames) return;
+		void window.CopaAccounts?.trainer(this.userid()).then(trainer => {
+			this.trainer = trainer;
+			if (trainer && this.props.room.title !== trainer.name) {
+				this.props.room.title = trainer.name;
+				PS.update();
+			}
+			this.forceUpdate();
+		}, () => {
+			this.trainer = null;
+			this.error = 'Perfil temporariamente indisponível.';
+			this.forceUpdate();
+		});
+	}
+
+	/* eslint-disable no-restricted-syntax */
+	private loadReplays = async () => {
+		if (this.replayLoading || this.cursor === null) return;
+		this.replayLoading = true;
+		this.replayError = '';
+		this.forceUpdate();
+		try {
+			const query = new URLSearchParams({ player: this.userid(), cursor: this.cursor || '' });
+			const response = await window.fetch(`https://copa-rinha-showdown.onrender.com/copa-rinha/replays/?${query}`, {
+				credentials: 'omit', cache: 'no-store', signal: AbortSignal.timeout(15000),
+			});
+			if (!response.ok) throw new Error('Replay lookup failed');
+			const page: { replays: CopaTrainerReplay[], cursor: string | null } = await response.json();
+			page.replays.forEach(replay => {
+				if (/^[A-Za-z0-9_-]{32}$/.test(replay.id) && replay.players.some(player => player.userid === this.userid()) &&
+					!this.replays.some(entry => entry.id === replay.id)) this.replays.push(replay);
+			});
+			this.cursor = page.cursor;
+		} catch {
+			this.replayError = 'Não foi possível carregar os replays públicos.';
+		} finally {
+			this.replayLoading = false;
+			this.forceUpdate();
+		}
+	};
+
+	private edit = () => {
+		if (!this.trainer || !window.CopaAccounts?.ownsProfile(this.trainer.name)) return;
+		const { card } = this.trainer;
+		this.draft = {
+			bio: card?.bio || '', region: card?.region || '', banner: card?.banner || '',
+			dreamTeam: Array.from({ length: 6 }, (_, i) => {
+				const slot = card?.dreamTeam[i];
+				return slot ? { ...slot, species: Dex.species.get(slot.species).name || slot.species } : null;
+			}),
+		};
+		this.error = '';
+		this.forceUpdate();
+	};
+
+	private save = async (event: Event) => {
+		event.preventDefault();
+		if (!this.draft || !this.trainer || !window.CopaAccounts || this.saving || this.preparingBanner) return;
+		const dreamTeam = this.draft.dreamTeam.map(slot => {
+			const name = slot?.species.trim();
+			return name ? { species: Dex.species.get(name).id, shiny: !!slot?.shiny } : null;
+		});
+		if (dreamTeam.some(pokemon => pokemon && !Dex.species.get(pokemon.species).exists)) {
+			this.error = 'Escolha espécies ou formas válidas.';
+			this.forceUpdate();
+			return;
+		}
+		this.error = '';
+		this.saving = true;
+		this.forceUpdate();
+		try {
+			this.trainer.card = await window.CopaAccounts.saveTrainer({ ...this.draft, dreamTeam });
+			this.draft = undefined;
+			this.tab = 0;
+		} catch (error) {
+			this.error = (error as Error).message;
+		} finally {
+			this.saving = false;
+			this.forceUpdate();
+		}
+	};
+
+	private loadBanner = async (event: Event) => {
+		const file = (event.currentTarget as HTMLInputElement).files?.[0];
+		const draft = this.draft;
+		if (!file || !draft) return;
+		this.error = '';
+		if (!/^image\/(?:jpeg|png|webp)$/.test(file.type) || file.size > 4 * 1024 * 1024) {
+			this.error = 'Escolha uma imagem JPEG, PNG ou WebP de até 4 MB.';
+			this.forceUpdate();
+			return;
+		}
+		this.preparingBanner = true;
+		this.forceUpdate();
+		try {
+			const bitmap = await window.createImageBitmap(file);
+			try {
+				const canvas = document.createElement('canvas');
+				canvas.width = 480;
+				canvas.height = 180;
+				const ctx = canvas.getContext('2d')!;
+				const scale = Math.max(canvas.width / bitmap.width, canvas.height / bitmap.height);
+				const w = bitmap.width * scale, h = bitmap.height * scale;
+				ctx.fillStyle = '#101d32';
+				ctx.fillRect(0, 0, canvas.width, canvas.height);
+				ctx.drawImage(bitmap, (canvas.width - w) / 2, (canvas.height - h) / 2, w, h);
+				let banner = '';
+				for (const quality of [0.75, 0.5, 0.3, 0.15, 0.06]) {
+					banner = canvas.toDataURL('image/jpeg', quality);
+					if (banner.length <= 6800) break;
+				}
+				if (banner.length > 6800) throw new Error('Image too large');
+				draft.banner = banner;
+			} finally { bitmap.close(); }
+		} catch {
+			this.error = 'Não foi possível preparar essa imagem. Experimente outra.';
+		} finally {
+			this.preparingBanner = false;
+			this.forceUpdate();
+		}
+	};
+
+	/* eslint-enable no-restricted-syntax */
+
+	private renderEditor(draft: CopaTrainerCard) {
+		const options = copaProfileSpeciesOptions();
+		const updateOrder = (from: number, to: number) => {
+			const slots = draft.dreamTeam;
+			[slots[from], slots[to]] = [slots[to], slots[from]];
+			this.forceUpdate();
+		};
+		return <form class="copa-trainer-editor" onSubmit={ev => { void this.save(ev); }}>
+			<h2>Editar perfil</h2>
+			<fieldset disabled={this.saving || this.preparingBanner}>
+				<label><span>Fundo do cabeçalho</span>
+					<input type="file" accept="image/jpeg,image/png,image/webp" onChange={ev => { void this.loadBanner(ev); }} />
+				</label>
+				{draft.banner && <button
+					type="button" class="button" onClick={() => {
+						draft.banner = '';
+						this.forceUpdate();
+					}}
+				>Restaurar azul-marinho</button>}
+				<label>Região representada<select
+					class="textbox" value={draft.region} onChange={ev => {
+						draft.region = (ev.currentTarget as HTMLSelectElement).value as CopaRegion;
+					}}
+				>
+					<option value="">Sem região</option>
+					{COPA_REGIONS.map(region => <option key={region} value={region}>{region}</option>)}
+				</select></label>
+				<label>Biografia<textarea
+					class="textbox" rows={3} maxLength={360} value={draft.bio} onInput={ev => {
+						draft.bio = (ev.currentTarget as HTMLTextAreaElement).value;
+					}}
+				/></label>
+				<div class="copa-trainer-actions">
+					<button
+						class="button" type="button" onClick={() => {
+							PS.join('lobby' as RoomID);
+							(PS.rooms.lobby as ChatRoom | undefined)?.prepareCopaAvatar();
+						}}
+					>Alterar avatar no Lobby</button>
+					<button
+						class="button" type="button" onClick={() => PS.join('copapartner' as RoomID, {
+							args: { onSave: () => this.load() },
+						})}
+					>Alterar Pokémon parceiro</button>
+				</div>
+				<h3>Dream Team</h3>
+				<datalist id="copa-dream-species">{options.map(name => <option key={name} value={name} />)}</datalist>
+				<ol class="copa-trainer-fields">{draft.dreamTeam.map((slot, i) => <li key={i}>
+					<input
+						class="textbox" name={`species-${i}`} aria-label={`Pokémon ${i + 1}`} list="copa-dream-species"
+						value={slot?.species || ''} onInput={ev => {
+							draft.dreamTeam[i] = {
+								species: (ev.currentTarget as HTMLInputElement).value, shiny: !!draft.dreamTeam[i]?.shiny,
+							};
+						}}
+					/>
+					<label><input
+						type="checkbox" name={`shiny-${i}`} checked={!!slot?.shiny} onChange={ev => {
+							draft.dreamTeam[i] = {
+								species: draft.dreamTeam[i]?.species || '', shiny: (ev.currentTarget as HTMLInputElement).checked,
+							};
+						}}
+					/> Shiny</label>
+					{[-1, 1].map(step => <button
+						key={step} type="button" class="button"
+						disabled={i + step < 0 || i + step >= 6} aria-label={step < 0 ? 'Mover para cima' : 'Mover para baixo'}
+						onClick={() => updateOrder(i, i + step)}
+					>{step < 0 ? '↑' : '↓'}</button>)}
+				</li>)}</ol>
+				<button class="button" type="submit">Salvar perfil</button> {}
+				<button
+					class="button" type="button" onClick={() => {
+						this.draft = undefined;
+						this.error = '';
+						this.forceUpdate();
+					}}
+				>Cancelar</button>
+			</fieldset>
+			{this.error && <p role="alert">{this.error}</p>}
+		</form>;
+	}
+
+	override render() {
+		const trainer = this.trainer;
+		const ownsProfile = trainer && window.CopaAccounts?.ownsProfile(trainer.name);
+		const card = this.draft || trainer?.card;
+		const banner = card?.banner;
+		const stats = trainer?.stats;
+		return <PSPanelWrapper room={this.props.room}><article class="copa-trainer">
+			{Config.copaRinhaLocalNames && (trainer ? <>
+				<header
+					class="copa-trainer-header"
+					style={banner && /^data:image\/jpeg;base64,[A-Za-z0-9+/]+=*$/.test(banner) ?
+						{ backgroundImage: `linear-gradient(90deg, #091323ed, #101c31a8), url("${banner}")` } : undefined}
+				>
+					<div class="copa-trainer-details">
+						<h1>{trainer.name}</h1>
+						<p class={trainer.online ? 'copa-trainer-online' : ''}>{trainer.online ? 'Online' : 'Offline'}</p>
+						<p>{card?.region || 'Região não definida'}</p>
+						<p>{trainer.registeredAt ? `Desde ${copaDate(trainer.registeredAt)}` : 'Data de registro indisponível'}</p>
+						<div class="copa-trainer-actions">
+							{ownsProfile ? <button type="button" class="button" onClick={this.edit}>Editar perfil</button> : <>
+								<button
+									class="button" disabled={!PS.user.named || !trainer.online} data-href={`challenge-${this.userid()}`}
+								>Desafiar</button>
+								<button class="button" disabled={!PS.user.named} data-href={`dm-${this.userid()}`}>Mensagem</button>
+							</>}
+						</div>
+					</div>
+					<div class="copa-profile-sprites copa-trainer-duo">
+						<CopaPresenceAvatar
+							name={trainer.name} avatar={ownsProfile ? String(PS.user.avatar) : trainer.avatar}
+							participant={toID(trainer.name)} profile
+						/>
+						<CopaPartnerSprite partner={parseCopaPartner(trainer.partner)} profile />
+					</div>
+				</header>
+				<section class="copa-trainer-dream" aria-label="Dream Team">
+					<h2>Dream Team</h2>
+					<ol class="copa-trainer-team">{Array.from({ length: 6 }, (_, i) => {
+						const pokemon = parseCopaPartner(card?.dreamTeam[i]);
+						return <li key={i} class={pokemon ? '' : 'empty'}>{pokemon ? <>
+							<CopaPartnerSprite partner={pokemon} />
+							<strong>{Dex.species.get(pokemon.species).name}{pokemon.shiny ? ' ✦' : ''}</strong>
+						</> : <span aria-label="Espaço vazio">—</span>}</li>;
+					})}</ol>
+				</section>
+				{this.draft && ownsProfile ? this.renderEditor(this.draft) : <>
+					<nav class="copa-trainer-tabs" aria-label="Seções do perfil">
+						{COPA_TRAINER_TABS.map((tab, index) => <button
+							type="button" key={tab} aria-pressed={index === this.tab}
+							onClick={() => {
+								this.tab = index;
+								if (index === 2 && this.cursor === undefined) void this.loadReplays();
+								this.forceUpdate();
+							}}
+						>{tab}</button>)}
+					</nav>
+					<section class="copa-trainer-body" aria-label={COPA_TRAINER_TABS[this.tab]}>
+						{this.tab === 0 && <section class="copa-trainer-badges" aria-label="Insígnias regionais">
+							<h2>Insígnias <small>{trainer.badges.length}/10</small></h2>
+							<div>{COPA_REGIONS.map(region => {
+								const earned = trainer.badges.includes(region);
+								return <button
+									type="button" key={region} class={earned ? 'earned' : 'locked'}
+									aria-label={`${region} · ${earned ? 'Conquistada' : 'Bloqueada'}`}
+									title={region} onClick={() => {
+										this.badge = this.badge === region ? undefined : region;
+										this.forceUpdate();
+									}}
+								>
+									<img src={`/assets/copa-rinha/regional-badges/${region.toLowerCase()}.png`} alt="" />
+									<span>{region}</span>
+								</button>;
+							})}</div>
+							{this.badge && <p role="status">
+								{this.badge} · {trainer.badges.includes(this.badge) ? 'Conquistada' : 'Bloqueada'}
+							</p>}
+						</section>}
+						{this.tab === 1 && <>
+							<h2>Biografia</h2><p class="copa-trainer-bio">{card?.bio || 'Biografia não preenchida.'}</p>
+							<h2>Batalhas contra jogadores</h2>
+							{stats?.total ? <dl class="copa-trainer-stats">
+								{[['Batalhas', stats.total], ['Vitórias', stats.wins], ['Derrotas', stats.losses],
+									['Aproveitamento', `${Math.round(stats.wins / stats.total * 100)}%`]].map(([label, value]) =>
+									<div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
+							</dl> : <p>Ainda sem estatísticas registradas.</p>}
+							{!!stats?.total && <p><small>Dados registrados desde a ativação dos perfis.</small></p>}
+						</>}
+						{this.tab === 2 && <>
+							{this.replayError && <p role="alert">{this.replayError}</p>}
+							{!this.replays.length && this.cursor === null && <p>Nenhum replay público.</p>}
+							<ul class="copa-trainer-replays">{this.replays.map(replay => {
+								const opponent = replay.players.find(player => player.userid !== this.userid());
+								const result = !replay.winner ? 'Empate' : toID(replay.winner) === this.userid() ? 'Vitória' : 'Derrota';
+								return <li key={replay.id}><div><strong>{opponent?.name}</strong>
+									<small>{copaDate(replay.createdAt)} · {result}</small></div>
+								<a href={`/replay.html?id=${replay.id}`} target="_blank" rel="noopener">Assistir</a></li>;
+							})}</ul>
+							{this.cursor !== null && <button
+								class="button" disabled={this.replayLoading} onClick={() => { void this.loadReplays(); }}
+							>
+								{this.replayLoading ? 'Carregando…' : this.replayError ? 'Tentar novamente' : 'Carregar mais'}
+							</button>}
+						</>}
+					</section>
+				</>}
+			</> : <p role="status">
+				{this.error || (trainer === null ? 'Perfil Copa Rinha indisponível.' : 'Carregando perfil…')}
+				{trainer === null && Config.routes.users && <> {}
+					<a href={`//${Config.routes.users}/${this.userid()}`} target="_blank" rel="noopener">Perfil no Showdown</a>
+				</>}
+			</p>)}
+		</article></PSPanelWrapper>;
+	}
+}
+
 class CopaPartnerPanel extends PSRoomPanel {
 	static readonly id = 'copapartner';
 	static readonly routes = ['copapartner'];
@@ -677,6 +1050,8 @@ class CopaPartnerPanel extends PSRoomPanel {
 		this.error = '';
 		this.forceUpdate();
 		void window.CopaAccounts.savePartner(name ? { species: species.id, shiny: this.shiny } : null).then(() => {
+			const onSave = this.props.room.args?.onSave;
+			if (typeof onSave === 'function') onSave();
 			this.close();
 		}, error => {
 			this.error = error instanceof Error ? error.message : 'Não foi possível salvar o parceiro.';
@@ -685,25 +1060,10 @@ class CopaPartnerPanel extends PSRoomPanel {
 		});
 	};
 
-	private options?: string[];
-	private speciesOptions() {
-		if (this.options) return this.options;
-		const options: Record<string, string> = {};
-		for (const id of Object.keys(window.BattlePokedex || {})) {
-			const entry = Dex.species.get(id);
-			if (!entry.exists || entry.num <= 0 || entry.isNonstandard === 'CAP' || entry.isNonstandard === 'Custom' ||
-				entry.tags.includes('Pokestar')) continue;
-			options[entry.id] = entry.name;
-			for (const form of entry.cosmeticFormes || []) options[toID(form)] = form;
-		}
-		this.options = Object.values(options).sort((a, b) => a.localeCompare(b));
-		return this.options;
-	}
-
 	override render() {
 		const disabled = this.loading || this.saving;
 		const species = Dex.species.get(this.species);
-		const options = this.loading ? [] : this.speciesOptions();
+		const options = this.loading ? [] : copaProfileSpeciesOptions();
 		return <PSPanelWrapper room={this.props.room} width={380}><div class="pad copa-partner-picker">
 			{Config.copaRinhaLocalNames && <form onSubmit={this.save}>
 				<h3>Pokémon parceiro</h3>
@@ -834,14 +1194,15 @@ class CopaMembersPanel extends PSRoomPanel {
 								<CopaAvatarLink name={member.name} avatar={member.avatar} />}
 							</div>
 							<div class="copa-online-player">
+								<a href={`copatrainer-${id}`}>{member.name}</a> {}
 								<button
-									class="button" onClick={ev => {
+									class="button small" aria-label={`Interagir com ${member.name}`} onClick={ev => {
 										ev.stopPropagation();
 										PS.join(`user-${id}` as RoomID, {
 											args: { username: member.name, copaMember: true }, parentElem: ev.currentTarget as HTMLElement,
 										});
 									}}
-								>{member.name}</button>
+								>⋯</button>
 								<small class={member.online ? 'copa-member-connected' : ''}>
 									{member.battle ? (
 										<a class="copa-member-battle" href={`/${member.battle}`}>Em batalha pública</a>
@@ -2740,6 +3101,7 @@ class RulesPanel extends PSRoomPanel<PopupRoom> {
 PS.addRoomType(
 	UserPanel,
 	CopaProfilePanel,
+	CopaTrainerPanel,
 	CopaPartnerPanel,
 	UserOptionsPanel,
 	UserListPanel,
