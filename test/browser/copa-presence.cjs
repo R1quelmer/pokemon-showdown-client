@@ -25,9 +25,9 @@ const members = [
 async function measurePairPixels(pair) {
 	const shots = [];
 	for (const selector of [
-		'.copa-profile-sprites img',
-		'.copa-profile-sprites .copa-partner-sprite img',
-		'.copa-profile-sprites .copa-online-avatar img',
+		'.copa-profile-sprites img,.copa-battle-pair img',
+		'.copa-profile-sprites .copa-partner-sprite img,.copa-battle-pair .copa-partner-sprite img',
+		'.copa-profile-sprites .copa-online-avatar img,.copa-battle-pair .copa-online-avatar img',
 	]) {
 		const shot = await pair.screenshot({style: `${selector}{visibility:hidden!important}`, scale:'css'});
 		shots.push(shot.toString('base64'));
@@ -377,12 +377,15 @@ print(json.dumps({"gap": gap, "baseDelta": abs(a.getbbox()[3] - b.getbbox()[3])}
 				await page.evaluate(id => {
 					PS.prefs.set("mute",true);
 					PS.receive('>' + id + '\n|init|battle\n|title|Bob vs. Alice\n|gametype|singles\n|gen|9\n' +
-						'|player|p1|Alice|1\n|player|p2|Bob|ethan\n|start\n|turn|1');
+						'|player|p1|Alice|marnie\n|player|p2|Bob|marnie\n|start\n|turn|1');
 				},publicBattle);
 				const pairs = page.locator('.copa-battle-pair');
 				await pairs.nth(1).waitFor({timeout:8000});
 				for (const pair of await pairs.all()) {
 					await pair.locator('[data-profile-tight]').nth(1).waitFor({timeout:8000});
+					const pixels = await measurePairPixels(pair);
+					console.log('Marnie + Sylveon',width,pixels);
+					assert(pixels.gap >= 4 && pixels.gap <= 6 && pixels.baseDelta <= 1, JSON.stringify(pixels));
 					assert(await pair.evaluate(node => {
 						const [avatar, partner] = node.children;
 						const a = avatar.getBoundingClientRect(), b = partner.getBoundingClientRect();

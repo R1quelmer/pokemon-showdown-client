@@ -361,7 +361,9 @@ function alignCopaProfilePair(frame: HTMLElement) {
 	const trainerRows = copaProfileSilhouettes.get(trainer);
 	const partnerRows = copaProfileSilhouettes.get(partner);
 	if (!trainerRows || !partnerRows) return;
-	const gap = pair.classList.contains('copa-profile-sprites') ? 6 : 3;
+	const battle = pair.classList.contains('copa-battle-pair');
+	const zoom = battle ? pair.getBoundingClientRect().width / pair.offsetWidth : 1;
+	const gap = battle ? 6.5 / (zoom || 1) : pair.classList.contains('copa-profile-sprites') ? 6 : 3;
 	let offset = -Infinity;
 	for (const a of trainerRows) {
 		for (const b of partnerRows) {
@@ -477,7 +479,7 @@ function CopaCompactPair({ name, avatar, partner, battle }: {
 }) {
 	return <span class={battle ? 'copa-battle-pair' : 'copa-directory-pair'}>
 		<CopaPresenceAvatar name={name} avatar={avatar} participant={toID(name)} size={battle ? 80 : 40} />
-		<CopaPartnerSprite partner={partner} size={battle ? 30 : 38} />
+		<CopaPartnerSprite partner={partner} size={battle ? 62 : 38} />
 	</span>;
 }
 
