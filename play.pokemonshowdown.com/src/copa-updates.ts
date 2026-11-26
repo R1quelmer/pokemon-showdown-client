@@ -1,5 +1,6 @@
 // Add player-facing changes at the top. For entries on the same date, newest goes first.
 export const COPA_UPDATES = [
+	{ date: '2026-11-26', text: 'Oguri Cap chegou ao catálogo de avatares da Copa Rinha.' },
 	{ date: '2026-11-26', text: 'Escolha a cor do nickname pela roda de cores ou pelo código HEX, com prévia ao vivo.' },
 	{ date: '2026-11-26', text: 'Escolha a cor do nickname. Complete as dez insígnias para desbloquear o visual dourado.' },
 	{ date: '2026-11-26', text: 'A edição do Hall da Fama sugere Pokémon com prévia e reúne a seleção de insígnias.' },

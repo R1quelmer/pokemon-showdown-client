@@ -13,8 +13,10 @@ from PIL import Image, UnidentifiedImageError
 root = Path(sys.argv[1])
 assets = Path(__file__).resolve().parents[1] / "play.pokemonshowdown.com/assets/copa-rinha"
 crops = {}
-for directory in ("trainers", "trainers-custom", "gen5", "gen5-shiny", "partner-za", "profile-partners"):
+for directory in ("trainers", "trainers-custom", "gen5", "gen5-shiny", "partner-za", "profile-partners", "copa-avatars"):
     files = (assets if directory in ("partner-za", "profile-partners") else root) / directory
+    if directory == "copa-avatars":
+        files = assets / "avatars"
     for path in sorted(files.glob("*.png")):
         try:
             image = Image.open(path)

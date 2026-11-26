@@ -9,7 +9,7 @@ const {serveNativeSprite, assertSpriteElementsLoaded} = require('./copa-sprite-a
 const root = path.resolve(__dirname, '../../play.pokemonshowdown.com');
 const endpoint = 'https://copa-rinha-showdown.onrender.com';
 const screenshots = process.env.COPA_TRAINER_SCREENSHOTS;
-const member = {name:'Alice', avatar:'marnie', partner:{species:'sylveon', shiny:false}, online:true, rooms:['Lobby']};
+const member = {name:'Alice', avatar:'oguri-cap', partner:{species:'sylveon', shiny:false}, online:true, rooms:['Lobby']};
 const pokemon = (species, shiny = false) => ({species, shiny});
 const team = [pokemon('sylveon'), pokemon('greninjamega'), pokemon('charizardmegax'), pokemon('rotomwash', true),
 	pokemon('kingambit'), pokemon('landorustherian')];
@@ -36,7 +36,7 @@ const team = [pokemon('sylveon'), pokemon('greninjamega'), pokemon('charizardmeg
 			const errors = [];
 			const messages = [];
 			page.on('pageerror', error => errors.push(error.message));
-			const initial = {region:'Unova', dreamTeam:team, banner:'', bio:'Treinadora de Unova. Minha dupla é Marnie e Sylveon.'};
+			const initial = {region:'Unova', dreamTeam:team, banner:'', bio:'Treinadora de Unova. Minha dupla é Oguri Cap e Sylveon.'};
 			let card = structuredClone(initial), socket, nicknameColor;
 			const initialBadges = ['Johto','Unova','Galar'];
 			let badgesForAlice = initialBadges;
@@ -55,7 +55,7 @@ const team = [pokemon('sylveon'), pokemon('greninjamega'), pokemon('charizardmeg
 					messages.push(msg);
 					if (msg.endsWith('/cmd userdetails bob')) ws.send('|queryresponse|userdetails|' +
 						JSON.stringify({userid:'bob', name:'Bob', avatar:'ethan', rooms:{lobby:{}}}));
-					if (msg.includes('/trn Alice')) ws.send('|updateuser| Alice|1|marnie');
+					if (msg.includes('/trn Alice')) ws.send('|updateuser| Alice|1|oguri-cap');
 					if (msg.includes('/join lobby')) ws.send('>lobby\n|init|chat\n|title|Lobby');
 					if (msg.includes('/cmd copapresence')) ws.send('|queryresponse|copapresence|' +
 						JSON.stringify({members:[member], users:[{...member,status:"",statusType:"online"}], guests:0,total:1,
@@ -145,11 +145,15 @@ const team = [pokemon('sylveon'), pokemon('greninjamega'), pokemon('charizardmeg
 			assert.equal(nicknameColor,'#8cf0bd');
 			await page.evaluate(() => PS.closeAllPopups());
 			await home.locator('a[href="copamembers"]').click();
+			await page.locator('#room-copamembers img[src$="/oguri-cap.png"]').waitFor();
+			await assertSpriteElementsLoaded(page, '#room-copamembers img[src$="/oguri-cap.png"]');
 			await page.locator('#room-copamembers').getByRole('link',{name:'Alice',exact:true}).click();
 			await heading.waitFor();
 			await page.waitForFunction(() => getComputedStyle(document.querySelector('#room-copatrainer-alice h1')).color === 'rgb(140, 240, 189)');
 			assert.equal(await page.locator('#room-copamembers [data-copa-name=alice]').evaluate(el=>getComputedStyle(el).color),'rgb(140, 240, 189)');
 			assert.deepEqual(await trainer.locator('nav button').allTextContents(), ['Insígnias','Visão geral','Replays']);
+			await assertSpriteElementsLoaded(page, '#room-copatrainer-alice img[src$="/oguri-cap.png"]');
+			await trainer.locator('.copa-trainer-duo [data-profile-tight]').nth(1).waitFor();
 			const dream = trainer.getByRole('region',{name:'Hall da Fama de Unova'});
 			const grid = dream.locator('.copa-trainer-team');
 			const tabs = trainer.getByRole('navigation',{name:'Seções do perfil'});

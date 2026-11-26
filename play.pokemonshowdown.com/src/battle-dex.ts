@@ -615,6 +615,7 @@ export const Dex = new class implements ModdedDex {
 	}
 
 	resolveAvatar(avatar: string, participant?: string): string {
+		if (avatar === 'oguri-cap' && window.Config?.copaRinhaLocalNames) return '/assets/copa-rinha/avatars/oguri-cap.png';
 		const local = participant && window.CopaRinhaAvatars?.resolve(participant);
 		if (local) return local;
 		if (window.BattleAvatarNumbers && avatar in BattleAvatarNumbers) {

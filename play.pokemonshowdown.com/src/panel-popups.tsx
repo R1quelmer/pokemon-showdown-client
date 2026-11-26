@@ -419,7 +419,8 @@ function fitCopaProfileSprite(image: HTMLImageElement, size = 104) {
 	if (image.dataset.profileFit) return;
 	image.dataset.profileFit = 'true';
 	const path = new URL(image.src).pathname;
-	const key = path.replace(/^.*\/sprites\//, '').replace(/^.*\/(partner-za|profile-partners)\//, '$1/');
+	const key = path.replace(/^.*\/sprites\//, '').replace(/^.*\/(partner-za|profile-partners)\//, '$1/')
+		.replace(/^\/assets\/copa-rinha\/avatars\//, 'copa-avatars/');
 	copaProfileCrops ||= window.fetch('/assets/copa-rinha/profile-crops.json').then(response => (
 		response.ok ? response.json() as Promise<Record<string, CopaSpriteCrop>> : Promise.reject(new Error('Sprite crops'))
 	)).catch(() => {
