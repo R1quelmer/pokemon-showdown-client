@@ -375,28 +375,51 @@ print(json.dumps({"gap": gap, "baseDelta": abs(a.getbbox()[3] - b.getbbox()[3])}
 			await page.waitForFunction(id => !!PS.rooms[id], publicBattle);
 			if ([1440,390].includes(width)) {
 				await page.evaluate(id => {
-					PS.prefs.set("mute",true);
+					PS.prefs.set('mute', true);
+					PS.prefs.set('noanim', true);
+					const side = {id:'p2', name:'Alice', pokemon:[{
+						ident:'p2: Sylveon', details:'Sylveon, L50', condition:'100/100', active:false,
+						moves:['protect'], baseAbility:'pixilate', item:'', pokeball:'pokeball',
+					}]};
+					window.copaBattleSide = side;
 					PS.receive('>' + id + '\n|init|battle\n|title|Bob vs. Alice\n|gametype|singles\n|gen|9\n' +
-						'|player|p1|Alice|marnie\n|player|p2|Bob|marnie\n|start\n|turn|1');
+						'|player|p1|Bob|1\n|player|p2|Alice|marnie\n|poke|p1|Sylveon, L50|\n' +
+						'|poke|p2|Sylveon, L50|\n|teampreview|1\n|request|' + JSON.stringify({side, teamPreview:true}));
 				},publicBattle);
+				await page.waitForFunction(id => PS.rooms[id]?.side?.id === 'p2' && PS.rooms[id]?.request?.teamPreview, publicBattle);
 				const pairs = page.locator('.copa-battle-pair');
 				await pairs.nth(1).waitFor({timeout:8000});
-				for (const pair of await pairs.all()) {
-					await pair.locator('[data-profile-tight]').nth(1).waitFor({timeout:8000});
-					const pixels = await measurePairPixels(pair);
-					console.log('Marnie + Sylveon',width,pixels);
-					assert(pixels.gap >= 0 && pixels.gap <= 3 && pixels.baseDelta <= 1, JSON.stringify(pixels));
-					assert(await pair.evaluate(node => {
-						const [avatar, partner] = node.children;
-						const a = avatar.getBoundingClientRect(), b = partner.getBoundingClientRect();
-						const rail = node.closest('.trainer').getBoundingClientRect();
-						const icons = node.closest('.trainer').querySelector('.teamicons').getBoundingClientRect();
-						return Math.abs(a.bottom - b.bottom) < 2 && a.left >= rail.left - 1 &&
-							b.right <= rail.right + 1 && b.bottom <= icons.top;
-					}));
-				}
-				if (process.env.COPA_MEMBERS_SCREENSHOTS) {
-					await page.screenshot({path:path.join(process.env.COPA_MEMBERS_SCREENSHOTS, `batalha-${width}.png`)});
+				assert.match(await pairs.filter({has:page.locator('img[src$="/lucas.png"]')}).first()
+					.locator('.copa-online-avatar img').getAttribute('src'), /lucas\.png$/);
+				for (const phase of ['selecao','turno']) {
+					if (phase === 'turno') {
+						await page.evaluate(id => {
+							const side = window.copaBattleSide;
+							side.pokemon[0].active = true;
+							PS.receive('>' + id + '\n|start\n|switch|p1a: Sylveon|Sylveon, L50|100/100\n' +
+								'|switch|p2a: Sylveon|Sylveon, L50|100/100\n|turn|1\n|request|' +
+								JSON.stringify({side, active:[{moves:[{move:'Protect',id:'protect',pp:10,maxpp:10,target:'self'}]}]}));
+						},publicBattle);
+						await page.waitForFunction(id => PS.rooms[id]?.battle?.turn === 1 && !!PS.rooms[id]?.request?.active, publicBattle);
+					}
+					await pairs.nth(1).waitFor({timeout:8000});
+					for (const pair of await pairs.all()) {
+						await pair.locator('[data-profile-tight]').nth(1).waitFor({timeout:8000});
+						const pixels = await measurePairPixels(pair);
+						console.log(phase,width,pixels);
+						assert(pixels.gap >= 0 && pixels.gap <= 6 && pixels.baseDelta <= 1, JSON.stringify(pixels));
+						assert(await pair.evaluate(node => {
+							const [avatar, partner] = node.children;
+							const a = avatar.getBoundingClientRect(), b = partner.getBoundingClientRect();
+							const rail = node.closest('.trainer').getBoundingClientRect();
+							const icons = node.closest('.trainer').querySelector('.teamicons').getBoundingClientRect();
+							return Math.abs(a.bottom - b.bottom) < 2 && a.left >= rail.left - 1 &&
+								b.right <= rail.right + 1 && b.bottom <= icons.top;
+						}));
+					}
+					if (process.env.COPA_MEMBERS_SCREENSHOTS) {
+						await page.screenshot({path:path.join(process.env.COPA_MEMBERS_SCREENSHOTS, `batalha-${phase}-${width}.png`)});
+					}
 				}
 
 				await page.getByRole('button', {name:'Ver perfil de Bob'}).click({timeout:8000});

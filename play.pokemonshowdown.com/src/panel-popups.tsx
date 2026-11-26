@@ -362,8 +362,7 @@ function alignCopaProfilePair(frame: HTMLElement) {
 	const partnerRows = copaProfileSilhouettes.get(partner);
 	if (!trainerRows || !partnerRows) return;
 	const battle = pair.classList.contains('copa-battle-pair');
-	const zoom = battle ? pair.getBoundingClientRect().width / pair.offsetWidth : 1;
-	const gap = battle ? 2.5 / (zoom || 1) : pair.classList.contains('copa-profile-sprites') ? 6 : 3;
+	const gap = battle || pair.classList.contains('copa-profile-sprites') ? 6 : 3;
 	let offset = -Infinity;
 	for (const a of trainerRows) {
 		for (const b of partnerRows) {
@@ -373,7 +372,20 @@ function alignCopaProfilePair(frame: HTMLElement) {
 		}
 	}
 	if (!Number.isFinite(offset)) return;
-	partner.style.marginLeft = `${Math.round(offset - trainer.offsetWidth)}px`;
+	if (!battle) {
+		partner.style.marginLeft = `${Math.round(offset - trainer.offsetWidth)}px`;
+		return;
+	}
+	// Work in untransformed CSS pixels: the battle scene can resize or start hidden.
+	const trainerWidth = parseFloat(trainer.style.width);
+	const partnerWidth = parseFloat(partner.style.width);
+	const width = Math.max(trainerWidth, offset + partnerWidth);
+	const height = Math.max(parseFloat(trainer.style.height), parseFloat(partner.style.height));
+	pair.style.width = `${width}px`;
+	pair.style.height = `${height}px`;
+	partner.style.marginLeft = `${offset - trainerWidth}px`;
+	pair.style.transform = `translateX(-50%) scale(${Math.min(1, 100 / width, 80 / height)})`;
+	pair.closest('.trainersprite')?.classList.add('copa-has-battle-partner');
 }
 
 type CopaSpriteCrop = [number, number, number, number, number, number, [number, number, number][]];
@@ -385,12 +397,19 @@ function fitCopaProfileSprite(image: HTMLImageElement, size = 104) {
 	image.dataset.profileFit = 'true';
 	const key = new URL(image.src).pathname.replace(/^.*\/sprites\//, '').replace(/^.*\/partner-za\//, 'partner-za/');
 	copaProfileCrops ||= window.fetch('assets/copa-rinha/profile-crops.json').then(response => (
-		response.ok ? response.json() as Promise<Record<string, CopaSpriteCrop>> : {}
-	)).catch(() => ({}));
+		response.ok ? response.json() as Promise<Record<string, CopaSpriteCrop>> : Promise.reject(new Error('Sprite crops'))
+	)).catch(() => {
+		copaProfileCrops = undefined;
+		return {};
+	});
 	void copaProfileCrops.then(crops => {
 		const crop = crops[key];
 		const frame = image.parentElement;
-		if (!crop || !frame || !image.isConnected) return;
+		if (!frame || !image.isConnected) return;
+		if (!crop) {
+			image.dataset.profileFit = 'unavailable';
+			return;
+		}
 		const [width, height, left, right, top, bottom, rows] = crop;
 		const scale = size / Math.max(width, height);
 		frame.style.width = `${(right - left) * scale}px`;
@@ -478,8 +497,8 @@ function CopaCompactPair({ name, avatar, partner, battle }: {
 	name: string, avatar: string, partner: CopaPartner, battle?: boolean,
 }) {
 	return <span class={battle ? 'copa-battle-pair' : 'copa-directory-pair'}>
-		<CopaPresenceAvatar name={name} avatar={avatar} participant={toID(name)} size={battle ? 80 : 40} />
-		<CopaPartnerSprite partner={partner} size={battle ? 62 : 38} />
+		<CopaPresenceAvatar name={name} avatar={avatar} participant={toID(name)} size={battle ? 104 : 40} />
+		<CopaPartnerSprite partner={partner} size={battle ? 104 : 38} />
 	</span>;
 }
 
@@ -513,7 +532,6 @@ document.addEventListener('copa-battle-sidebar', event => {
 			const mount = document.createElement('span');
 			portrait.insertBefore(mount, button);
 			preact.render(<CopaCompactPair name={name} avatar={avatar} partner={partner} battle />, mount);
-			portrait.classList.add('copa-has-battle-partner');
 		});
 	});
 });

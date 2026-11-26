@@ -577,7 +577,8 @@ html.copa-rinha .copa-directory-pair .copa-partner-sprite img {width:38px;height
 html.copa-rinha .trainer .copa-has-battle-partner {
   background-image:none!important;transform:none!important;width:100px;max-width:100%;opacity:1;
 }
-html.copa-rinha .copa-battle-pair {height:80px;width:100px;max-width:100%;overflow:hidden}
-html.copa-rinha .copa-battle-pair .copa-online-avatar,
-html.copa-rinha .copa-battle-pair .copa-online-avatar img {width:64px;height:80px;max-width:none}
-html.copa-rinha .copa-battle-pair .copa-partner-sprite {width:62px;height:62px;margin-left:1px}
+html.copa-rinha .copa-battle-pair {
+  position:absolute;left:50%;bottom:0;transform-origin:center bottom;visibility:hidden;
+}
+html.copa-rinha .copa-has-battle-partner .copa-battle-pair {visibility:visible}
+html.copa-rinha .copa-battle-avatar-link {z-index:1}
