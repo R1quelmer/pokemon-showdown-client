@@ -19,7 +19,7 @@ const members = [
 	{name: 'Davi', avatar: 'ethan', online: false, rooms: []},
 	{name: 'Carla', avatar: 'dawn', online: false, rooms: []},
 	{name: 'Bob', avatar: 'ethan', online: true, battle: publicBattle, rooms: ['Lobby']},
-	{name: 'Alice', avatar: 1, online: true, rooms: ['Lobby']},
+	{name: 'Alice', avatar: 'marnie', online: true, rooms: ['Lobby']},
 ];
 
 async function measurePairPixels(pair) {
@@ -120,7 +120,7 @@ print(json.dumps({"gap": gap, "baseDelta": abs(a.getbbox()[3] - b.getbbox()[3])}
 				}
 				if (url.includes('/config/config.js')) return route.fulfill({contentType: 'text/javascript', body:
 					"var Config={customcolors:{},whitelist:[],routes:{client:'play.pokemonshowdown.com'},defaultserver:{id:'showdown',host:'sim3.psim.us',port:443}};"});
-				if (await serveNativeSprite(route)) return;
+				if (await serveNativeSprite(route, false)) return;
 				return url.startsWith(origin) ? route.continue() : route.abort();
 			});
 			await page.goto(origin + '/copa-rinha.html');
@@ -320,6 +320,35 @@ print(json.dumps({"gap": gap, "baseDelta": abs(a.getbbox()[3] - b.getbbox()[3])}
 				await page.screenshot({path: path.join(process.env.COPA_MEMBERS_SCREENSHOTS, `perfil-${width}.png`)});
 			}
 			await enlarged.getByRole('button', {name:'Fechar'}).click();
+			partner = {species:'sylveon',shiny:false};
+			fixture.members = fixture.members.map(row => row.name === 'Alice' ? {...row, avatar:'marnie', partner} : row);
+			for (const entry of ['members','profile','settings']) {
+				await page.evaluate(entry => {
+					PS.closePopupsAbove(null);
+					PS.user.avatar = 'marnie';
+					PS.join(entry === 'members' ? 'copamembers' : entry === 'settings' ? 'options' : 'user-alice', {
+						args:{username:'Alice'},
+					});
+					window.CopaRinhaPresence.refresh();
+				}, entry);
+				await page.clock.fastForward(15050);
+				const scope = entry === 'members' ? '#room-copamembers' : entry === 'settings' ? '#room-options' : '#room-user-alice';
+				await page.locator(scope + ' .copa-avatar-link[aria-label="Ver perfil de Alice"] img[src$="/marnie.png"]').waitFor({timeout:5000});
+				await page.locator(scope)
+					.getByRole('button', {name:'Ver perfil de Alice'}).click();
+				await enlarged.getByRole('img', {name:'Sylveon', exact:true}).waitFor();
+				await enlarged.locator('[data-profile-tight]').nth(1).waitFor();
+				assert.match(await pair.locator('.copa-online-avatar img').getAttribute('src'), /marnie\.png$/);
+				const visible = await measurePairPixels(pair);
+				if (process.env.COPA_MEMBERS_SCREENSHOTS && [1440,390].includes(width)) {
+					await pair.screenshot({path:path.join(process.env.COPA_MEMBERS_SCREENSHOTS, `sylveon-${entry}-${width}.png`)});
+				}
+				assert(visible.gap >= 4 && visible.gap <= 8 && visible.baseDelta <= 1, JSON.stringify(visible));
+				console.log(`Sylveon via ${entry} at ${width}px:`, visible);
+				await page.evaluate(() => PS.closePopupsAbove(null));
+			}
+			await page.evaluate(() => PS.join('copamembers'));
+
 			const search = directory.getByRole('searchbox');
 			await search.fill('CAR');
 			assert.deepEqual(await nicknames(), ['Carla']);

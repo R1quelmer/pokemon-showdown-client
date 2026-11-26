@@ -374,46 +374,22 @@ function alignCopaProfilePair(frame: HTMLElement) {
 	partner.style.marginLeft = `${Math.round(offset - trainer.offsetWidth)}px`;
 }
 
-/** Tighten the enlarged composition using the visible bounds of each static image. */
+type CopaSpriteCrop = [number, number, number, number, number, number, [number, number, number][]];
+let copaProfileCrops: Promise<Record<string, CopaSpriteCrop>> | undefined;
+
+/** Use bounds precomputed from the PNGs, independent of CDN CORS headers. */
 function fitCopaProfileSprite(image: HTMLImageElement) {
 	if (image.dataset.profileFit) return;
 	image.dataset.profileFit = 'true';
-	const source = new Image();
-	source.crossOrigin = 'anonymous';
-	source.onload = () => {
-		const { naturalWidth: width, naturalHeight: height } = source;
+	const key = new URL(image.src).pathname.replace(/^.*\/sprites\//, '').replace(/^.*\/partner-za\//, 'partner-za/');
+	copaProfileCrops ||= window.fetch('assets/copa-rinha/profile-crops.json').then(response => (
+		response.ok ? response.json() as Promise<Record<string, CopaSpriteCrop>> : {}
+	)).catch(() => ({}));
+	void copaProfileCrops.then(crops => {
+		const crop = crops[key];
 		const frame = image.parentElement;
-		if (!frame || !width || !height) return;
-		const canvas = document.createElement('canvas');
-		canvas.width = width;
-		canvas.height = height;
-		const context = canvas.getContext('2d');
-		if (!context) return;
-		context.drawImage(source, 0, 0);
-		let pixels: Uint8ClampedArray;
-		try {
-			pixels = context.getImageData(0, 0, width, height).data;
-		} catch {
-			return;
-		}
-		let left = width, right = 0, top = height, bottom = 0;
-		const rows: { left: number, right: number, y: number }[] = [];
-		for (let y = 0; y < height; y++) {
-			let rowLeft = width, rowRight = 0;
-			for (let x = 0; x < width; x++) {
-				if (!pixels[(y * width + x) * 4 + 3]) continue;
-				rowLeft = Math.min(rowLeft, x);
-				rowRight = x + 1;
-				top = Math.min(top, y);
-				bottom = y + 1;
-			}
-			if (rowRight > rowLeft) {
-				left = Math.min(left, rowLeft);
-				right = Math.max(right, rowRight);
-				rows.push({ left: rowLeft, right: rowRight, y });
-			}
-		}
-		if (right <= left || bottom <= top) return;
+		if (!crop || !frame || !image.isConnected) return;
+		const [width, height, left, right, top, bottom, rows] = crop;
 		const scale = 104 / Math.max(width, height);
 		frame.style.width = `${(right - left) * scale}px`;
 		frame.style.height = `${(bottom - top) * scale}px`;
@@ -422,12 +398,11 @@ function fitCopaProfileSprite(image: HTMLImageElement) {
 		image.style.left = `${-left * scale}px`;
 		image.style.top = `${-top * scale}px`;
 		frame.dataset.profileTight = 'true';
-		copaProfileSilhouettes.set(frame, rows.map(row => ({
-			left: (row.left - left) * scale, right: (row.right - left) * scale, y: (row.y - bottom + 0.5) * scale,
+		copaProfileSilhouettes.set(frame, rows.map(([y, rowLeft, rowRight]) => ({
+			left: (rowLeft - left) * scale, right: (rowRight - left) * scale, y: (y - bottom + 0.5) * scale,
 		})));
 		alignCopaProfilePair(frame);
-	};
-	source.src = image.src;
+	});
 }
 
 /** Copa presence uses the native popup, avatar and challenge/profile routes. */

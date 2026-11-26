@@ -45,7 +45,7 @@ async function loadSprite(relativePath) {
 
 // Call before a catch-all route abort. Returns false for every URL outside the
 // exact allowlist, including Z-A sprites (which must be served by our own app).
-async function serveNativeSprite(route) {
+async function serveNativeSprite(route, cors = true) {
 	const url = new URL(route.request().url());
 	if (url.hostname !== 'play.pokemonshowdown.com') return false;
 	// Build native sprite metadata from real, hash-verified fixture GIF dimensions.
@@ -69,7 +69,7 @@ async function serveNativeSprite(route) {
 	const body = await loadSprite(relativePath);
 	await route.fulfill({
 		body, contentType: relativePath.endsWith('.gif') ? 'image/gif' : 'image/png',
-		headers: {'access-control-allow-origin': '*'},
+		headers: cors ? {'access-control-allow-origin': '*'} : undefined,
 	});
 	return true;
 }

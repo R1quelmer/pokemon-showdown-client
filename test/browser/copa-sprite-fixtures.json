@@ -17,6 +17,13 @@
     "ani/landorus-therian.gif": {
       "gitBlob": "8f8fc96ca3f88d42c3e2d0065d374a802ca7d183"
     },
+    "trainers/marnie.png": {
+      "gitBlob": "dfedf067cb56e54a2345f50b2370ac8f26da1b7e",
+      "source": "https://raw.githubusercontent.com/MasterTernimus/PokemonShowdown-Client/baf485faff4d224134bd1ead47936e02c25b2be8/play.pokemonshowdown.com/sprites/trainers/marnie.png"
+    },
+    "gen5/sylveon.png": {
+      "gitBlob": "bd3815d8b7ba7072e5bd6dc50ebe79f266d7aa5a"
+    },
     "gen5-shiny/rotom-wash.png": {
       "gitBlob": "97f6448089161309c939f38e7eb5ee2a9120dee2"
     },
