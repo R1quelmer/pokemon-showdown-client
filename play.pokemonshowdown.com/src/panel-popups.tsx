@@ -361,7 +361,7 @@ function alignCopaProfilePair(frame: HTMLElement) {
 	const trainerRows = copaProfileSilhouettes.get(trainer);
 	const partnerRows = copaProfileSilhouettes.get(partner);
 	if (!trainerRows || !partnerRows) return;
-	const gap = 6;
+	const gap = pair.classList.contains('copa-profile-sprites') ? 6 : 3;
 	let offset = -Infinity;
 	for (const a of trainerRows) {
 		for (const b of partnerRows) {
@@ -378,7 +378,7 @@ type CopaSpriteCrop = [number, number, number, number, number, number, [number, 
 let copaProfileCrops: Promise<Record<string, CopaSpriteCrop>> | undefined;
 
 /** Use bounds precomputed from the PNGs, independent of CDN CORS headers. */
-function fitCopaProfileSprite(image: HTMLImageElement) {
+function fitCopaProfileSprite(image: HTMLImageElement, size = 104) {
 	if (image.dataset.profileFit) return;
 	image.dataset.profileFit = 'true';
 	const key = new URL(image.src).pathname.replace(/^.*\/sprites\//, '').replace(/^.*\/partner-za\//, 'partner-za/');
@@ -390,7 +390,7 @@ function fitCopaProfileSprite(image: HTMLImageElement) {
 		const frame = image.parentElement;
 		if (!crop || !frame || !image.isConnected) return;
 		const [width, height, left, right, top, bottom, rows] = crop;
-		const scale = 104 / Math.max(width, height);
+		const scale = size / Math.max(width, height);
 		frame.style.width = `${(right - left) * scale}px`;
 		frame.style.height = `${(bottom - top) * scale}px`;
 		image.style.width = `${width * scale}px`;
@@ -406,8 +406,8 @@ function fitCopaProfileSprite(image: HTMLImageElement) {
 }
 
 /** Copa presence uses the native popup, avatar and challenge/profile routes. */
-function CopaPresenceAvatar({ name, avatar, participant, profile }: {
-	name: string, avatar: string, participant?: string, profile?: boolean,
+function CopaPresenceAvatar({ name, avatar, participant, profile, size }: {
+	name: string, avatar: string, participant?: string, profile?: boolean, size?: number,
 }) {
 	const url = Dex.resolveAvatar(avatar, participant);
 	return <span class="copa-online-avatar" aria-hidden="true" key={url}>{name.charAt(0).toUpperCase()}
@@ -417,7 +417,7 @@ function CopaPresenceAvatar({ name, avatar, participant, profile }: {
 				if (!element) return;
 				const image = element as HTMLImageElement;
 				image.onerror = () => { image.hidden = true; };
-				if (profile) fitCopaProfileSprite(image);
+				if (profile || size) fitCopaProfileSprite(image, size);
 			}}
 		/>
 	</span>;
@@ -446,7 +446,7 @@ const COPA_ZA_PARTNER_ART = (
 ).split(' ');
 const COPA_ZA_NORMAL_PARTNER_ART = ['tatsugiricurlymega', 'zygardemega'];
 
-function CopaPartnerSprite({ partner, profile }: { partner?: CopaPartner, profile?: boolean }) {
+function CopaPartnerSprite({ partner, profile, size }: { partner?: CopaPartner, profile?: boolean, size?: number }) {
 	if (!partner) return null;
 	const species = Dex.species.get(partner.species);
 	if (!species.exists) return null;
@@ -465,12 +465,56 @@ function CopaPartnerSprite({ partner, profile }: { partner?: CopaPartner, profil
 					image.hidden = true;
 					image.parentElement?.classList.add('copa-partner-missing');
 				};
-				if (profile) fitCopaProfileSprite(image);
+				if (profile || size) fitCopaProfileSprite(image, size);
 			}}
 		/>
 		<small title="Sprite estático indisponível">{label}</small>
 	</span>;
 }
+
+function CopaCompactPair({ name, avatar, partner, battle }: {
+	name: string, avatar: string, partner: CopaPartner, battle?: boolean,
+}) {
+	return <span class={battle ? 'copa-battle-pair' : 'copa-directory-pair'}>
+		<CopaPresenceAvatar name={name} avatar={avatar} participant={toID(name)} size={battle ? 80 : 40} />
+		<CopaPartnerSprite partner={partner} size={battle ? 30 : 38} />
+	</span>;
+}
+
+// Share in-flight requests across sidebar redraws and across battles.
+const copaBattleProfiles = new window.Map<string, {
+	expires: number, profile: Promise<CopaProfile | null>,
+}>();
+
+document.addEventListener('copa-battle-sidebar', event => {
+	const sidebar = event.target;
+	const accounts = window.CopaAccounts;
+	if (!Config.copaRinhaLocalNames || !(sidebar instanceof HTMLElement) || !accounts) return;
+	sidebar.querySelectorAll<HTMLButtonElement>('.copa-battle-avatar-link').forEach(button => {
+		const name = button.dataset.profileName;
+		const avatar = button.dataset.profileAvatar;
+		const portrait = button.parentElement;
+		if (!name || !avatar || !portrait || !/^[a-z0-9 ]{1,18}$/i.test(name)) return;
+		const id = toID(name);
+		let entry = copaBattleProfiles.get(id);
+		if (!entry || entry.expires <= Date.now()) {
+			if (copaBattleProfiles.size >= 128) copaBattleProfiles.clear();
+			entry = {
+				expires: Date.now() + 30000,
+				profile: accounts.profile(name).catch(() => null),
+			};
+			copaBattleProfiles.set(id, entry);
+		}
+		void entry.profile.then(profile => {
+			const partner = parseCopaPartner(profile?.partner);
+			if (!partner || !portrait.isConnected) return;
+			const mount = document.createElement('span');
+			portrait.insertBefore(mount, button);
+			preact.render(<CopaCompactPair name={name} avatar={avatar} partner={partner} battle />, mount);
+			portrait.classList.add('copa-has-battle-partner');
+		});
+	});
+});
 
 class CopaProfilePanel extends PSRoomPanel {
 	static readonly id = 'copaprofile';
@@ -712,8 +756,16 @@ class CopaMembersPanel extends PSRoomPanel {
 						const id = toID(member.name);
 						return <li key={id}>
 							<div class="copa-member-sprites">
-								<CopaAvatarLink name={member.name} avatar={member.avatar} />
-								<CopaPartnerSprite partner={member.partner} />
+								{member.partner ? <button
+									type="button" class="copa-avatar-link" aria-label={`Ver perfil de ${member.name}`}
+									onClick={ev => {
+										ev.stopPropagation();
+										PS.join(`copaprofile-${id}` as RoomID, {
+											args: { name: member.name, avatar: member.avatar }, parentElem: ev.currentTarget as HTMLElement,
+										});
+									}}
+								><CopaCompactPair name={member.name} avatar={member.avatar} partner={member.partner} /></button> :
+								<CopaAvatarLink name={member.name} avatar={member.avatar} />}
 							</div>
 							<div class="copa-online-player">
 								<button

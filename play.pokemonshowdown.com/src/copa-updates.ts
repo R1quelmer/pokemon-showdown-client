@@ -1,5 +1,6 @@
 // Add player-facing changes at the top. For entries on the same date, newest goes first.
 export const COPA_UPDATES = [
+	{ date: '2026-11-26', text: 'Veja treinadores e parceiros juntos na lista de membros e nas batalhas.' },
 	{ date: '2026-11-25', text: 'A dupla no perfil ampliado mantém o alinhamento com sprites carregados de outros sites.' },
 	{ date: '2026-11-25', text: 'No perfil ampliado, a distância da dupla agora segue o contorno visível dos sprites.' },
 	{ date: '2026-11-25', text: 'O perfil compacto mostra o avatar à esquerda e dá mais espaço ao status.' },

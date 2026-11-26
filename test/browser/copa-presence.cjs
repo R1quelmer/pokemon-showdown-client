@@ -110,7 +110,7 @@ print(json.dumps({"gap": gap, "baseDelta": abs(a.getbbox()[3] - b.getbbox()[3])}
 					}
 					if (url.endsWith('/profile')) {
 						const row = members.find(member => member.name === data.name);
-						return route.fulfill({json: {member: row ? {...row, partner: data.name === 'Alice' ? partner : undefined} : null}});
+						return route.fulfill({json: {member: row ? {...row, partner: data.name === 'Alice' ? partner : {species:'sylveon',shiny:false}} : null}});
 					}
 					if (data.name) accountName = data.name;
 					return route.fulfill({json: {name: accountName, token: 'a'.repeat(43), expires: Date.now() + 30 * 86400000}});
@@ -373,12 +373,29 @@ print(json.dumps({"gap": gap, "baseDelta": abs(a.getbbox()[3] - b.getbbox()[3])}
 			await page.evaluate(() => { PS.closePopupsAbove(null); PS.join('copamembers'); });
 			await battleLink.click();
 			await page.waitForFunction(id => !!PS.rooms[id], publicBattle);
-			if (width === 1440) {
+			if ([1440,390].includes(width)) {
 				await page.evaluate(id => {
 					PS.prefs.set("mute",true);
 					PS.receive('>' + id + '\n|init|battle\n|title|Bob vs. Alice\n|gametype|singles\n|gen|9\n' +
-						'|player|p1|Alice|167\n|player|p2|Bob|ethan\n|start\n|turn|1');
+						'|player|p1|Alice|1\n|player|p2|Bob|ethan\n|start\n|turn|1');
 				},publicBattle);
+				const pairs = page.locator('.copa-battle-pair');
+				await pairs.nth(1).waitFor({timeout:8000});
+				for (const pair of await pairs.all()) {
+					await pair.locator('[data-profile-tight]').nth(1).waitFor({timeout:8000});
+					assert(await pair.evaluate(node => {
+						const [avatar, partner] = node.children;
+						const a = avatar.getBoundingClientRect(), b = partner.getBoundingClientRect();
+						const rail = node.closest('.trainer').getBoundingClientRect();
+						const icons = node.closest('.trainer').querySelector('.teamicons').getBoundingClientRect();
+						return Math.abs(a.bottom - b.bottom) < 2 && a.left >= rail.left - 1 &&
+							b.right <= rail.right + 1 && b.bottom <= icons.top;
+					}));
+				}
+				if (process.env.COPA_MEMBERS_SCREENSHOTS) {
+					await page.screenshot({path:path.join(process.env.COPA_MEMBERS_SCREENSHOTS, `batalha-${width}.png`)});
+				}
+
 				await page.getByRole('button', {name:'Ver perfil de Bob'}).click({timeout:8000});
 				await page.locator('.copa-profile').getByRole('heading', {name:'Bob'}).waitFor();
 			}

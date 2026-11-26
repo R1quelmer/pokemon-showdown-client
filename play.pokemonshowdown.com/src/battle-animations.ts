@@ -788,6 +788,9 @@ export class BattleScene implements BattleSceneStub {
 		} else {
 			this.$leftbar.html(this.getSidebarHTML(side, 'near'));
 		}
+		if (document.documentElement.classList.contains('copa-rinha') && !this.battle.isReplay) {
+			this.$leftbar[0]?.dispatchEvent(new Event('copa-battle-sidebar', { bubbles: true }));
+		}
 	}
 	updateRightSidebar() {
 		const side = this.battle.farSide;
@@ -800,6 +803,9 @@ export class BattleScene implements BattleSceneStub {
 			this.$rightbar.html(this.getSidebarHTML(side2, 'far2') + this.getSidebarHTML(side, 'far'));
 		} else {
 			this.$rightbar.html(this.getSidebarHTML(side, 'far'));
+		}
+		if (document.documentElement.classList.contains('copa-rinha') && !this.battle.isReplay) {
+			this.$rightbar[0]?.dispatchEvent(new Event('copa-battle-sidebar', { bubbles: true }));
 		}
 	}
 	updateSidebars() {
