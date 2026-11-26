@@ -27,6 +27,8 @@ import { BattleLog } from "./battle-log";
 type BattleDesc = {
 	id: RoomID,
 	minElo?: number | string,
+	training?: boolean,
+	private?: boolean,
 	p1?: string,
 	p2?: string,
 	p3?: string,
@@ -54,7 +56,11 @@ export class BattlesRoom extends PSRoom {
 		this.refresh();
 	}
 	refresh() {
-		PS.send(`/cmd roomlist ${toID(this.format)}, ${this.filters}`);
+		if (Config.copaRinhaLocalNames) {
+			PS.send(`/cmd copabattles ${toID(this.format)},${this.filters}`);
+		} else {
+			PS.send(`/cmd roomlist ${toID(this.format)}, ${this.filters}`);
+		}
 	}
 }
 
@@ -68,6 +74,11 @@ class BattlesPanel extends PSRoomPanel<BattlesRoom> {
 	static getTitle() {
 		return TL`Battles`;
 	}
+	override focus(options?: Parameters<PSRoomPanel['focus']>[0]) {
+		super.focus(options);
+		if (Config.copaRinhaLocalNames && this.props.room.battles) this.props.room.refresh();
+	}
+
 	refresh = () => {
 		this.props.room.refresh();
 	};
@@ -79,7 +90,7 @@ class BattlesPanel extends PSRoomPanel<BattlesRoom> {
 		e.preventDefault();
 		const minElo = this.base?.querySelector<HTMLInputElement>(`select[name=elofilter]`)?.value;
 		const searchPrefix = this.base?.querySelector<HTMLInputElement>(`input[name=prefixsearch]`)?.value;
-		this.props.room.filters = `${minElo || ''},${searchPrefix || ''}`;
+		this.props.room.filters = Config.copaRinhaLocalNames ? toID(searchPrefix) : `${minElo || ''},${searchPrefix || ''}`;
 		this.refresh();
 	};
 	renderBattleLink(battle: BattleDesc) {
@@ -90,6 +101,11 @@ class BattlesPanel extends PSRoomPanel<BattlesRoom> {
 			{minEloMessage && <small style="float:right">({minEloMessage})</small>}
 			<small>[{Dex.copaFormatLabel(format) ?? format}]</small><br />
 			<em>{players}</em>
+			{Config.copaRinhaLocalNames && battle.training && (
+				<small class="copa-training-label">
+					{' · '}{battle.private ? 'Seu treino privado contra bot' : 'Treino público contra bot'}
+				</small>
+			)}
 		</a></div>;
 	}
 	override render() {
@@ -113,12 +129,12 @@ class BattlesPanel extends PSRoomPanel<BattlesRoom> {
 					<label class="label">{TL.label(TL`Format`)}</label>
 					<FormatDropdown onChange={this.changeFormat} placeholder={TL`(All formats)`} />
 				</p>
-				<label class="label">
+				{!Config.copaRinhaLocalNames && <label class="label">
 					{TL.label(TL`Minimum Elo`)}<select name="elofilter" class="select" onChange={this.applyFilters}>
 						<option value="none">{TL`None`}</option><option value="1100">1100</option><option value="1300">1300</option>
 						<option value="1500">1500</option><option value="1700">1700</option><option value="1900">1900</option>
 					</select>
-				</label>
+				</label>}
 
 				<form class="search" onSubmit={this.applyFilters}>
 					<p>

@@ -1,5 +1,6 @@
 // Add player-facing changes at the top. For entries on the same date, newest goes first.
 export const COPA_UPDATES = [
+	{ date: '2026-11-26', text: 'Parceiros nas batalhas e uma lista com partidas públicas e seus treinos privados.' },
 	{ date: '2026-11-25', text: 'A dupla mantém a mesma composição do perfil ao mudar a escala da batalha.' },
 	{ date: '2026-11-26', text: 'Nas batalhas, treinador e Pokémon parceiro ficam quase encostados.' },
 	{ date: '2026-11-25', text: 'Nas batalhas, o Pokémon parceiro aparece maior e mais perto do treinador.' },

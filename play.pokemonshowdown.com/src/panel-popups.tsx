@@ -395,8 +395,9 @@ let copaProfileCrops: Promise<Record<string, CopaSpriteCrop>> | undefined;
 function fitCopaProfileSprite(image: HTMLImageElement, size = 104) {
 	if (image.dataset.profileFit) return;
 	image.dataset.profileFit = 'true';
-	const key = new URL(image.src).pathname.replace(/^.*\/sprites\//, '').replace(/^.*\/partner-za\//, 'partner-za/');
-	copaProfileCrops ||= window.fetch('assets/copa-rinha/profile-crops.json').then(response => (
+	const path = new URL(image.src).pathname;
+	const key = path.replace(/^.*\/sprites\//, '').replace(/^.*\/partner-za\//, 'partner-za/');
+	copaProfileCrops ||= window.fetch('/assets/copa-rinha/profile-crops.json').then(response => (
 		response.ok ? response.json() as Promise<Record<string, CopaSpriteCrop>> : Promise.reject(new Error('Sprite crops'))
 	)).catch(() => {
 		copaProfileCrops = undefined;
@@ -405,7 +406,7 @@ function fitCopaProfileSprite(image: HTMLImageElement, size = 104) {
 	void copaProfileCrops.then(crops => {
 		const crop = crops[key];
 		const frame = image.parentElement;
-		if (!frame || !image.isConnected) return;
+		if (!frame || !image.isConnected || new URL(image.src).pathname !== path) return;
 		if (!crop) {
 			image.dataset.profileFit = 'unavailable';
 			return;
@@ -467,7 +468,9 @@ const COPA_ZA_PARTNER_ART = (
 ).split(' ');
 const COPA_ZA_NORMAL_PARTNER_ART = ['tatsugiricurlymega', 'zygardemega'];
 
-function CopaPartnerSprite({ partner, profile, size }: { partner?: CopaPartner, profile?: boolean, size?: number }) {
+function CopaPartnerSprite({ partner, profile, size, battle }: {
+	partner?: CopaPartner, profile?: boolean, size?: number, battle?: boolean,
+}) {
 	if (!partner) return null;
 	const species = Dex.species.get(partner.species);
 	if (!species.exists) return null;
@@ -484,6 +487,22 @@ function CopaPartnerSprite({ partner, profile, size }: { partner?: CopaPartner, 
 				const image = element as HTMLImageElement;
 				image.onerror = () => {
 					image.hidden = true;
+					if (battle && local && !image.dataset.spriteFallback) {
+						image.dataset.spriteFallback = 'true';
+						image.src = `${Dex.resourcePrefix}sprites/gen5${suffix}/${species.spriteid}.png`;
+						const frame = image.parentElement;
+						const pair = frame?.parentElement;
+						if (frame && pair) {
+							copaProfileSilhouettes.delete(frame);
+							frame.removeAttribute('style');
+							delete frame.dataset.profileTight;
+							image.removeAttribute('style');
+							pair.removeAttribute('style');
+							delete image.dataset.profileFit;
+							fitCopaProfileSprite(image, size);
+						}
+						return;
+					}
 					image.parentElement?.classList.add('copa-partner-missing');
 				};
 				if (profile || size) fitCopaProfileSprite(image, size);
@@ -498,7 +517,7 @@ function CopaCompactPair({ name, avatar, partner, battle }: {
 }) {
 	return <span class={battle ? 'copa-battle-pair' : 'copa-directory-pair'}>
 		<CopaPresenceAvatar name={name} avatar={avatar} participant={toID(name)} size={battle ? 104 : 40} />
-		<CopaPartnerSprite partner={partner} size={battle ? 104 : 38} />
+		<CopaPartnerSprite partner={partner} size={battle ? 104 : 38} battle={battle} />
 	</span>;
 }
 
@@ -522,16 +541,23 @@ document.addEventListener('copa-battle-sidebar', event => {
 			if (copaBattleProfiles.size >= 128) copaBattleProfiles.clear();
 			entry = {
 				expires: Date.now() + 30000,
-				profile: accounts.profile(name).catch(() => null),
+				profile: accounts.profile(name).catch(() => {
+					copaBattleProfiles.delete(id);
+					return null;
+				}),
 			};
 			copaBattleProfiles.set(id, entry);
 		}
 		void entry.profile.then(profile => {
 			const partner = parseCopaPartner(profile?.partner);
-			if (!partner || !portrait.isConnected) return;
+			if (!partner || !portrait.isConnected || portrait.querySelector('.copa-battle-pair')) return;
 			const mount = document.createElement('span');
 			portrait.insertBefore(mount, button);
-			preact.render(<CopaCompactPair name={name} avatar={avatar} partner={partner} battle />, mount);
+			// The battle protocol can still carry the numeric placeholder while the account has a saved avatar.
+			const resolved = window.BattleAvatarNumbers?.[avatar] || avatar;
+			const displayAvatar = resolved === 'unknown' ? profile?.avatar || avatar : avatar;
+			preact.render(<CopaCompactPair name={name} avatar={displayAvatar} partner={partner} battle />, mount);
+			portrait.classList.add('copa-has-battle-partner');
 		});
 	});
 });

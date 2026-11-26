@@ -6,7 +6,7 @@ const fs = require('node:fs/promises');
 const path = require('node:path');
 const http = require('node:http');
 const {chromium} = require('playwright');
-const {serveNativeSprite, assertSpriteElementsLoaded} = require('./copa-sprite-assets.cjs');
+const {serveNativeSprite, assertSpriteElementsLoaded, loadSprite} = require('./copa-sprite-assets.cjs');
 
 const root = path.resolve(__dirname, '../../play.pokemonshowdown.com');
 const endpoint = /^wss:\/\/copa-rinha-showdown\.onrender\.com(?::443)?\/showdown\/websocket$/;
@@ -427,6 +427,25 @@ print(json.dumps({"gap": gap, "baseDelta": abs(a.getbbox()[3] - b.getbbox()[3])}
 			}
 			assert.deepEqual(fixture.errors, []); assert.deepEqual(fixture.authRequests, []);
 			assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+				// A valid CDN sprite without crop metadata used to hide the whole pair.
+				await page.route('**/sprites/trainers/qa-no-crop.png', async route => route.fulfill({
+					contentType:'image/png', body:await loadSprite('trainers/marnie.png'),
+				}));
+				await page.evaluate(id => {
+					PS.closePopupsAbove(null);
+					const battle = PS.rooms[id].battle;
+					battle.farSide.setAvatar('qa-no-crop');
+					battle.scene.updateSidebars();
+				},publicBattle);
+				const fallback = pairs.filter({has:page.locator('img[src$="/qa-no-crop.png"]')});
+				await fallback.locator('img[data-profile-fit="unavailable"]').waitFor();
+				await fallback.getByRole('img',{name:'Sylveon',exact:true}).waitFor();
+				assert(await fallback.evaluate(node => {
+					const portrait = node.closest('.trainersprite');
+					const images = Array.from(node.querySelectorAll('img'));
+					return portrait.classList.contains('copa-has-battle-partner') &&
+						images.every(image => image.naturalWidth && getComputedStyle(image).visibility === 'visible');
+				}));
 			console.log(`Native presence counter/list, dedup, anonymous/privacy, profile/challenge, automatic updates, visibility/reconnect/errors and layout passed at ${width}px`);
 			await context.close();
 		}

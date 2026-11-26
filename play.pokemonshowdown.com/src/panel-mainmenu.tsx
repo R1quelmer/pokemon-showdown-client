@@ -44,6 +44,7 @@ export class MainMenuRoom extends PSRoom {
 	} = {};
 	roomsCache: {
 		battleCount?: number,
+		copaBattleCounts?: { publicCount: number, privateTrainingCount: number },
 		userCount?: number,
 		chat?: RoomInfo[],
 		sectionTitles?: string[],
@@ -420,7 +421,10 @@ export class MainMenuRoom extends PSRoom {
 		let fullid: string = id;
 		switch (id) {
 		case 'copapresence':
-			if (Config.copaRinhaLocalNames) window.CopaRinhaPresence?.receive(response);
+			if (Config.copaRinhaLocalNames) {
+				if (response?.copaBattleCounts) this.roomsCache.copaBattleCounts = response.copaBattleCounts;
+				window.CopaRinhaPresence?.receive(response);
+			}
 			break;
 		case 'userdetails':
 			let userid = response.userid;
@@ -458,6 +462,12 @@ export class MainMenuRoom extends PSRoom {
 			const roomsRoom = PS.rooms[`rooms`] as RoomsRoom;
 			if (roomsRoom) roomsRoom.update(null);
 			break;
+		case 'copabattles':
+			if (!Config.copaRinhaLocalNames || !response?.rooms) break;
+			this.roomsCache.copaBattleCounts = response.counts;
+			this.update(null);
+			PS.rooms['rooms']?.update(null);
+			// falls through
 		case 'roomlist':
 			const battlesRoom = PS.rooms[`battles`] as BattlesRoom;
 			if (battlesRoom) {
@@ -580,13 +590,18 @@ function CopaMascot({ name }: { name: 'sylveon' | 'poliwhirl' }) {
 }
 
 export function CopaCounters() {
+	const counts = PS.mainmenu.roomsCache.copaBattleCounts;
 	return <div class="roomcounters copa-counters">
 		<CopaMascot name="sylveon" />
 		<button class="button copa-online-counter" data-href="copaonline" title="Ver usuários online">
 			<strong>{window.CopaRinhaPresence?.snapshot?.total ?? '–'}</strong> conectados
 		</button>
 		<a class="button" href="battles" title={TL`Watch an active battle`}>
-			<strong>{PS.mainmenu.roomsCache.battleCount || '-'}</strong> {TL`active battles`}
+			{counts ? <>
+				<strong>{counts.publicCount}</strong> <span>públicas</span>
+				<small class="copa-private-training-count">{counts.privateTrainingCount} {counts.privateTrainingCount === 1 ?
+					'treino privado seu' : 'treinos privados seus'}</small>
+			</> : <><strong>–</strong> batalhas públicas</>}
 		</a>
 		<CopaMascot name="poliwhirl" />
 	</div>;
