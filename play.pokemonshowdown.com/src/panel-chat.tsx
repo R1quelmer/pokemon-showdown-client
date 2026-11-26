@@ -969,6 +969,47 @@ export class ChatTextEntry extends preact.Component<{
 		/** the text left of the cursor after tab completing */
 		cursor: string,
 	} | null = null;
+	private avatarCatalog?: { userid: ID, names: string[] };
+	private avatarSuggestions: string[] = [];
+	private avatarSelection = -1;
+	private avatarQuery = '';
+
+	private updateAvatarSuggestions = () => {
+		if (!Config.copaRinhaLocalNames || !PS.user.named || !(this.miniedit || this.textbox)) return;
+		const value = this.getValue();
+		const match = /^\/avatar +([#a-z0-9.-]*)$/i.exec(value);
+		this.avatarSuggestions = [];
+		this.avatarSelection = -1;
+		this.avatarQuery = value;
+		if (match) {
+			const userid = PS.user.userid;
+			if (this.avatarCatalog?.userid !== userid) {
+				const catalog = { userid, names: [] as string[] };
+				this.avatarCatalog = catalog;
+				void PS.mainmenu.makeQuery('copaavatars').then((names: unknown) => {
+					if (this.avatarCatalog !== catalog || !this.base) return;
+					catalog.names = Array.isArray(names) ? names.filter((name): name is string =>
+						typeof name === 'string' && /^#?[a-z0-9][a-z0-9.-]*$/.test(name)) : [];
+					if (this.avatarQuery) this.updateAvatarSuggestions();
+				});
+			}
+			const query = match[1].toLowerCase();
+			const names = this.avatarCatalog.names;
+			this.avatarSuggestions = names.filter(name => name.startsWith(query))
+				.concat(query ? names.filter(name => !name.startsWith(query) && name.includes(query)) : []).slice(0, 12);
+		}
+		this.forceUpdate();
+	};
+
+	private chooseAvatar(name: string) {
+		const value = '/avatar ' + name;
+		this.setValue(value, value.length);
+		this.avatarSuggestions = [];
+		this.avatarQuery = '';
+		(this.miniedit?.element || this.textbox)?.focus();
+		this.forceUpdate();
+	}
+
 	override componentDidMount() {
 		this.subscription = PS.user.subscribe(() => {
 			this.forceUpdate(() => this.applyCopaAvatarDraft());
@@ -1005,6 +1046,7 @@ export class ChatTextEntry extends preact.Component<{
 		PSView.scrollToRoom();
 		input.focus({ preventScroll: true });
 		this.setValue(command, command.length);
+		this.updateAvatarSuggestions();
 		requestAnimationFrame(() => {
 			if (PS.room === room && input.isConnected && document.activeElement !== input && this.getValue() === command) {
 				input.focus({ preventScroll: true });
@@ -1032,6 +1074,7 @@ export class ChatTextEntry extends preact.Component<{
 		this.props.onMessage(this.getValue(), this.miniedit?.element || this.textbox!);
 		this.historyPush(this.getValue());
 		this.setValue('', 0);
+		if (this.avatarSuggestions.length) this.updateAvatarSuggestions();
 		return true;
 	}
 	onKeyDown = (e: KeyboardEvent) => {
@@ -1122,6 +1165,28 @@ export class ChatTextEntry extends preact.Component<{
 		this.historyIndex = this.history.length;
 	}
 	handleKey(ev: KeyboardEvent) {
+		const suggestions = this.avatarSuggestions;
+		if (suggestions.length && this.getValue() === this.avatarQuery && !ev.ctrlKey && !ev.metaKey && !ev.altKey) {
+			if (ev.key === 'Escape') {
+				this.avatarSuggestions = [];
+				this.avatarQuery = '';
+				this.forceUpdate();
+				return true;
+			}
+			if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') {
+				const step = ev.key === 'ArrowDown' ? 1 : -1;
+				const current = Math.max(this.avatarSelection, step < 0 ? 0 : -1);
+				this.avatarSelection = (current + step + suggestions.length) % suggestions.length;
+				this.forceUpdate(() => {
+					this.base?.querySelector('.copa-avatar-suggestions .selected')?.scrollIntoView({ block: 'nearest' });
+				});
+				return true;
+			}
+			if (!ev.shiftKey && (ev.key === 'Tab' || (ev.key === 'Enter' && this.avatarSelection >= 0))) {
+				this.chooseAvatar(suggestions[Math.max(0, this.avatarSelection)]);
+				return true;
+			}
+		}
 		const cmdKey = ((ev.metaKey ? 1 : 0) + (ev.ctrlKey ? 1 : 0) === 1) && !ev.altKey && !ev.shiftKey;
 		// const anyModifier = ev.ctrlKey || ev.altKey || ev.metaKey || ev.shiftKey;
 		if (ev.keyCode === 13 && !ev.shiftKey) { // Enter key
@@ -1340,7 +1405,8 @@ export class ChatTextEntry extends preact.Component<{
 		const canTalk = PS.user.named || room.id === 'dm-';
 		const connected = room.connected === true || room.connectMode === null;
 		return <div
-			class="chat-log-add" onClick={this.focusIfNoSelection} style={{ left: this.props.left || 0 }}
+			class="chat-log-add" onClick={this.focusIfNoSelection}
+			onInput={Config.copaRinhaLocalNames ? this.updateAvatarSuggestions : undefined} style={{ left: this.props.left || 0 }}
 		>
 			<form class={`chatbox${this.props.tinyLayout ? ' nolabel' : ''}`} style={canTalk ? {} : { display: 'none' }}>
 				<label style={`color:${BattleLog.usernameColor(PS.user.userid)}`}>{PS.user.name}:</label>
@@ -1353,6 +1419,17 @@ export class ChatTextEntry extends preact.Component<{
 					placeholder={PSView.focusPreview(room)}
 				/>}
 			</form>
+			{canTalk && this.avatarSuggestions.length > 0 && <ul class="copa-avatar-suggestions" aria-label="Sugestões de avatar">
+				{this.avatarSuggestions.map((name, index) => <li key={name}>
+					<button
+						type="button" class={index === this.avatarSelection ? 'selected' : ''}
+						onMouseDown={ev => ev.preventDefault()} onClick={ev => {
+							ev.stopPropagation();
+							this.chooseAvatar(name);
+						}}
+					><img src={Dex.resolveAvatar(name)} alt="" />{name}</button>
+				</li>)}
+			</ul>}
 			{!canTalk && <button data-href="login" class="button autofocus">
 				{TL`[Choose a name before sending messages]`}
 			</button>}
