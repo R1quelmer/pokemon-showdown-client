@@ -1,5 +1,6 @@
 // Add player-facing changes at the top. For entries on the same date, newest goes first.
 export const COPA_UPDATES = [
+	{ date: '2026-11-26', text: 'Abra seu perfil nas configurações pelo botão Meu perfil ou pelo seu nickname.' },
 	{ date: '2026-11-26', text: 'Abra o perfil de treinador pelo nickname sem sair da tela atual.' },
 	{ date: '2026-11-26', text: 'O Dream Team fica no topo do perfil e as insígnias ganharam uma aba própria.' },
 	{ date: '2026-11-26', text: 'O perfil de treinador agora exibe as dez insígnias regionais da Copa Rinha.' },

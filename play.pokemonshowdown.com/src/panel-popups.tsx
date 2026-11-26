@@ -1625,6 +1625,14 @@ class OptionsPanel extends PSRoomPanel {
 		}
 	};
 
+	openCopaProfile = (ev: Event) => {
+		ev.preventDefault();
+		ev.stopPropagation();
+		if (!PS.user.named) return;
+		this.close();
+		PS.join(`copatrainer-${PS.user.userid}` as RoomID);
+	};
+
 	openCopaAvatar = () => {
 		this.close();
 		PS.join('lobby' as RoomID);
@@ -1653,7 +1661,11 @@ class OptionsPanel extends PSRoomPanel {
 					class="trainersprite yours" width="40" height="40" style={{ float: 'left', marginLeft: '-50px' }}
 					src={Dex.resolveAvatar(`${PS.user.avatar}`, PS.user.name)} data-href="avatars"
 				/>} {}
-				<strong>{PS.user.name}</strong>
+				<strong>{Config.copaRinhaLocalNames && PS.user.named ? (
+					<a
+						href={`copatrainer-${PS.user.userid}`} onClick={this.openCopaProfile}
+					>{PS.user.name}</a>
+				) : PS.user.name}</strong>
 				{Config.copaRinhaLocalNames && <small style="display:block">Conta Copa Rinha · autenticação local</small>}
 				<StatusEditor />
 			</p>
@@ -1663,7 +1675,10 @@ class OptionsPanel extends PSRoomPanel {
 					class="button" data-href={Config.copaRinhaLocalNames ? undefined : 'avatars'}
 					onClick={Config.copaRinhaLocalNames ? this.openCopaAvatar : undefined}
 				>{TL`[Avatar...]`}</button> {}
-				{Config.copaRinhaLocalNames && <button class="button" data-href="copapartner">Pokémon parceiro</button>}
+				{Config.copaRinhaLocalNames && <>
+					<button class="button" data-href="copapartner">Pokémon parceiro</button> {}
+					{PS.user.named && <button type="button" class="button" onClick={this.openCopaProfile}>Meu perfil</button>}
+				</>}
 			</p>
 
 			{PS.user.named && !Config.copaRinhaLocalNames && (PS.user.registered?.userid === PS.user.userid ?

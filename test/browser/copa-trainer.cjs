@@ -103,6 +103,16 @@ const team = [pokemon('sylveon'), pokemon('greninjamega'), pokemon('charizardmeg
 				await fs.mkdir(screenshots,{recursive:true});
 				await area.screenshot({path:path.join(screenshots,`${name}-${width}.png`)});
 			};
+			for (const shortcut of ['button','link']) {
+				await page.locator('button[data-href="options"]:visible').last().click();
+				const settings = page.locator('#room-options');
+				await settings.getByRole(shortcut,{name:shortcut === 'button' ? 'Meu perfil' : 'Alice',exact:true}).click();
+				await settings.waitFor({state:'hidden'});
+				await popup.waitFor();
+				await trainer.getByRole('button',{name:'Editar perfil'}).waitFor();
+				await popup.getByRole('button',{name:'Fechar perfil'}).click();
+				await popup.waitFor({state:'hidden'});
+			}
 			await home.locator('a[href="copamembers"]').click();
 			await page.locator('#room-copamembers').getByRole('link',{name:'Alice',exact:true}).click();
 			await heading.waitFor();
