@@ -1409,7 +1409,9 @@ export class ChatTextEntry extends preact.Component<{
 			onInput={Config.copaRinhaLocalNames ? this.updateAvatarSuggestions : undefined} style={{ left: this.props.left || 0 }}
 		>
 			<form class={`chatbox${this.props.tinyLayout ? ' nolabel' : ''}`} style={canTalk ? {} : { display: 'none' }}>
-				<label style={`color:${BattleLog.usernameColor(PS.user.userid)}`}>{PS.user.name}:</label>
+				<label data-copa-name={PS.user.userid} style={`color:${BattleLog.usernameColor(PS.user.userid)}`}>
+					{PS.user.name}:
+				</label>
 				{OLD_TEXTBOX ? <PSTextarea
 					name="message"
 					class={connected && canTalk ? 'autofocus' : 'disabled'} minHeight="16px"
@@ -1654,11 +1656,11 @@ export class ChatUserList extends preact.Component<{
 							{groupSymbol}
 						</em>
 						{group.type === 'leadership' ? (
-							<strong><em style={`color:${color}`}>{name.slice(1)}</em></strong>
+							<strong><em data-copa-name={userid} style={`color:${color}`}>{name.slice(1)}</em></strong>
 						) : group.type === 'staff' ? (
-							<strong style={`color:${color} `}>{name.slice(1)}</strong>
+							<strong data-copa-name={userid} style={`color:${color} `}>{name.slice(1)}</strong>
 						) : (
-							<span style={`color:${color}`}>{name.slice(1)}</span>
+							<span data-copa-name={userid} style={`color:${color}`}>{name.slice(1)}</span>
 						)}
 					</button></li>;
 				})}

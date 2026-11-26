@@ -37,7 +37,10 @@ const team = [pokemon('sylveon'), pokemon('greninjamega'), pokemon('charizardmeg
 			const messages = [];
 			page.on('pageerror', error => errors.push(error.message));
 			const initial = {region:'Unova', dreamTeam:team, banner:'', bio:'Treinadora de Unova. Minha dupla é Marnie e Sylveon.'};
-			let card = structuredClone(initial), socket;
+			let card = structuredClone(initial), socket, nicknameColor;
+			const initialBadges = ['Johto','Unova','Galar'];
+			let badgesForAlice = initialBadges;
+			const completeBadges = ['Kanto','Johto','Hoenn','Sinnoh','Unova','Kalos','Alola','Galar','Hisui','Paldea'];
 			await page.addInitScript(() => {
 				window.Worker = undefined;
 				localStorage.setItem('copa-rinha:account-session:v1', JSON.stringify({
@@ -55,7 +58,8 @@ const team = [pokemon('sylveon'), pokemon('greninjamega'), pokemon('charizardmeg
 					if (msg.includes('/trn Alice')) ws.send('|updateuser| Alice|1|marnie');
 					if (msg.includes('/join lobby')) ws.send('>lobby\n|init|chat\n|title|Lobby');
 					if (msg.includes('/cmd copapresence')) ws.send('|queryresponse|copapresence|' +
-						JSON.stringify({members:[member], users:[{...member,status:"",statusType:"online"}], guests:0,total:1}));
+						JSON.stringify({members:[member], users:[{...member,status:"",statusType:"online"}], guests:0,total:1,
+							nicknames:[{id:'alice',color:nicknameColor,gold:badgesForAlice.length===10,badges:badgesForAlice}]}));
 				});
 			});
 			await page.route('**/*', async route => {
@@ -73,10 +77,15 @@ const team = [pokemon('sylveon'), pokemon('greninjamega'), pokemon('charizardmeg
 						return route.fulfill({json:{trainer:null}});
 					}
 					if (action === 'trainer') return route.fulfill({json:{trainer:{
-						...member, registeredAt:'2026-11-19T20:00:00Z', badges:['Johto','Unova','Galar'], card,
+						...member, registeredAt:'2026-11-19T20:00:00Z', badges:badgesForAlice, card,
 						stats:{total:12,wins:8,losses:3},
 					}}});
-					if (action === 'profile') return route.fulfill({json:{member}});
+					if (action === 'nickname-color') {
+						assert.equal(route.request().headers().authorization, 'Bearer ' + 'a'.repeat(43));
+						nicknameColor = route.request().postDataJSON().color;
+						return route.fulfill({json:{nicknameColor}});
+					}
+					if (action === 'profile') return route.fulfill({json:{member:{...member,nicknameColor}}});
 					return route.fulfill({json:{name:'Alice',token:'a'.repeat(43),expires:Date.now()+86400000}});
 				}
 				if (url.href.startsWith(endpoint + '/copa-rinha/replays/')) {
@@ -115,9 +124,19 @@ const team = [pokemon('sylveon'), pokemon('greninjamega'), pokemon('charizardmeg
 				await popup.getByRole('button',{name:'Fechar perfil'}).click();
 				await popup.waitFor({state:'hidden'});
 			}
+			await page.locator('button[data-href="options"]:visible').last().click();
+			await page.getByRole('button',{name:'Cor do nickname',exact:true}).click();
+			const colors = page.locator('#room-copanicknamecolor');
+			await colors.locator('select').selectOption('mint');
+			await colors.getByRole('button',{name:'Salvar',exact:true}).click();
+			await colors.waitFor({state:'hidden'});
+			assert.equal(nicknameColor,'mint');
+			await page.evaluate(() => PS.closeAllPopups());
 			await home.locator('a[href="copamembers"]').click();
 			await page.locator('#room-copamembers').getByRole('link',{name:'Alice',exact:true}).click();
 			await heading.waitFor();
+			await page.waitForFunction(() => getComputedStyle(document.querySelector('#room-copatrainer-alice h1')).color === 'rgb(140, 240, 189)');
+			assert.equal(await page.locator('#room-copamembers [data-copa-name=alice]').evaluate(el=>getComputedStyle(el).color),'rgb(140, 240, 189)');
 			assert.deepEqual(await trainer.locator('nav button').allTextContents(), ['Insígnias','Visão geral','Replays']);
 			const dream = trainer.getByRole('region',{name:'Hall da Fama de Unova'});
 			const grid = dream.locator('.copa-trainer-team');
@@ -213,6 +232,28 @@ const team = [pokemon('sylveon'), pokemon('greninjamega'), pokemon('charizardmeg
 			});
 			socket.send('>lobby\n|c| Alice|Olá\n|c| Bob|Olá também');
 			const lobby = page.locator('#room-lobby');
+			const chatName = lobby.locator('.chat-log [data-copa-name=alice]').first();
+			await chatName.waitFor();
+			const publishBadges = async () => {
+				await page.waitForFunction(() => !window.CopaRinhaPresence.pending);
+				await page.evaluate(() => window.CopaRinhaPresence.refresh());
+			};
+			badgesForAlice = completeBadges;
+			await publishBadges();
+			await page.waitForFunction(() => getComputedStyle(
+				document.querySelector('#room-lobby .chat-log [data-copa-name=alice]')).color === 'rgb(243, 206, 119)');
+			assert.equal(await chatName.evaluate(el=>getComputedStyle(el).backgroundImage),'none');
+			await chatName.click();
+			await trainer.getByText('10/10').waitFor();
+			assert.match(await heading.evaluate(el=>getComputedStyle(el).backgroundImage), /linear-gradient/);
+			await capture('ouro');
+			badgesForAlice = initialBadges;
+			await publishBadges();
+			await trainer.getByText('3/10').waitFor();
+			assert.equal(await heading.evaluate(el=>getComputedStyle(el).backgroundImage),'none');
+			assert.equal(await chatName.evaluate(el=>getComputedStyle(el).color),'rgb(140, 240, 189)');
+			await popup.getByRole('button',{name:'Fechar perfil'}).click();
+
 			await lobby.locator('.chat-log .username').filter({hasText:'Alice'}).click();
 			await heading.waitFor();
 			assert.equal(await page.locator('#room-user-alice').count(),0);

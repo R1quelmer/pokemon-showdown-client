@@ -1,5 +1,6 @@
 // Add player-facing changes at the top. For entries on the same date, newest goes first.
 export const COPA_UPDATES = [
+	{ date: '2026-11-26', text: 'Escolha a cor do nickname. Complete as dez insígnias para desbloquear o visual dourado.' },
 	{ date: '2026-11-26', text: 'A edição do Hall da Fama sugere Pokémon com prévia e reúne a seleção de insígnias.' },
 	{ date: '2026-11-26', text: 'O Hall da Fama mostra o time oficial do campeonato, com região, títulos e conquistas.' },
 	{ date: '2026-11-26', text: 'A administração pode atribuir e remover várias insígnias de uma só vez.' },

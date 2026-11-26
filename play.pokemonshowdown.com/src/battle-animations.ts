@@ -761,7 +761,7 @@ export class BattleScene implements BattleSceneStub {
 			`data-href="copaprofile-${toID(side.name)}" data-profile-name="${profileName}" ` +
 			`data-profile-avatar="${BattleLog.escapeHTML(String(side.avatar))}"></button>` : '';
 		const nickname = copaProfile ?
-			`<a class="copa-battle-nickname" href="copatrainer-${toID(side.name)}">${profileName}</a>` : profileName;
+			`<a class="copa-battle-nickname" data-copa-name="${toID(side.name)}" href="copatrainer-${toID(side.name)}">${profileName}</a>` : profileName;
 
 		return (
 			`<div class="trainer trainer-${posStr}"${faded}><strong>${nickname}</strong>` +

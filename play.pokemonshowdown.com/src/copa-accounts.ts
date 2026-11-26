@@ -12,7 +12,7 @@ interface Session {
 	expires: number;
 }
 export interface CopaPartner { species: string; shiny: boolean }
-export interface CopaProfile { name: string; avatar: string; partner?: CopaPartner }
+export interface CopaProfile { name: string; avatar: string; partner?: CopaPartner; nicknameColor?: string }
 export const COPA_REGIONS = [
 	'Kanto', 'Johto', 'Hoenn', 'Sinnoh', 'Unova', 'Kalos', 'Alola', 'Galar', 'Hisui', 'Paldea',
 ] as const;
@@ -28,6 +28,7 @@ export interface CopaTrainer extends CopaProfile {
 	registeredAt?: string;
 	card?: CopaTrainerCard;
 	badges: CopaRegion[];
+	goldNickname?: boolean;
 	achievements?: string[];
 	titles?: string[];
 	stats?: { total: number, wins: number, losses: number };
@@ -76,6 +77,12 @@ export const CopaAccounts = new class {
 		const session = this.read();
 		if (!session || !this.ownsProfile(session.name)) throw new Error('Entre com sua conta Copa Rinha.');
 		return (await this.request('edit-trainer', { card }, session.token)).card;
+	}
+	async saveNicknameColor(color: string | null) {
+		const session = this.read();
+		if (!session || !this.ownsProfile(session.name)) throw new Error('Entre com sua conta Copa Rinha.');
+		await this.request('nickname-color', { color }, session.token);
+		window.CopaRinhaPresence?.refresh();
 	}
 	async savePartner(partner: CopaPartner | null) {
 		const session = this.read();

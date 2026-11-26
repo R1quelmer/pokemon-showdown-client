@@ -1268,7 +1268,8 @@ export class BattleLog {
 			group = name.charAt(0);
 			name = name.slice(1);
 		}
-		const clickableName = `<span class="username"><small class="groupsymbol">${BattleLog.escapeHTML(group)}</small>${BattleLog.escapeHTML(name)}</span>`;
+		const copaName = ` data-copa-name="${toID(name)}"`;
+		const clickableName = `<span class="username"${copaName}><small class="groupsymbol">${BattleLog.escapeHTML(group)}</small>${BattleLog.escapeHTML(name)}</span>`;
 		return clickableName;
 	}
 	parseChatMessage(

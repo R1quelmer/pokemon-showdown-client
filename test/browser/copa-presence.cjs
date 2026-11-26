@@ -428,6 +428,16 @@ print(json.dumps({"gap": gap, "baseDelta": abs(a.getbbox()[3] - b.getbbox()[3]),
 						'|poke|p2|Sylveon, L50|\n|teampreview|1\n|request|' + JSON.stringify({side, teamPreview:true}));
 				},publicBattle);
 				await page.waitForFunction(id => PS.rooms[id]?.side?.id === 'p2' && PS.rooms[id]?.request?.teamPreview, publicBattle);
+				fixture.snapshot.nicknames = [{id:'bob',color:'mint',gold:true}];
+				await page.clock.fastForward(15050);
+				const battleName = page.locator(`#room-${publicBattle} .copa-battle-nickname[data-copa-name=bob]`);
+				await page.waitForFunction(id => getComputedStyle(document.querySelector(
+					`#room-${id} .copa-battle-nickname[data-copa-name=bob]`)).color === 'rgb(243, 206, 119)', publicBattle);
+				assert.equal(await battleName.evaluate(el=>getComputedStyle(el).backgroundImage),'none');
+				fixture.snapshot.nicknames = [{id:'bob',color:'mint',gold:false}];
+				await page.clock.fastForward(15050);
+				await page.waitForFunction(id => getComputedStyle(document.querySelector(
+					`#room-${id} .copa-battle-nickname[data-copa-name=bob]`)).color === 'rgb(140, 240, 189)', publicBattle);
 				const pairs = page.locator('.copa-battle-pair');
 				await pairs.nth(1).waitFor({timeout:8000});
 				assert.match(await pairs.filter({has:page.locator('img[src$="/lucas.png"]')}).first()

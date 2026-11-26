@@ -16,7 +16,7 @@ import { PSHeader } from "./panel-topbar";
 import {
 	COPA_REGIONS, type CopaPartner, type CopaProfile, type CopaRegion, type CopaTrainer, type CopaTrainerCard,
 } from "./copa-accounts";
-import { parseCopaPartner } from "./copa-online";
+import { COPA_NICKNAME_COLORS, parseCopaPartner } from "./copa-online";
 
 const WARNING_SECONDS = 5;
 // a function because it's evaluated before translations have loaded
@@ -300,6 +300,7 @@ class UserPanel extends PSRoomPanel<UserRoom> {
 			<strong><a
 				href={Config.copaRinhaLocalNames ? `copatrainer-${user.userid}` : `//${Config.routes.users}/${user.userid}`}
 				target={Config.copaRinhaLocalNames ? undefined : '_blank'}
+				data-copa-name={user.userid}
 				style={`color: ${away ? '#888888' : BattleLog.usernameColor(user.userid)}`}
 			>
 				{user.name}
@@ -865,11 +866,15 @@ class CopaTrainerPanel extends PSRoomPanel {
 		const banner = this.draft?.banner ?? card?.banner;
 		const hall = card?.region ? `Hall da Fama de ${card.region}` : 'Hall da Fama';
 		const stats = trainer?.stats;
+		const nicknames = window.CopaRinhaPresence?.snapshot?.nicknames;
+		const nickname = nicknames?.get(userid);
+		const badges = nicknames ? nickname?.badges || [] : trainer?.badges || [];
+		const gold = nickname?.gold ?? (!nicknames && (trainer?.goldNickname || badges.length === 10));
 		return <PSPanelWrapper room={this.props.room} fullSize={!this.editing}>
 			{!this.editing && <button
 				type="button" class="copa-trainer-dismiss autofocus" data-cmd="/close" aria-label="Fechar perfil"
 			>×</button>}
-			<article class="copa-trainer">
+			<article class={`copa-trainer${gold ? ' copa-trainer-gold' : ''}`}>
 				{Config.copaRinhaLocalNames && (trainer && (!this.editing || ownsProfile) ? <>
 					<header
 						class="copa-trainer-header"
@@ -877,7 +882,7 @@ class CopaTrainerPanel extends PSRoomPanel {
 							{ backgroundImage: `linear-gradient(90deg, #091323ed, #101c31a8), url("${banner}")` } : undefined}
 					>
 						<div class="copa-trainer-details">
-							<h1>{trainer.name}</h1>
+							<h1 data-copa-name={gold ? undefined : userid}>{trainer.name}</h1>
 							<p class={trainer.online ? 'copa-trainer-online' : ''}>{trainer.online ? 'Online' : 'Offline'}</p>
 							<p>{card?.region || 'Região não definida'}</p>
 							<p>{trainer.registeredAt ? `Desde ${copaDate(trainer.registeredAt)}` : 'Data de registro indisponível'}</p>
@@ -922,9 +927,9 @@ class CopaTrainerPanel extends PSRoomPanel {
 						</nav>
 						<section class="copa-trainer-body" aria-label={COPA_TRAINER_TABS[this.tab]}>
 							{this.tab === 0 && <section class="copa-trainer-badges" aria-label="Insígnias regionais">
-								<h2>Insígnias <small>{trainer.badges.length}/10</small></h2>
+								<h2>Insígnias <small>{badges.length}/10</small></h2>
 								<div>{COPA_REGIONS.map(region => {
-									const earned = trainer.badges.includes(region);
+									const earned = badges.includes(region);
 									return <button
 										type="button" key={region} class={earned ? 'earned' : 'locked'}
 										aria-label={`${region} · ${earned ? 'Conquistada' : 'Bloqueada'}`}
@@ -938,7 +943,7 @@ class CopaTrainerPanel extends PSRoomPanel {
 									</button>;
 								})}</div>
 								{this.badge && <p role="status">
-									{this.badge} · {trainer.badges.includes(this.badge) ? 'Conquistada' : 'Bloqueada'}
+									{this.badge} · {badges.includes(this.badge) ? 'Conquistada' : 'Bloqueada'}
 								</p>}
 							</section>}
 							{this.tab === 1 && <>
@@ -987,6 +992,64 @@ class CopaTrainerEditorPanel extends CopaTrainerPanel {
 	static override readonly routes = ['copatraineredit-*'];
 	static override readonly location = 'left';
 	protected override readonly editing = true;
+}
+
+class CopaNicknameColorPanel extends PSRoomPanel {
+	static readonly id = 'copanicknamecolor';
+	static readonly routes = ['copanicknamecolor'];
+	static readonly location = 'modal-popup';
+	static readonly noURL = true;
+	private choice?: string;
+	private busy = true;
+	private error = '';
+
+	override componentDidMount() {
+		super.componentDidMount();
+		const accounts = window.CopaAccounts;
+		if (!Config.copaRinhaLocalNames || !accounts?.ownsProfile(PS.user.name)) return;
+		void accounts.profile(PS.user.name).then(profile => {
+			this.choice = profile?.nicknameColor || '';
+			this.busy = false;
+			this.forceUpdate();
+		}, () => {
+			this.error = 'Não foi possível carregar a cor.';
+			this.forceUpdate();
+		});
+	}
+
+	private save = (event: Event) => {
+		event.preventDefault();
+		if (this.busy || !window.CopaAccounts) return;
+		this.busy = true;
+		this.forceUpdate();
+		void window.CopaAccounts.saveNicknameColor(this.choice || null).then(() => this.close(), () => {
+			this.error = 'Não foi possível salvar a cor.';
+			this.busy = false;
+			this.forceUpdate();
+		});
+	};
+
+	override render() {
+		const color = COPA_NICKNAME_COLORS.find(entry => entry.id === this.choice)?.color;
+		return <PSPanelWrapper room={this.props.room} width={340}><form class="pad" onSubmit={this.save}>
+			{Config.copaRinhaLocalNames && <>
+				<h3>Cor do nickname</h3>
+				<label>Cor <select
+					class="select" value={this.choice || ''} disabled={this.busy} onChange={ev => {
+						this.choice = (ev.currentTarget as HTMLSelectElement).value;
+						this.forceUpdate();
+					}}
+				>
+					<option value="">Padrão do Showdown</option>
+					{COPA_NICKNAME_COLORS.map(entry => <option key={entry.id} value={entry.id}>{entry.label}</option>)}
+				</select></label>
+				<p><strong style={{ color: color || BattleLog.usernameColor(PS.user.userid) }}>{PS.user.name}</strong></p>
+				{this.error && <p role="alert">{this.error}</p>}
+				<button type="submit" class="button" disabled={this.busy}>Salvar</button> {}
+				<button type="button" class="button" onClick={() => this.close()}>Fechar</button>
+			</>}
+		</form></PSPanelWrapper>;
+	}
 }
 
 class CopaPartnerPanel extends PSRoomPanel {
@@ -1105,7 +1168,7 @@ class CopaOnlinePanel extends PSRoomPanel {
 						return <li key={id}>
 							<CopaAvatarLink name={user.name} avatar={user.avatar} />
 							<div class="copa-online-player">
-								<button class="button" data-href={`copatrainer-${id}`}>{user.name}</button>
+								<button class="button" data-href={`copatrainer-${id}`} data-copa-name={id}>{user.name}</button>
 								<small>
 									{user.statusType === 'idle' ? 'Ausente' : user.statusType === 'busy' ? 'Ocupado' : 'Online'}
 									{user.inBattle ? ' · Em batalha' : ''}
@@ -1180,7 +1243,7 @@ class CopaMembersPanel extends PSRoomPanel {
 								<CopaAvatarLink name={member.name} avatar={member.avatar} />}
 							</div>
 							<div class="copa-online-player">
-								<a href={`copatrainer-${id}`}>{member.name}</a> {}
+								<a href={`copatrainer-${id}`} data-copa-name={id}>{member.name}</a> {}
 								<button
 									class="button small" aria-label={`Interagir com ${member.name}`} onClick={ev => {
 										ev.stopPropagation();
@@ -1619,7 +1682,7 @@ class OptionsPanel extends PSRoomPanel {
 				/>} {}
 				<strong>{Config.copaRinhaLocalNames && PS.user.named ? (
 					<a
-						href={`copatrainer-${PS.user.userid}`} onClick={this.openCopaProfile}
+						href={`copatrainer-${PS.user.userid}`} onClick={this.openCopaProfile} data-copa-name={PS.user.userid}
 					>{PS.user.name}</a>
 				) : PS.user.name}</strong>
 				{Config.copaRinhaLocalNames && <small style="display:block">Conta Copa Rinha · autenticação local</small>}
@@ -1676,6 +1739,8 @@ class OptionsPanel extends PSRoomPanel {
 			</>}
 			<hr />
 			<h3>{TL`Appearance`}</h3>
+			{Config.copaRinhaLocalNames && window.CopaAccounts?.ownsProfile(PS.user.name) &&
+				<p><button type="button" class="button" data-href="copanicknamecolor">Cor do nickname</button></p>}
 			<p>
 				<label class="optlabel">{TL.label(TL`Theme`)}<select
 					name="theme" class="select" onChange={this.setTheme} value={PS.prefs.theme || 'light'}
@@ -3105,6 +3170,7 @@ PS.addRoomType(
 	CopaTrainerPanel,
 	CopaTrainerEditorPanel,
 	CopaPartnerPanel,
+	CopaNicknameColorPanel,
 	UserOptionsPanel,
 	UserListPanel,
 	VolumePanel,

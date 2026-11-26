@@ -113,7 +113,7 @@ const wallpaperPath = path.join(root,'fx/client-bg-horizon.jpg');
    assert.equal(await colorOf(news.getByRole('link',{name:'Lista de avatares disponíveis'})),'rgb(89, 217, 245)');
    const updates=news.locator('.copa-updates');
    assert.equal(await updates.locator('li:visible').count(),3);
-   assert.match(await updates.locator('li').first().textContent(),/A edição do Hall da Fama sugere Pokémon/);
+   assert.match(await updates.locator('li').first().textContent(),/Escolha a cor do nickname/);
    await updates.locator('summary').click();
    assert(await updates.locator('li:visible').count() > 3);
    await updates.locator('summary').click();

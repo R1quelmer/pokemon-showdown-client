@@ -238,7 +238,7 @@ export class PSHeader extends preact.Component {
 		}
 		const userColor = window.BattleLog && `color:${PS.user.away ? '#888' : BattleLog.usernameColor(PS.user.userid)}`;
 		return <span class="username" style={userColor}>
-			<span class="usernametext">{PS.user.name}</span>
+			<span class="usernametext" data-copa-name={PS.user.userid}>{PS.user.name}</span>
 		</span>;
 	}
 	renderBrand(size = 48) {
@@ -375,7 +375,9 @@ export class PSMiniHeader extends preact.Component {
 		return <div class="mini-header" style={`left:${PSView.verticalHeaderWidth + (PSView.narrowMode ? 0 : -1)}px;`}>
 			{menuButton}
 			<button data-href="options" class="mini-header-right" aria-label={TL`[Options]`}>
-				{PS.user.named ? <strong style={userColor}>{PS.user.name}</strong> : <i class="fa fa-cog" aria-hidden></i>}
+				{PS.user.named ?
+					<strong data-copa-name={PS.user.userid} style={userColor}>{PS.user.name}</strong> :
+					<i class="fa fa-cog" aria-hidden></i>}
 			</button>
 			{icon} {Dex.isCopaRinha() && PS.getPanel()?.id === '' ? 'COPA RINHA II' : title}
 		</div>;

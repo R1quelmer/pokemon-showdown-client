@@ -698,3 +698,13 @@ html.copa-rinha .copa-avatar-suggestions button {
 }
 html.copa-rinha .copa-avatar-suggestions button:is(:hover,:focus-visible,.selected) {background:#244560}
 html.copa-rinha .copa-avatar-suggestions img {width:34px;height:34px;object-fit:contain;image-rendering:pixelated}
+
+html.copa-rinha .copa-trainer-gold {
+  border:1px solid #c9a454;border-radius:12px;padding-top:8px;padding-bottom:8px;
+}
+html.copa-rinha .copa-trainer-gold h1 {
+  color:#f3ce77;background:linear-gradient(145deg,#fff2b1 0%,#e2af53 40%,#ffe8a5 54%,#ca9946 85%);
+  background-clip:text;-webkit-text-fill-color:transparent;width:fit-content;max-width:100%;
+}
+html.copa-rinha .copa-trainer-gold .copa-trainer-badges h2 small {color:#f3ce77}
+html.copa-rinha .copa-battle-nickname[data-copa-name] {text-shadow:0 1px 2px #172031,0 0 2px #172031}

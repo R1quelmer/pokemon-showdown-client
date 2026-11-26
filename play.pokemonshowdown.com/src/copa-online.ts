@@ -1,8 +1,17 @@
-import type { CopaPartner } from './copa-accounts';
+import type { CopaPartner, CopaRegion } from './copa-accounts';
 /* eslint-disable no-restricted-globals */
 /** Public presence over the native Showdown query transport, only in the Copa entry. */
 import { Config, PS } from './client-main';
 import { toID } from './battle-dex';
+
+export const COPA_NICKNAME_COLORS = [
+	{ id: 'cyan', label: 'Ciano', color: '#75e5fb' },
+	{ id: 'mint', label: 'Verde-menta', color: '#8cf0bd' },
+	{ id: 'pink', label: 'Rosa', color: '#ffaacf' },
+	{ id: 'lilac', label: 'Lilás', color: '#d0baff' },
+	{ id: 'peach', label: 'Pêssego', color: '#ffc4a5' },
+];
+interface CopaNickname { color?: string; gold: boolean; badges: CopaRegion[] }
 
 export interface CopaOnlineUser {
 	name: string;
@@ -16,6 +25,7 @@ export interface CopaPresenceSnapshot {
 	guests: number;
 	users: CopaOnlineUser[];
 	members?: CopaMember[] | null;
+	nicknames?: Map<string, CopaNickname>;
 }
 export function parseCopaPartner(input: unknown): CopaPartner | undefined {
 	const value = input as Partial<CopaPartner> | undefined;
@@ -71,6 +81,17 @@ export const CopaRinhaPresence = new class {
 		users.sort((a, b) => a.name.localeCompare(b.name));
 		const snapshot: CopaPresenceSnapshot = { total: users.length + data.guests!, guests: data.guests!, users };
 		if (data.members !== undefined) snapshot.members = this.parseMembers(data.members);
+		if (Array.isArray(data.nicknames)) {
+			const nicknames = new Map<string, CopaNickname>();
+			(data.nicknames as unknown as {
+				id: unknown, color?: unknown, gold?: boolean, badges?: CopaRegion[],
+			}[]).slice(0, 1000).forEach(row => {
+				if (!row || typeof row.id !== 'string' || !/^[a-z0-9]{1,18}$/.test(row.id)) return;
+				const color = COPA_NICKNAME_COLORS.find(entry => entry.id === row.color)?.color;
+				nicknames.set(row.id, { color, gold: row.gold === true, badges: Array.isArray(row.badges) ? row.badges : [] });
+			});
+			snapshot.nicknames = nicknames;
+		}
 		return snapshot;
 	}
 	private parseMembers(rows: unknown): CopaMember[] | null {
@@ -92,7 +113,27 @@ export const CopaRinhaPresence = new class {
 		}
 		return members.sort((a, b) => a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' }));
 	}
+	private nicknameStyles?: HTMLStyleElement;
+	private updateNicknameStyles() {
+		const rules: string[] = [];
+		this.snapshot?.nicknames?.forEach(({ color, gold }, id) => {
+			const name = `[data-copa-name="${id}"]`;
+			if (color) rules.push(`html.copa-rinha ${name}{color:${color}!important}`);
+			if (gold) rules.push(`html.copa-rinha :is(#room-lobby,[id^="room-battle-"]) ${name}{color:#f3ce77!important}`);
+		});
+		const css = rules.join('\n');
+		if (!this.nicknameStyles && css) {
+			this.nicknameStyles = document.createElement('style');
+			document.head.append(this.nicknameStyles);
+		}
+		if (this.nicknameStyles && this.nicknameStyles.textContent !== css) this.nicknameStyles.textContent = css;
+	}
+
 	private notify() {
+		this.updateNicknameStyles();
+		for (const id of PS.popups) {
+			if (id.startsWith('copatrainer-')) PS.rooms[id]?.update(null);
+		}
 		PS.mainmenu.update(null);
 		PS.rooms['rooms']?.update(null);
 		PS.rooms['copaonline']?.update(null);
@@ -118,7 +159,7 @@ export const CopaRinhaPresence = new class {
 		this.pending = true;
 		this.requestedMembers = !!PS.rooms['copamembers'];
 		this.timeout = setTimeout(() => this.invalidate('unavailable'), 10000);
-		PS.send(this.requestedMembers ? '/cmd copapresence members' : '/cmd copapresence');
+		PS.send(this.requestedMembers ? '/cmd copapresence members' : '/cmd copapresence nicknames');
 	};
 	receive(value: unknown) {
 		if (!Config.copaRinhaLocalNames || !this.pending || !PS.connection?.connected || document.hidden) return;
