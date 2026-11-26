@@ -593,3 +593,8 @@ html.copa-rinha .copa-battle-pair .copa-partner-missing small {font-size:8px}
 html.copa-rinha .copa-battle-avatar-link {z-index:1}
 html.copa-rinha .copa-private-training-count {display:block;font-size:10px;line-height:1.1}
 html.copa-rinha .copa-counters a[href="battles"]:has(.copa-private-training-count) {height:auto;min-height:52px;padding:3px}
+
+html.copa-rinha .copa-compact-profile:has(.copa-directory-pair) {grid-template-columns:82px minmax(0,1fr)}
+html.copa-rinha .copa-compact-profile .copa-directory-pair .copa-online-avatar,
+html.copa-rinha .copa-compact-profile .copa-directory-pair .copa-online-avatar img {width:40px;height:40px}
+html.copa-rinha .copa-compact-profile .copa-directory-pair .copa-partner-sprite img {width:38px;height:38px}

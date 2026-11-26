@@ -158,6 +158,22 @@ class UserPanel extends PSRoomPanel<UserRoom> {
 	static readonly Model = UserRoom;
 	static readonly location = 'popup';
 
+	private copaProfile?: { userid: ID, details?: CopaProfile | null };
+
+	override componentDidUpdate() {
+		super.componentDidUpdate();
+		const { userid, name } = this.props.room;
+		if (!Config.copaRinhaLocalNames || userid === this.copaProfile?.userid) return;
+		const lookup: NonNullable<UserPanel['copaProfile']> = { userid };
+		this.copaProfile = lookup;
+		if (!userid) return;
+		void window.CopaAccounts?.profile(name.trim()).then(profile => {
+			if (this.copaProfile !== lookup || this.props.room.userid !== userid) return;
+			lookup.details = profile;
+			this.forceUpdate();
+		}, () => {});
+	}
+
 	renderUser() {
 		const room = this.props.room;
 		if (!room.userid) return null;
@@ -297,10 +313,13 @@ class UserPanel extends PSRoomPanel<UserRoom> {
 		</>;
 		if (Config.copaRinhaLocalNames) {
 			const member = window.CopaRinhaPresence?.snapshot?.members?.find(row => toID(row.name) === room.userid);
+			const profile = this.copaProfile?.userid === room.userid ? this.copaProfile.details : undefined;
+			const partner = parseCopaPartner(profile === undefined ? member?.partner : profile?.partner);
 			const liveAvatar = isSelf ? PS.user.avatar : user.avatar;
-			const avatarId = String((liveAvatar !== '[loading]' && liveAvatar) || member?.avatar || 'unknown');
+			const avatarId = String((liveAvatar !== '[loading]' && liveAvatar !== 'unknown' && liveAvatar) ||
+				profile?.avatar || member?.avatar || 'unknown');
 			return [<div class="copa-compact-profile userdetails">
-				<CopaAvatarLink name={user.name.trim()} avatar={avatarId} />
+				<CopaAvatarLink name={user.name.trim()} avatar={avatarId} partner={partner} />
 				<div class="copa-compact-profile-info">{details}</div>
 			</div>, buttonbar];
 		}
@@ -445,7 +464,7 @@ function CopaPresenceAvatar({ name, avatar, participant, profile, size }: {
 	</span>;
 }
 
-function CopaAvatarLink({ name, avatar }: { name: string, avatar: string }) {
+function CopaAvatarLink({ name, avatar, partner }: { name: string, avatar: string, partner?: CopaPartner }) {
 	return <button
 		type="button" class="copa-avatar-link" aria-label={`Ver perfil de ${name}`}
 		onClick={ev => {
@@ -454,7 +473,8 @@ function CopaAvatarLink({ name, avatar }: { name: string, avatar: string }) {
 				args: { name, avatar }, parentElem: ev.currentTarget as HTMLElement,
 			});
 		}}
-	><CopaPresenceAvatar name={name} avatar={avatar} /></button>;
+	>{partner ? <CopaCompactPair name={name} avatar={avatar} partner={partner} /> :
+		<CopaPresenceAvatar name={name} avatar={avatar} />}</button>;
 }
 
 // Local BW artwork for Z-A forms whose sprites are not consistently on the native CDN.

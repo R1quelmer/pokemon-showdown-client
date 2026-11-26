@@ -629,6 +629,10 @@ function CopaNews() {
 			</a></p>
 		</section>
 		<section class="newsentry">
+			<h4>Pokémon parceiro</h4>
+			<p>Escolha seu Pokémon parceiro nas configurações. Ele aparece ao lado do seu treinador no perfil.</p>
+		</section>
+		<section class="newsentry">
 			<h4>Treinamento contra bots</h4>
 			<p>
 				Para jogar contra o bot de treinamento, basta marcar a opção de pareamento contra bots e iniciar uma busca de batalha.

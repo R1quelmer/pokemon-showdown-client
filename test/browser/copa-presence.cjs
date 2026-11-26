@@ -24,12 +24,12 @@ const members = [
 
 async function measurePairPixels(pair) {
 	const shots = [];
+	const scopes = ['.copa-profile-sprites', '.copa-battle-pair', '.copa-compact-profile .copa-directory-pair'];
 	for (const selector of [
-		'.copa-profile-sprites img,.copa-battle-pair img',
-		'.copa-profile-sprites .copa-partner-sprite img,.copa-battle-pair .copa-partner-sprite img',
-		'.copa-profile-sprites .copa-online-avatar img,.copa-battle-pair .copa-online-avatar img',
+		'img', '.copa-partner-sprite img', '.copa-online-avatar img',
 	]) {
-		const shot = await pair.screenshot({style: `${selector}{visibility:hidden!important}`, scale:'css'});
+		const style = `${scopes.map(scope => `${scope} ${selector}`).join(',')}{visibility:hidden!important}`;
+		const shot = await pair.screenshot({style, scale:'css'});
 		shots.push(shot.toString('base64'));
 	}
 	return JSON.parse(execFileSync('python3', ['-c', `
@@ -56,7 +56,8 @@ print(json.dumps({"gap": gap, "baseDelta": abs(a.getbbox()[3] - b.getbbox()[3])}
 		try {
 			const type = {'.js': 'text/javascript', '.html': 'text/html', '.css': 'text/css', '.png': 'image/png',
 				'.json': 'application/json', '.woff2': 'font/woff2'}[path.extname(file)];
-			res.writeHead(200, {'Content-Type': type || 'application/octet-stream'}).end(await fs.readFile(file));
+			const contents = await fs.readFile(file);
+			res.writeHead(200, {'Content-Type': type || 'application/octet-stream'}).end(contents);
 		} catch { res.writeHead(404).end(); }
 	});
 	await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
@@ -84,6 +85,7 @@ print(json.dumps({"gap": gap, "baseDelta": abs(a.getbbox()[3] - b.getbbox()[3])}
 					const message = String(raw); fixture.requests.push(message);
 					const renamed = /^\|?\/trn ([^,\r\n]+)(?:,0,copa)?$/.exec(message);
 					if (renamed) return ws.send(`|updateuser| ${renamed[1]}|1|167`);
+					if (message === '|/join lobby') return ws.send('>lobby\n|init|chat\n|title|Lobby');
 					if (message.endsWith('/cmd copapresence members')) {
 						ws.send('|queryresponse|copapresence|' + JSON.stringify({...fixture.snapshot, members: fixture.members}));
 					} else if (/\/cmd copapresence(?:\s|$)/.test(message)) {
@@ -109,8 +111,8 @@ print(json.dumps({"gap": gap, "baseDelta": abs(a.getbbox()[3] - b.getbbox()[3])}
 						return route.fulfill({json: {partner}});
 					}
 					if (url.endsWith('/profile')) {
-						const row = members.find(member => member.name === data.name);
-						return route.fulfill({json: {member: row ? {...row, partner: data.name === 'Alice' ? partner : {species:'sylveon',shiny:false}} : null}});
+						const row = members.find(member => member.name.toLowerCase() === data.name.toLowerCase());
+						return route.fulfill({json: {member: row ? {...row, partner: row.name === 'Alice' ? partner : {species:'sylveon',shiny:false}} : null}});
 					}
 					if (data.name) accountName = data.name;
 					return route.fulfill({json: {name: accountName, token: 'a'.repeat(43), expires: Date.now() + 30 * 86400000}});
@@ -276,14 +278,12 @@ print(json.dumps({"gap": gap, "baseDelta": abs(a.getbbox()[3] - b.getbbox()[3])}
 			const compact = page.locator('#room-user-alice');
 			const addStatus = compact.getByRole('button', {name:'Add status',exact:true});
 			await addStatus.waitFor();
-			const portrait = compact.locator('.copa-online-avatar');
-			const picture = portrait.locator('img');
-			await assertSpriteElementsLoaded(page, '#room-user-alice .copa-online-avatar img');
-			const [portraitBox, pictureBox, statusBox, popupBox] = await Promise.all([
-				portrait.boundingBox(), picture.boundingBox(), addStatus.boundingBox(), compact.boundingBox(),
+			const compactPair = compact.locator('.copa-directory-pair');
+			await compactPair.getByRole('img', {name:'Rotom-Wash · Shiny'}).waitFor();
+			const [pairBox, statusBox, popupBox] = await Promise.all([
+				compactPair.boundingBox(), addStatus.boundingBox(), compact.boundingBox(),
 			]);
-			assert(Math.abs(portraitBox.x - pictureBox.x) <= 1, 'portrait covers the placeholder initial');
-			assert(statusBox.x >= portraitBox.x + portraitBox.width);
+			assert(statusBox.x >= pairBox.x + pairBox.width);
 			assert(statusBox.x + statusBox.width <= popupBox.x + popupBox.width);
 			if (process.env.COPA_MEMBERS_SCREENSHOTS && [1440,390].includes(width)) {
 				await page.screenshot({path: path.join(process.env.COPA_MEMBERS_SCREENSHOTS, `compacto-${width}.png`)});
@@ -362,6 +362,41 @@ print(json.dumps({"gap": gap, "baseDelta": abs(a.getbbox()[3] - b.getbbox()[3])}
 			await directory.getByRole('button', {name: 'Bob', exact: true}).click();
 			await page.waitForFunction(() => !!PS.rooms['user-bob']?.args?.copaMember);
 			const profile = page.locator('[id="room-user-bob"]');
+			const verifyBobPair = async (popup, entry) => {
+				const duo = popup.locator('.copa-directory-pair');
+				await duo.getByRole('img', {name:'Sylveon', exact:true}).waitFor();
+				await duo.locator('[data-profile-tight]').nth(1).waitFor();
+				await assertSpriteElementsLoaded(page, `#${await popup.getAttribute('id')} .copa-directory-pair img`);
+				assert.equal(await duo.locator('img').evaluateAll(images => images.length === 2 && images.every(image =>
+					image.src.endsWith('.png') && getComputedStyle(image).imageRendering === 'pixelated' &&
+					!image.getAnimations().length)), true);
+				const pixels = await measurePairPixels(duo);
+				assert(pixels.gap <= 5 && pixels.baseDelta <= 1, `${entry} at ${width}px: ${JSON.stringify(pixels)}`);
+				console.log(`Compact profile via ${entry} at ${width}px:`, pixels);
+				if (process.env.COPA_MEMBERS_SCREENSHOTS && [1440, 390].includes(width)) {
+					await popup.screenshot({path:path.join(process.env.COPA_MEMBERS_SCREENSHOTS, `perfil-${entry}-${width}.png`)});
+				}
+			};
+			await verifyBobPair(profile, 'membros');
+			await page.evaluate(() => PS.closePopupsAbove(null));
+			await page.locator('#room- a[href="users"]').click();
+			const lookupPopup = page.locator('#room-users');
+			const username = lookupPopup.locator('input[name=username]');
+			await username.fill('bob');
+			await username.press('Enter');
+			await verifyBobPair(lookupPopup, 'busca');
+			await username.fill('Visitante');
+			await username.press('Enter');
+			await lookupPopup.getByRole('button', {name:'Ver perfil de Visitante'}).waitFor();
+			assert.equal(await lookupPopup.locator('.copa-directory-pair').count(), 0);
+			await page.evaluate(() => { PS.closePopupsAbove(null); PS.join(''); });
+			await page.locator('#room- a[href="lobby"]').click();
+			await page.locator('#room-lobby .chat-log').waitFor();
+			fixture.socket.send(`>lobby\n|c:|${Math.floor(Date.now() / 1000)}| Bob|Olá`);
+			await page.locator('#room-lobby .chat-log .username').filter({hasText:'Bob'}).click();
+			await verifyBobPair(profile, 'chat');
+			await page.evaluate(() => { PS.closePopupsAbove(null); PS.join('copamembers'); });
+			await directory.getByRole('button', {name: 'Bob', exact: true}).click();
 			await profile.locator('[data-href="challenge-bob"]').waitFor();
 			assert.equal(await profile.locator('a[href="/privatefixture"]').count(), 0);
 			await profile.locator('[data-href="dm-bob"]').click();
@@ -424,9 +459,6 @@ print(json.dumps({"gap": gap, "baseDelta": abs(a.getbbox()[3] - b.getbbox()[3])}
 
 				await page.getByRole('button', {name:'Ver perfil de Bob'}).click({timeout:8000});
 				await page.locator('.copa-profile').getByRole('heading', {name:'Bob'}).waitFor();
-			}
-			assert.deepEqual(fixture.errors, []); assert.deepEqual(fixture.authRequests, []);
-			assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
 				// A valid CDN sprite without crop metadata used to hide the whole pair.
 				await page.route('**/sprites/trainers/qa-no-crop.png', async route => route.fulfill({
 					contentType:'image/png', body:await loadSprite('trainers/marnie.png'),
@@ -446,6 +478,9 @@ print(json.dumps({"gap": gap, "baseDelta": abs(a.getbbox()[3] - b.getbbox()[3])}
 					return portrait.classList.contains('copa-has-battle-partner') &&
 						images.every(image => image.naturalWidth && getComputedStyle(image).visibility === 'visible');
 				}));
+			}
+			assert.deepEqual(fixture.errors, []); assert.deepEqual(fixture.authRequests, []);
+			assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
 			console.log(`Native presence counter/list, dedup, anonymous/privacy, profile/challenge, automatic updates, visibility/reconnect/errors and layout passed at ${width}px`);
 			await context.close();
 		}

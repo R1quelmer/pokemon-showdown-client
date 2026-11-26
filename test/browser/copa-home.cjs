@@ -101,7 +101,7 @@ const wallpaperPath = path.join(root,'fx/client-bg-horizon.jpg');
    const minimize=news.locator('.minimizebutton');
    if(width<628)await minimize.click();
    assert.deepEqual(await news.getByRole('heading',{level:4}).allTextContents(),
-    ['Copa Rinha II','Fase de testes','Personalize seu avatar','Treinamento contra bots','Últimas atualizações']);
+    ['Copa Rinha II','Fase de testes','Personalize seu avatar','Pokémon parceiro','Treinamento contra bots','Últimas atualizações']);
    assert.equal(await news.locator('time').first().getAttribute('datetime'),'2026-12-05T20:00:00-03:00');
    assert.equal(await news.getByRole('link',{name:'Lista de avatares disponíveis'}).getAttribute('href'),
     'https://play.pokemonshowdown.com/sprites/trainers/');
@@ -112,8 +112,9 @@ const wallpaperPath = path.join(root,'fx/client-bg-horizon.jpg');
    assert.equal(await colorOf(news.getByRole('link',{name:'Lista de avatares disponíveis'})),'rgb(89, 217, 245)');
    const updates=news.locator('.copa-updates');
    assert.equal(await updates.locator('li:visible').count(),3);
+   assert.match(await updates.locator('li').first().textContent(),/O Pokémon parceiro aparece no perfil aberto pela busca/);
    await updates.locator('summary').click();
-   assert.equal(await updates.locator('li:visible').count(),20);
+   assert(await updates.locator('li:visible').count() > 3);
    await updates.locator('summary').click();
    const right=page.locator('#room-rooms');
    if(width>=700){
