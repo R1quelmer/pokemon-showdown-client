@@ -64,7 +64,9 @@ const team = [pokemon('sylveon'), pokemon('greninjamega'), pokemon('charizardmeg
 					const action = url.pathname.split('/').pop();
 					if (action === 'edit-trainer') {
 						assert.equal(route.request().headers().authorization, 'Bearer ' + 'a'.repeat(43));
-						card = route.request().postDataJSON().card;
+						const changes = route.request().postDataJSON().card;
+							assert.deepEqual(Object.keys(changes).sort(), ['banner','bio']);
+							card = {...card, ...changes};
 						return route.fulfill({json:{card}});
 					}
 					if (action === 'trainer' && route.request().postDataJSON().name !== 'alice') {
@@ -117,7 +119,7 @@ const team = [pokemon('sylveon'), pokemon('greninjamega'), pokemon('charizardmeg
 			await page.locator('#room-copamembers').getByRole('link',{name:'Alice',exact:true}).click();
 			await heading.waitFor();
 			assert.deepEqual(await trainer.locator('nav button').allTextContents(), ['Insígnias','Visão geral','Replays']);
-			const dream = trainer.getByRole('region',{name:'Dream Team'});
+			const dream = trainer.getByRole('region',{name:'Hall da Fama de Unova'});
 			const grid = dream.locator('.copa-trainer-team');
 			const tabs = trainer.getByRole('navigation',{name:'Seções do perfil'});
 			const badgesTab = tabs.getByRole('button',{name:'Insígnias'});
@@ -180,7 +182,8 @@ const team = [pokemon('sylveon'), pokemon('greninjamega'), pokemon('charizardmeg
 			await dream.waitFor({state:'visible'});
 			await trainer.getByRole('button',{name:'Editar perfil'}).click();
 			await editor.getByLabel('Biografia').fill('Biografia atualizada.');
-			await editor.getByRole('button',{name:'Mover para baixo'}).first().click();
+			assert.equal(await editor.getByLabel('Pokémon 1').count(),0);
+			assert.equal(await editor.getByLabel('Região de origem').count(),0);
 			await editor.getByLabel('Fundo do cabeçalho').setInputFiles(path.join(root,'assets/copa-rinha/poliwhirl-wallpaper.jpg'));
 			await page.waitForFunction(() => document.querySelector('.copa-trainer-header').style.backgroundImage.includes('data:image/jpeg'));
 			await popup.waitFor({state:'hidden'});
@@ -188,7 +191,7 @@ const team = [pokemon('sylveon'), pokemon('greninjamega'), pokemon('charizardmeg
 			await editor.getByRole('button',{name:'Salvar perfil'}).click();
 			await editor.getByRole('heading',{name:'Editar perfil'}).waitFor({state:'hidden'});
 			assert.equal(card.bio,'Biografia atualizada.');
-			assert.equal(card.dreamTeam[0].species,'greninjamega');
+			assert.equal(card.dreamTeam[0].species,team[0].species);
 			assert.match(card.banner,/^data:image\/jpeg;base64,/);
 			await popup.waitFor();
 			await capture('fundo-personalizado');

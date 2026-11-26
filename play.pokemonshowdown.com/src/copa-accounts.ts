@@ -28,6 +28,8 @@ export interface CopaTrainer extends CopaProfile {
 	registeredAt?: string;
 	card?: CopaTrainerCard;
 	badges: CopaRegion[];
+	achievements?: string[];
+	titles?: string[];
 	stats?: { total: number, wins: number, losses: number };
 }
 class CopaAccountError extends Error {
@@ -70,7 +72,7 @@ export const CopaAccounts = new class {
 		return !!(Config.copaRinhaLocalNames && session && toID(session.name) === toID(name) &&
 			toID(session.name) === PS.user.userid && PS.user.named);
 	}
-	async saveTrainer(card: CopaTrainerCard): Promise<CopaTrainerCard> {
+	async saveTrainer(card: Pick<CopaTrainerCard, 'bio' | 'banner'>): Promise<CopaTrainerCard> {
 		const session = this.read();
 		if (!session || !this.ownsProfile(session.name)) throw new Error('Entre com sua conta Copa Rinha.');
 		return (await this.request('edit-trainer', { card }, session.token)).card;

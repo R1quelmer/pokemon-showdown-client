@@ -13,4 +13,25 @@
 		<label><input type="checkbox" name="badge-region" value="Hisui"> Hisui</label>
 		<label><input type="checkbox" name="badge-region" value="Paldea"> Paldea</label>
 	</div>
-</fieldset> <button>Executar</button></form><p id="admin-status" role="status"></p><pre id="admin-result"></pre><p>As sessões válidas listadas não representam usuários online. Contas registradas são permanentes; desativar não libera o nickname. A chave administrativa fica somente na memória desta página.</p><p>Entregue o código de recuperação por um canal privado ao titular verificado. Ele é descartável e vale por 24 horas. A emissão revoga as sessões anteriores.</p><a href="copa-conta.html">Página de recuperação do participante</a></main><script src="js/copa-account-pages.js"></script></html>
+</fieldset> <button>Executar</button></form><p id="admin-status" role="status"></p><pre id="admin-result"></pre>
+<section aria-labelledby="competitive-heading">
+	<h2 id="competitive-heading">Perfil competitivo</h2>
+	<form id="competitive-lookup">
+		<button type="button" id="competitive-accounts">Carregar contas cadastradas</button>
+		<label>Participante <select id="competitive-user" required><option value="">Selecione uma conta</option></select></label>
+		<button type="submit">Abrir perfil</button>
+	</form>
+	<p id="competitive-status" role="status"></p>
+	<form id="competitive-editor" hidden>
+		<h3 id="competitive-name"></h3>
+		<label>Região de origem <select name="origin"><option value="">Sem região</option></select></label>
+		<fieldset id="competitive-hall">
+			<legend>Hall da Fama</legend>
+			<p>Time oficial do participante. Use o nome da espécie ou forma, como Rotom-Wash.</p>
+		</fieldset>
+		<fieldset id="competitive-badges"><legend>Regiões concluídas</legend><div class="badge-regions-grid"></div></fieldset>
+		<label>Conquistas, uma por linha<textarea name="achievements" rows="3" maxlength="971"></textarea></label>
+		<label>Títulos, um por linha<textarea name="titles" rows="3" maxlength="971"></textarea></label>
+		<button type="submit">Salvar alterações do perfil</button>
+	</form>
+</section><p>As sessões válidas listadas não representam usuários online. Contas registradas são permanentes; desativar não libera o nickname. A chave administrativa fica somente na memória desta página.</p><p>Entregue o código de recuperação por um canal privado ao titular verificado. Ele é descartável e vale por 24 horas. A emissão revoga as sessões anteriores.</p><a href="copa-conta.html">Página de recuperação do participante</a></main><script src="js/copa-account-pages.js"></script></html>

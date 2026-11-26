@@ -1,14 +1,15 @@
 // Add player-facing changes at the top. For entries on the same date, newest goes first.
 export const COPA_UPDATES = [
+	{ date: '2026-11-26', text: 'O Hall da Fama mostra o time oficial do campeonato, com região, títulos e conquistas.' },
 	{ date: '2026-11-26', text: 'A administração pode atribuir e remover várias insígnias de uma só vez.' },
 	{ date: '2026-11-26', text: 'Perfis de contas antigas sem data de registro agora exibem 24/11/2026.' },
 	{ date: '2026-11-26', text: 'O Metagross shiny do Wan aparece maior e mais perto do treinador no perfil.' },
 	{ date: '2026-11-26', text: 'O comando /avatar sugere sprites com prévia, incluindo trajes alternativos.' },
 	{ date: '2026-11-26', text: 'Abra seu perfil nas configurações pelo botão Meu perfil ou pelo seu nickname.' },
 	{ date: '2026-11-26', text: 'Abra o perfil de treinador pelo nickname sem sair da tela atual.' },
-	{ date: '2026-11-26', text: 'O Dream Team fica no topo do perfil e as insígnias ganharam uma aba própria.' },
+	{ date: '2026-11-26', text: 'O Hall da Fama fica no topo do perfil e as insígnias ganharam uma aba própria.' },
 	{ date: '2026-11-26', text: 'O perfil de treinador agora exibe as dez insígnias regionais da Copa Rinha.' },
-	{ date: '2026-11-26', text: 'Personalize seu perfil de treinador com Dream Team, região e replays públicos.' },
+	{ date: '2026-11-26', text: 'Personalize seu perfil de treinador com biografia, fundo e replays públicos.' },
 	{ date: '2026-11-26', text: 'O Pokémon parceiro aparece no perfil aberto pela busca, lista de membros ou chat.' },
 	{ date: '2026-11-26', text: 'Parceiros nas batalhas e uma lista com partidas públicas e seus treinos privados.' },
 	{ date: '2026-11-25', text: 'A dupla mantém a mesma composição do perfil ao mudar a escala da batalha.' },

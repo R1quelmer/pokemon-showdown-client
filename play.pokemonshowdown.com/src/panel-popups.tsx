@@ -669,7 +669,7 @@ class CopaTrainerPanel extends PSRoomPanel {
 	private trainer?: CopaTrainer | null;
 	private tab = 0;
 	private badge?: CopaRegion;
-	private draft?: CopaTrainerCard;
+	private draft?: Pick<CopaTrainerCard, 'bio' | 'banner'>;
 	private saving = false;
 	private preparingBanner = false;
 	private error = '';
@@ -734,13 +734,7 @@ class CopaTrainerPanel extends PSRoomPanel {
 	private prepareDraft() {
 		if (!this.trainer || !window.CopaAccounts?.ownsProfile(this.trainer.name)) return;
 		const { card } = this.trainer;
-		this.draft = {
-			bio: card?.bio || '', region: card?.region || '', banner: card?.banner || '',
-			dreamTeam: Array.from({ length: 6 }, (_, i) => {
-				const slot = card?.dreamTeam[i];
-				return slot ? { ...slot, species: Dex.species.get(slot.species).name || slot.species } : null;
-			}),
-		};
+		this.draft = { bio: card?.bio || '', banner: card?.banner || '' };
 		this.error = '';
 	}
 
@@ -761,20 +755,11 @@ class CopaTrainerPanel extends PSRoomPanel {
 	private save = async (event: Event) => {
 		event.preventDefault();
 		if (!this.draft || !this.trainer || !window.CopaAccounts || this.saving || this.preparingBanner) return;
-		const dreamTeam = this.draft.dreamTeam.map(slot => {
-			const name = slot?.species.trim();
-			return name ? { species: Dex.species.get(name).id, shiny: !!slot?.shiny } : null;
-		});
-		if (dreamTeam.some(pokemon => pokemon && !Dex.species.get(pokemon.species).exists)) {
-			this.error = 'Escolha espécies ou formas válidas.';
-			this.forceUpdate();
-			return;
-		}
 		this.error = '';
 		this.saving = true;
 		this.forceUpdate();
 		try {
-			this.trainer.card = await window.CopaAccounts.saveTrainer({ ...this.draft, dreamTeam });
+			this.trainer.card = await window.CopaAccounts.saveTrainer(this.draft);
 			if (PS.room === this.props.room) this.returnToProfile();
 		} catch (error) {
 			this.error = (error as Error).message;
@@ -826,13 +811,7 @@ class CopaTrainerPanel extends PSRoomPanel {
 
 	/* eslint-enable no-restricted-syntax */
 
-	private renderEditor(draft: CopaTrainerCard) {
-		const options = copaProfileSpeciesOptions();
-		const updateOrder = (from: number, to: number) => {
-			const slots = draft.dreamTeam;
-			[slots[from], slots[to]] = [slots[to], slots[from]];
-			this.forceUpdate();
-		};
+	private renderEditor(draft: Pick<CopaTrainerCard, 'bio' | 'banner'>) {
 		return <form class="copa-trainer-editor" onSubmit={ev => { void this.save(ev); }}>
 			<h2>Editar perfil</h2>
 			<fieldset disabled={this.saving || this.preparingBanner}>
@@ -845,14 +824,6 @@ class CopaTrainerPanel extends PSRoomPanel {
 						this.forceUpdate();
 					}}
 				>Restaurar azul-marinho</button>}
-				<label>Região representada<select
-					class="textbox" value={draft.region} onChange={ev => {
-						draft.region = (ev.currentTarget as HTMLSelectElement).value as CopaRegion;
-					}}
-				>
-					<option value="">Sem região</option>
-					{COPA_REGIONS.map(region => <option key={region} value={region}>{region}</option>)}
-				</select></label>
 				<label>Biografia<textarea
 					class="textbox" rows={3} maxLength={360} value={draft.bio} onInput={ev => {
 						draft.bio = (ev.currentTarget as HTMLTextAreaElement).value;
@@ -871,30 +842,6 @@ class CopaTrainerPanel extends PSRoomPanel {
 						})}
 					>Alterar Pokémon parceiro</button>
 				</div>
-				<h3>Dream Team</h3>
-				<datalist id="copa-dream-species">{options.map(name => <option key={name} value={name} />)}</datalist>
-				<ol class="copa-trainer-fields">{draft.dreamTeam.map((slot, i) => <li key={i}>
-					<input
-						class="textbox" name={`species-${i}`} aria-label={`Pokémon ${i + 1}`} list="copa-dream-species"
-						value={slot?.species || ''} onInput={ev => {
-							draft.dreamTeam[i] = {
-								species: (ev.currentTarget as HTMLInputElement).value, shiny: !!draft.dreamTeam[i]?.shiny,
-							};
-						}}
-					/>
-					<label><input
-						type="checkbox" name={`shiny-${i}`} checked={!!slot?.shiny} onChange={ev => {
-							draft.dreamTeam[i] = {
-								species: draft.dreamTeam[i]?.species || '', shiny: (ev.currentTarget as HTMLInputElement).checked,
-							};
-						}}
-					/> Shiny</label>
-					{[-1, 1].map(step => <button
-						key={step} type="button" class="button"
-						disabled={i + step < 0 || i + step >= 6} aria-label={step < 0 ? 'Mover para cima' : 'Mover para baixo'}
-						onClick={() => updateOrder(i, i + step)}
-					>{step < 0 ? '↑' : '↓'}</button>)}
-				</li>)}</ol>
 				<button class="button" type="submit">Salvar perfil</button> {}
 				<button class="button" type="button" onClick={this.returnToProfile}>Cancelar</button>
 			</fieldset>
@@ -914,8 +861,9 @@ class CopaTrainerPanel extends PSRoomPanel {
 		};
 		const trainer = this.trainer || (!this.editing && this.trainer === null ? fallback : null);
 		const ownsProfile = !!this.trainer && window.CopaAccounts?.ownsProfile(this.trainer.name);
-		const card = this.draft || trainer?.card;
-		const banner = card?.banner;
+		const card = trainer?.card;
+		const banner = this.draft?.banner ?? card?.banner;
+		const hall = card?.region ? `Hall da Fama de ${card.region}` : 'Hall da Fama';
 		const stats = trainer?.stats;
 		return <PSPanelWrapper room={this.props.room} fullSize={!this.editing}>
 			{!this.editing && <button
@@ -951,8 +899,8 @@ class CopaTrainerPanel extends PSRoomPanel {
 							<CopaPartnerSprite partner={parseCopaPartner(trainer.partner)} profile trainer={toID(trainer.name)} />
 						</div>
 					</header>
-					<section class="copa-trainer-dream" aria-label="Dream Team">
-						<h2>Dream Team</h2>
+					<section class="copa-trainer-dream" aria-label={hall}>
+						<h2>{hall}</h2>
 						<ol class="copa-trainer-team">{Array.from({ length: 6 }, (_, i) => {
 							const pokemon = parseCopaPartner(card?.dreamTeam[i]);
 							return <li key={i} class={pokemon ? '' : 'empty'}>{pokemon ? <>
@@ -995,6 +943,11 @@ class CopaTrainerPanel extends PSRoomPanel {
 							</section>}
 							{this.tab === 1 && <>
 								<h2>Biografia</h2><p class="copa-trainer-bio">{card?.bio || 'Biografia não preenchida.'}</p>
+								{[['Títulos', trainer.titles], ['Conquistas', trainer.achievements]].map(([label, entries]) =>
+									typeof label === 'string' && Array.isArray(entries) && entries.length > 0 && <div key={label}>
+										<h2>{label}</h2>
+										<ul>{entries.map(entry => <li key={entry}>{entry}</li>)}</ul>
+									</div>)}
 								<h2>Batalhas contra jogadores</h2>
 								{stats?.total ? <dl class="copa-trainer-stats">
 									{[['Batalhas', stats.total], ['Vitórias', stats.wins], ['Derrotas', stats.losses],
