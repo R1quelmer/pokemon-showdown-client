@@ -385,7 +385,7 @@ print(json.dumps({"gap": gap, "baseDelta": abs(a.getbbox()[3] - b.getbbox()[3])}
 					await pair.locator('[data-profile-tight]').nth(1).waitFor({timeout:8000});
 					const pixels = await measurePairPixels(pair);
 					console.log('Marnie + Sylveon',width,pixels);
-					assert(pixels.gap >= 4 && pixels.gap <= 6 && pixels.baseDelta <= 1, JSON.stringify(pixels));
+					assert(pixels.gap >= 0 && pixels.gap <= 3 && pixels.baseDelta <= 1, JSON.stringify(pixels));
 					assert(await pair.evaluate(node => {
 						const [avatar, partner] = node.children;
 						const a = avatar.getBoundingClientRect(), b = partner.getBoundingClientRect();

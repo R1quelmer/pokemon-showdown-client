@@ -363,7 +363,7 @@ function alignCopaProfilePair(frame: HTMLElement) {
 	if (!trainerRows || !partnerRows) return;
 	const battle = pair.classList.contains('copa-battle-pair');
 	const zoom = battle ? pair.getBoundingClientRect().width / pair.offsetWidth : 1;
-	const gap = battle ? 6.5 / (zoom || 1) : pair.classList.contains('copa-profile-sprites') ? 6 : 3;
+	const gap = battle ? 2.5 / (zoom || 1) : pair.classList.contains('copa-profile-sprites') ? 6 : 3;
 	let offset = -Infinity;
 	for (const a of trainerRows) {
 		for (const b of partnerRows) {
