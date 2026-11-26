@@ -1,19 +1,4 @@
-<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src https://copa-rinha-showdown.onrender.com; object-src 'none'; base-uri 'none'; form-action 'none'"><title>Administração de contas — Copa Rinha</title><link rel="stylesheet" href="style/copa-replay.css"><link rel="stylesheet" href="style/copa-team.css"><link rel="stylesheet" href="style/copa-accounts.css"><main><header class="site-header"><a href="copa-rinha.html">Copa Rinha</a></header><h1>Administração de contas</h1><p>Acesso administrativo exclusivo da Copa Rinha. Não use senhas do Showdown.</p><form id="admin-form"><label>Chave administrativa <input id="admin-key" type="password" autocomplete="off" required></label><p><label>Nicknames, um por linha (até 100)<textarea id="names" rows="6"></textarea></label></p><select id="action"><option value="list">Listar contas</option><option value="reserve">Reservar em lote</option><option value="release">Remover reservas sem conta</option><option value="disable">Desativar contas</option><option value="enable">Reativar contas</option><option value="recover">Emitir recuperação para uma conta</option><option value="award-badge">Atribuir insígnia</option><option value="remove-badge">Remover insígnia</option></select> <fieldset id="badge-regions">
-	<legend>Regiões das insígnias</legend>
-	<label><input type="checkbox" id="badge-select-all"> Selecionar todas</label>
-	<div class="badge-regions-grid">
-		<label><input type="checkbox" name="badge-region" value="Kanto"> Kanto</label>
-		<label><input type="checkbox" name="badge-region" value="Johto"> Johto</label>
-		<label><input type="checkbox" name="badge-region" value="Hoenn"> Hoenn</label>
-		<label><input type="checkbox" name="badge-region" value="Sinnoh"> Sinnoh</label>
-		<label><input type="checkbox" name="badge-region" value="Unova"> Unova</label>
-		<label><input type="checkbox" name="badge-region" value="Kalos"> Kalos</label>
-		<label><input type="checkbox" name="badge-region" value="Alola"> Alola</label>
-		<label><input type="checkbox" name="badge-region" value="Galar"> Galar</label>
-		<label><input type="checkbox" name="badge-region" value="Hisui"> Hisui</label>
-		<label><input type="checkbox" name="badge-region" value="Paldea"> Paldea</label>
-	</div>
-</fieldset> <button>Executar</button></form><p id="admin-status" role="status"></p><pre id="admin-result"></pre>
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src https://copa-rinha-showdown.onrender.com; img-src 'self' https://play.pokemonshowdown.com; object-src 'none'; base-uri 'none'; form-action 'none'"><title>Administração de contas — Copa Rinha</title><link rel="stylesheet" href="style/copa-replay.css"><link rel="stylesheet" href="style/copa-team.css"><link rel="stylesheet" href="style/copa-accounts.css"><main><header class="site-header"><a href="copa-rinha.html">Copa Rinha</a></header><h1>Administração de contas</h1><p>Acesso administrativo exclusivo da Copa Rinha. Não use senhas do Showdown.</p><form id="admin-form"><label>Chave administrativa <input id="admin-key" type="password" autocomplete="off" required></label><p><label>Nicknames, um por linha (até 100)<textarea id="names" rows="6"></textarea></label></p><select id="action"><option value="list">Listar contas</option><option value="reserve">Reservar em lote</option><option value="release">Remover reservas sem conta</option><option value="disable">Desativar contas</option><option value="enable">Reativar contas</option><option value="recover">Emitir recuperação para uma conta</option></select> <button>Executar</button></form><p id="admin-status" role="status"></p><pre id="admin-result"></pre>
 <section aria-labelledby="competitive-heading">
 	<h2 id="competitive-heading">Perfil competitivo</h2>
 	<form id="competitive-lookup">
@@ -29,7 +14,9 @@
 			<legend>Hall da Fama</legend>
 			<p>Time oficial do participante. Use o nome da espécie ou forma, como Rotom-Wash.</p>
 		</fieldset>
-		<fieldset id="competitive-badges"><legend>Regiões concluídas</legend><div class="badge-regions-grid"></div></fieldset>
+		<fieldset id="competitive-badges"><legend>Regiões concluídas</legend>
+			<label><input type="checkbox" id="badge-select-all"> Selecionar todas</label>
+			<div class="badge-regions-grid"></div></fieldset>
 		<label>Conquistas, uma por linha<textarea name="achievements" rows="3" maxlength="971"></textarea></label>
 		<label>Títulos, um por linha<textarea name="titles" rows="3" maxlength="971"></textarea></label>
 		<button type="submit">Salvar alterações do perfil</button>

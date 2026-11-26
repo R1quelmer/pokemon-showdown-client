@@ -16,34 +16,16 @@ async function copaAccountRequest(action: string, body: object, adminKey?: strin
 	return value;
 }
 if (copaAdminForm) {
-	const selectAll = copaInput('badge-select-all');
-	const regionInputs = Array.from(copaAdminForm.querySelectorAll<HTMLInputElement>('input[name=badge-region]'));
-	selectAll.onchange = () => {
-		for (const region of regionInputs) region.checked = selectAll.checked;
-	};
-	for (const region of regionInputs) {
-		region.onchange = () => {
-			const count = regionInputs.filter(input => input.checked).length;
-			selectAll.checked = count === regionInputs.length;
-			selectAll.indeterminate = count > 0 && count < regionInputs.length;
-		};
-	}
 	copaAdminForm.onsubmit = event => {
 		event.preventDefault();
 		const action = copaInput('action').value;
-		const regions = regionInputs.filter(input => input.checked).map(input => input.value);
-		if ((action === 'award-badge' || action === 'remove-badge') && !regions.length) {
-			copaAccountStatus.textContent = 'Selecione uma ou mais regiões.';
-			selectAll.focus();
-			return;
-		}
 		const button = copaAdminForm.querySelector('button')!;
 		button.disabled = true;
 		const result = document.getElementById('admin-result')!;
 		result.textContent = '';
 		copaAccountStatus.textContent = 'Processando…';
 		void copaAccountRequest('admin', {
-			action, regions,
+			action,
 			names: copaInput('names').value.split(/[\n,]/).map(name => name.trim()).filter(Boolean),
 		}, copaInput('admin-key').value).then(value => {
 			result.textContent = value.recovery ?
@@ -78,12 +60,46 @@ if (competitiveLookup) {
 	const origin = editor.querySelector<HTMLSelectElement>('select[name=origin]')!;
 	const badges = editor.querySelector('#competitive-badges .badge-regions-grid')!;
 	const hall = editor.querySelector('#competitive-hall')!;
-	for (const region of document.querySelectorAll<HTMLInputElement>('#badge-regions input[name=badge-region]')) {
-		origin.add(new Option(region.value, region.value));
-		const label = region.parentElement!.cloneNode(true) as HTMLElement;
-		label.querySelector('input')!.name = 'completed';
+	const regions = ['Kanto', 'Johto', 'Hoenn', 'Sinnoh', 'Unova', 'Kalos', 'Alola', 'Galar', 'Hisui', 'Paldea'];
+	const selectAll = copaInput('badge-select-all');
+	const checkboxes = regions.map(region => {
+		origin.add(new Option(region, region));
+		const label = document.createElement('label');
+		const checkbox = document.createElement('input');
+		checkbox.type = 'checkbox';
+		checkbox.name = 'completed';
+		checkbox.value = region;
+		label.append(checkbox, region);
 		badges.append(label);
-	}
+		return checkbox;
+	});
+	const updateSelectAll = () => {
+		const checked = checkboxes.filter(checkbox => checkbox.checked).length;
+		selectAll.checked = checked === checkboxes.length;
+		selectAll.indeterminate = checked > 0 && checked < checkboxes.length;
+	};
+	for (const checkbox of checkboxes) checkbox.onchange = updateSelectAll;
+	selectAll.onchange = () => {
+		for (const checkbox of checkboxes) checkbox.checked = selectAll.checked;
+	};
+
+	type SpeciesChoice = { id: string, name: string, sprite: string };
+	let catalog: SpeciesChoice[] = [];
+	let localSprites: Record<string, unknown> = {};
+	const speciesID = (value: string) => value.toLowerCase().replace(/[^a-z0-9]/g, '');
+	const findSpecies = (value: string) => catalog.find(entry => entry.id === speciesID(value));
+	const sprite = (image: HTMLImageElement, entry: SpeciesChoice, shiny: boolean) => {
+		const variant = shiny ? '-shiny' : '';
+		const local = `partner-za/${entry.id}${variant}.png`;
+		const bw = `gen5${variant}/${entry.sprite}.png`;
+		image.onerror = () => {
+			image.onerror = null;
+			image.src = `https://play.pokemonshowdown.com/sprites/${bw}`;
+		};
+		image.src = Array.isArray(localSprites[local]) ? `assets/copa-rinha/${local}` :
+			`https://play.pokemonshowdown.com/sprites/dex${variant}/${entry.sprite}.png`;
+	};
+
 	const slots = Array.from({ length: 6 }, (_, index) => {
 		const row = document.createElement('div');
 		row.className = 'competitive-slot';
@@ -91,14 +107,67 @@ if (competitiveLookup) {
 		label.textContent = `Pokémon ${index + 1}`;
 		const species = document.createElement('input');
 		species.maxLength = 48;
+		species.autocomplete = 'off';
 		label.append(species);
 		const shinyLabel = document.createElement('label');
 		const shiny = document.createElement('input');
 		shiny.type = 'checkbox';
 		shinyLabel.append(shiny, ' Shiny');
-		row.append(label, shinyLabel);
+		const preview = document.createElement('img');
+		preview.alt = '';
+		preview.className = 'competitive-preview';
+		const suggestions = document.createElement('div');
+		suggestions.className = 'competitive-suggestions';
+		suggestions.hidden = true;
+		const updatePreview = () => {
+			const entry = findSpecies(species.value);
+			preview.hidden = !entry;
+			if (entry) {
+				sprite(preview, entry, shiny.checked);
+				preview.alt = entry.name + (shiny.checked ? ' · Shiny' : '');
+			}
+		};
+		const suggest = () => {
+			const query = speciesID(species.value);
+			suggestions.replaceChildren();
+			const matches = query ? catalog.filter(entry => entry.id.includes(query)).slice(0, 8) : [];
+			matches.forEach(entry => {
+				const button = document.createElement('button');
+				button.type = 'button';
+				const icon = document.createElement('img');
+				icon.alt = '';
+				sprite(icon, entry, shiny.checked);
+				button.append(icon, entry.name);
+				button.onclick = () => {
+					species.value = entry.name;
+					species.setCustomValidity('');
+					species.focus();
+					suggestions.hidden = true;
+					updatePreview();
+				};
+				suggestions.append(button);
+			});
+			suggestions.hidden = !matches.length;
+		};
+		species.oninput = () => {
+			species.setCustomValidity('');
+			updatePreview();
+			suggest();
+		};
+		species.onfocus = suggest;
+		shiny.onchange = updatePreview;
+		row.addEventListener('focusout', event => {
+			if (!row.contains(event.relatedTarget as Node | null)) suggestions.hidden = true;
+		});
+		row.onkeydown = event => {
+			if (event.key === 'Escape') {
+				species.focus();
+				suggestions.hidden = true;
+			}
+		};
+		row.append(label, shinyLabel, preview, suggestions);
 		hall.append(row);
-		return { species, shiny };
+		return { species, shiny, updatePreview, suggestions };
 	});
 	let loaded = '';
 	const field = (name: string) => editor.elements.namedItem(name) as HTMLTextAreaElement;
@@ -144,18 +213,30 @@ if (competitiveLookup) {
 		hideEditor();
 		void run(buttons, async () => {
 			const { profile } = await admin({ action: 'get-trainer', name }) as { profile: CopaAdminTrainerProfile };
+			if (!catalog.length) {
+				const [result, crops] = await Promise.all([
+					admin({ action: 'trainer-species' }) as Promise<{ species: SpeciesChoice[] }>,
+					fetch('assets/copa-rinha/profile-crops.json').then(response => response.json()).catch(() => ({})),
+				]);
+				if (!catalog.length) catalog = result.species;
+				localSprites = crops;
+			}
 			if (user.value !== name) return;
 			loaded = name;
 			document.querySelector('#competitive-name')!.textContent = profile.name;
 			origin.value = profile.region;
-			slots.forEach(({ species, shiny }, index) => {
+			slots.forEach(({ species, shiny, updatePreview, suggestions }, index) => {
 				const slot = profile.dreamTeam[index];
-				species.value = slot?.species || '';
+				species.value = findSpecies(slot?.species || '')?.name || slot?.species || '';
+				species.setCustomValidity('');
+				suggestions.hidden = true;
 				shiny.checked = !!slot?.shiny;
+				updatePreview();
 			});
 			for (const checkbox of badges.querySelectorAll<HTMLInputElement>('input')) {
 				checkbox.checked = profile.badges.includes(checkbox.value);
 			}
+			updateSelectAll();
 			field('achievements').value = profile.achievements.join('\n');
 			field('titles').value = profile.titles.join('\n');
 			editor.hidden = false;
@@ -164,11 +245,17 @@ if (competitiveLookup) {
 	editor.onsubmit = event => {
 		event.preventDefault();
 		if (!loaded || user.value !== loaded) return;
+		const invalid = slots.find(({ species }) => species.value.trim() && !findSpecies(species.value));
+		if (invalid) {
+			invalid.species.setCustomValidity('Escolha uma espécie ou forma válida.');
+			invalid.species.reportValidity();
+			return;
+		}
 		const lines = (name: string) => field(name).value.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
 		const profile = {
 			region: origin.value,
 			dreamTeam: slots.map(({ species, shiny }) => species.value.trim() ?
-				{ species: species.value.trim(), shiny: shiny.checked } : null),
+				{ species: findSpecies(species.value)!.id, shiny: shiny.checked } : null),
 			badges: new FormData(editor).getAll('completed'),
 			achievements: lines('achievements'),
 			titles: lines('titles'),
