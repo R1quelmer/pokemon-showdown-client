@@ -1,5 +1,6 @@
 // Add player-facing changes at the top. For entries on the same date, newest goes first.
 export const COPA_UPDATES = [
+	{ date: '2026-11-26', text: 'A administração pode atribuir e remover várias insígnias de uma só vez.' },
 	{ date: '2026-11-26', text: 'Perfis de contas antigas sem data de registro agora exibem 24/11/2026.' },
 	{ date: '2026-11-26', text: 'O Metagross shiny do Wan aparece maior e mais perto do treinador no perfil.' },
 	{ date: '2026-11-26', text: 'O comando /avatar sugere sprites com prévia, incluindo trajes alternativos.' },

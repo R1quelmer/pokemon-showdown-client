@@ -15,17 +15,35 @@ async function copaAccountRequest(action: string, body: object, adminKey?: strin
 		throw new Error(value.error || 'Não foi possível concluir a solicitação.');
 	return value;
 }
-if (copaAdminForm)
+if (copaAdminForm) {
+	const selectAll = copaInput('badge-select-all');
+	const regionInputs = Array.from(copaAdminForm.querySelectorAll<HTMLInputElement>('input[name=badge-region]'));
+	selectAll.onchange = () => {
+		for (const region of regionInputs) region.checked = selectAll.checked;
+	};
+	for (const region of regionInputs) {
+		region.onchange = () => {
+			const count = regionInputs.filter(input => input.checked).length;
+			selectAll.checked = count === regionInputs.length;
+			selectAll.indeterminate = count > 0 && count < regionInputs.length;
+		};
+	}
 	copaAdminForm.onsubmit = event => {
 		event.preventDefault();
+		const action = copaInput('action').value;
+		const regions = regionInputs.filter(input => input.checked).map(input => input.value);
+		if ((action === 'award-badge' || action === 'remove-badge') && !regions.length) {
+			copaAccountStatus.textContent = 'Selecione uma ou mais regiões.';
+			selectAll.focus();
+			return;
+		}
 		const button = copaAdminForm.querySelector('button')!;
 		button.disabled = true;
 		const result = document.getElementById('admin-result')!;
 		result.textContent = '';
 		copaAccountStatus.textContent = 'Processando…';
 		void copaAccountRequest('admin', {
-			action: copaInput('action').value,
-			region: copaInput('badge-region').value,
+			action, regions,
 			names: copaInput('names').value.split(/[\n,]/).map(name => name.trim()).filter(Boolean),
 		}, copaInput('admin-key').value).then(value => {
 			result.textContent = value.recovery ?
@@ -42,6 +60,7 @@ if (copaAdminForm)
 			copaAccountStatus.textContent = 'Concluído.';
 		}).catch(error => { copaAccountStatus.textContent = error.message; }).then(() => { button.disabled = false; });
 	};
+}
 if (copaRecoverForm)
 	copaRecoverForm.onsubmit = event => {
 		event.preventDefault();
