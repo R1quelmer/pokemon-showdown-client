@@ -659,9 +659,10 @@ interface CopaTrainerReplay {
 }
 
 class CopaTrainerPanel extends PSRoomPanel {
-	static readonly id = 'copatrainer';
+	static readonly id: string = 'copatrainer';
 	static readonly routes = ['copatrainer-*'];
-	static readonly location = 'left';
+	static readonly location: 'modal-popup' | 'left' = 'modal-popup';
+	static readonly noURL = true;
 	private trainer?: CopaTrainer | null;
 	private tab = 0;
 	private badge?: CopaRegion;
@@ -674,17 +675,21 @@ class CopaTrainerPanel extends PSRoomPanel {
 	private replays: CopaTrainerReplay[] = [];
 	private cursor: string | null | undefined;
 
-	private userid() { return this.props.room.id.slice('copatrainer-'.length); }
+	protected readonly editing: boolean = false;
+	private userid() { return this.props.room.id.split('-')[1]; }
 
 	override componentDidMount() {
 		super.componentDidMount();
+		if (Config.copaRinhaLocalNames && !this.editing) PS.send(`/cmd userdetails ${this.userid()}`);
 		this.load();
 	}
 
 	private load() {
 		if (!Config.copaRinhaLocalNames) return;
 		void window.CopaAccounts?.trainer(this.userid()).then(trainer => {
+			if (PS.rooms[this.props.room.id] !== this.props.room) return;
 			this.trainer = trainer;
+			if (this.editing && !this.draft) this.prepareDraft();
 			if (trainer && this.props.room.title !== trainer.name) {
 				this.props.room.title = trainer.name;
 				PS.update();
@@ -723,7 +728,7 @@ class CopaTrainerPanel extends PSRoomPanel {
 		}
 	};
 
-	private edit = () => {
+	private prepareDraft() {
 		if (!this.trainer || !window.CopaAccounts?.ownsProfile(this.trainer.name)) return;
 		const { card } = this.trainer;
 		this.draft = {
@@ -734,7 +739,20 @@ class CopaTrainerPanel extends PSRoomPanel {
 			}),
 		};
 		this.error = '';
-		this.forceUpdate();
+	}
+
+	private openEditor = () => {
+		if (!this.trainer || !window.CopaAccounts?.ownsProfile(this.trainer.name)) return;
+		const returnRoom = PS.baseRoom.id;
+		PS.closeAllPopups();
+		PS.join(`copatraineredit-${this.userid()}` as RoomID, { args: { returnRoom } });
+	};
+
+	private returnToProfile = () => {
+		const returnRoom = this.props.room.args?.returnRoom as RoomID | undefined;
+		this.close();
+		if (returnRoom !== undefined && PS.rooms[returnRoom]) PS.focusRoom(returnRoom);
+		PS.join(`copatrainer-${this.userid()}` as RoomID);
 	};
 
 	private save = async (event: Event) => {
@@ -754,8 +772,7 @@ class CopaTrainerPanel extends PSRoomPanel {
 		this.forceUpdate();
 		try {
 			this.trainer.card = await window.CopaAccounts.saveTrainer({ ...this.draft, dreamTeam });
-			this.draft = undefined;
-			this.tab = 0;
+			if (PS.room === this.props.room) this.returnToProfile();
 		} catch (error) {
 			this.error = (error as Error).message;
 		} finally {
@@ -876,131 +893,144 @@ class CopaTrainerPanel extends PSRoomPanel {
 					>{step < 0 ? '↑' : '↓'}</button>)}
 				</li>)}</ol>
 				<button class="button" type="submit">Salvar perfil</button> {}
-				<button
-					class="button" type="button" onClick={() => {
-						this.draft = undefined;
-						this.error = '';
-						this.forceUpdate();
-					}}
-				>Cancelar</button>
+				<button class="button" type="button" onClick={this.returnToProfile}>Cancelar</button>
 			</fieldset>
 			{this.error && <p role="alert">{this.error}</p>}
 		</form>;
 	}
 
 	override render() {
-		const trainer = this.trainer;
-		const ownsProfile = trainer && window.CopaAccounts?.ownsProfile(trainer.name);
+		const userid = this.userid();
+		const details = PS.mainmenu.userdetailsCache[userid];
+		const sourceName = this.props.room.args?.username;
+		const fallback: CopaTrainer = {
+			name: details?.name?.trim() || (typeof sourceName === 'string' && sourceName.trim()) || userid,
+			avatar: String((userid === PS.user.userid ? PS.user.avatar : details?.avatar) || 'unknown'),
+			online: userid === PS.user.userid || !!details?.rooms,
+			badges: [],
+		};
+		const trainer = this.trainer || (!this.editing && this.trainer === null ? fallback : null);
+		const ownsProfile = !!this.trainer && window.CopaAccounts?.ownsProfile(this.trainer.name);
 		const card = this.draft || trainer?.card;
 		const banner = card?.banner;
 		const stats = trainer?.stats;
-		return <PSPanelWrapper room={this.props.room}><article class="copa-trainer">
-			{Config.copaRinhaLocalNames && (trainer ? <>
-				<header
-					class="copa-trainer-header"
-					style={banner && /^data:image\/jpeg;base64,[A-Za-z0-9+/]+=*$/.test(banner) ?
-						{ backgroundImage: `linear-gradient(90deg, #091323ed, #101c31a8), url("${banner}")` } : undefined}
-				>
-					<div class="copa-trainer-details">
-						<h1>{trainer.name}</h1>
-						<p class={trainer.online ? 'copa-trainer-online' : ''}>{trainer.online ? 'Online' : 'Offline'}</p>
-						<p>{card?.region || 'Região não definida'}</p>
-						<p>{trainer.registeredAt ? `Desde ${copaDate(trainer.registeredAt)}` : 'Data de registro indisponível'}</p>
-						<div class="copa-trainer-actions">
-							{ownsProfile ? <button type="button" class="button" onClick={this.edit}>Editar perfil</button> : <>
-								<button
-									class="button" disabled={!PS.user.named || !trainer.online} data-href={`challenge-${this.userid()}`}
-								>Desafiar</button>
-								<button class="button" disabled={!PS.user.named} data-href={`dm-${this.userid()}`}>Mensagem</button>
-							</>}
+		return <PSPanelWrapper room={this.props.room} fullSize={!this.editing}>
+			{!this.editing && <button
+				type="button" class="copa-trainer-dismiss autofocus" data-cmd="/close" aria-label="Fechar perfil"
+			>×</button>}
+			<article class="copa-trainer">
+				{Config.copaRinhaLocalNames && (trainer && (!this.editing || ownsProfile) ? <>
+					<header
+						class="copa-trainer-header"
+						style={banner && /^data:image\/jpeg;base64,[A-Za-z0-9+/]+=*$/.test(banner) ?
+							{ backgroundImage: `linear-gradient(90deg, #091323ed, #101c31a8), url("${banner}")` } : undefined}
+					>
+						<div class="copa-trainer-details">
+							<h1>{trainer.name}</h1>
+							<p class={trainer.online ? 'copa-trainer-online' : ''}>{trainer.online ? 'Online' : 'Offline'}</p>
+							<p>{card?.region || 'Região não definida'}</p>
+							<p>{trainer.registeredAt ? `Desde ${copaDate(trainer.registeredAt)}` : 'Data de registro indisponível'}</p>
+							<div class="copa-trainer-actions">
+								{!this.editing && (ownsProfile ?
+									<button type="button" class="button" onClick={this.openEditor}>Editar perfil</button> : <>
+										<button
+											class="button" disabled={!PS.user.named || !trainer.online} data-href={`challenge-${this.userid()}`}
+										>Desafiar</button>
+										<button class="button" disabled={!PS.user.named} data-href={`dm-${this.userid()}`}>Mensagem</button>
+									</>)}
+							</div>
 						</div>
-					</div>
-					<div class="copa-profile-sprites copa-trainer-duo">
-						<CopaPresenceAvatar
-							name={trainer.name} avatar={ownsProfile ? String(PS.user.avatar) : trainer.avatar}
-							participant={toID(trainer.name)} profile
-						/>
-						<CopaPartnerSprite partner={parseCopaPartner(trainer.partner)} profile />
-					</div>
-				</header>
-				<section class="copa-trainer-dream" aria-label="Dream Team">
-					<h2>Dream Team</h2>
-					<ol class="copa-trainer-team">{Array.from({ length: 6 }, (_, i) => {
-						const pokemon = parseCopaPartner(card?.dreamTeam[i]);
-						return <li key={i} class={pokemon ? '' : 'empty'}>{pokemon ? <>
-							<CopaPartnerSprite partner={pokemon} />
-							<strong>{Dex.species.get(pokemon.species).name}{pokemon.shiny ? ' ✦' : ''}</strong>
-						</> : <span aria-label="Espaço vazio">—</span>}</li>;
-					})}</ol>
-				</section>
-				{this.draft && ownsProfile ? this.renderEditor(this.draft) : <>
-					<nav class="copa-trainer-tabs" aria-label="Seções do perfil">
-						{COPA_TRAINER_TABS.map((tab, index) => <button
-							type="button" key={tab} aria-pressed={index === this.tab}
-							onClick={() => {
-								this.tab = index;
-								if (index === 2 && this.cursor === undefined) void this.loadReplays();
-								this.forceUpdate();
-							}}
-						>{tab}</button>)}
-					</nav>
-					<section class="copa-trainer-body" aria-label={COPA_TRAINER_TABS[this.tab]}>
-						{this.tab === 0 && <section class="copa-trainer-badges" aria-label="Insígnias regionais">
-							<h2>Insígnias <small>{trainer.badges.length}/10</small></h2>
-							<div>{COPA_REGIONS.map(region => {
-								const earned = trainer.badges.includes(region);
-								return <button
-									type="button" key={region} class={earned ? 'earned' : 'locked'}
-									aria-label={`${region} · ${earned ? 'Conquistada' : 'Bloqueada'}`}
-									title={region} onClick={() => {
-										this.badge = this.badge === region ? undefined : region;
-										this.forceUpdate();
-									}}
-								>
-									<img src={`/assets/copa-rinha/regional-badges/${region.toLowerCase()}.png`} alt="" />
-									<span>{region}</span>
-								</button>;
-							})}</div>
-							{this.badge && <p role="status">
-								{this.badge} · {trainer.badges.includes(this.badge) ? 'Conquistada' : 'Bloqueada'}
-							</p>}
-						</section>}
-						{this.tab === 1 && <>
-							<h2>Biografia</h2><p class="copa-trainer-bio">{card?.bio || 'Biografia não preenchida.'}</p>
-							<h2>Batalhas contra jogadores</h2>
-							{stats?.total ? <dl class="copa-trainer-stats">
-								{[['Batalhas', stats.total], ['Vitórias', stats.wins], ['Derrotas', stats.losses],
-									['Aproveitamento', `${Math.round(stats.wins / stats.total * 100)}%`]].map(([label, value]) =>
-									<div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
-							</dl> : <p>Ainda sem estatísticas registradas.</p>}
-							{!!stats?.total && <p><small>Dados registrados desde a ativação dos perfis.</small></p>}
-						</>}
-						{this.tab === 2 && <>
-							{this.replayError && <p role="alert">{this.replayError}</p>}
-							{!this.replays.length && this.cursor === null && <p>Nenhum replay público.</p>}
-							<ul class="copa-trainer-replays">{this.replays.map(replay => {
-								const opponent = replay.players.find(player => player.userid !== this.userid());
-								const result = !replay.winner ? 'Empate' : toID(replay.winner) === this.userid() ? 'Vitória' : 'Derrota';
-								return <li key={replay.id}><div><strong>{opponent?.name}</strong>
-									<small>{copaDate(replay.createdAt)} · {result}</small></div>
-								<a href={`/replay.html?id=${replay.id}`} target="_blank" rel="noopener">Assistir</a></li>;
-							})}</ul>
-							{this.cursor !== null && <button
-								class="button" disabled={this.replayLoading} onClick={() => { void this.loadReplays(); }}
-							>
-								{this.replayLoading ? 'Carregando…' : this.replayError ? 'Tentar novamente' : 'Carregar mais'}
-							</button>}
-						</>}
+						<div class="copa-profile-sprites copa-trainer-duo">
+							<CopaPresenceAvatar
+								name={trainer.name} avatar={ownsProfile ? String(PS.user.avatar) : trainer.avatar}
+								participant={toID(trainer.name)} profile
+							/>
+							<CopaPartnerSprite partner={parseCopaPartner(trainer.partner)} profile />
+						</div>
+					</header>
+					<section class="copa-trainer-dream" aria-label="Dream Team">
+						<h2>Dream Team</h2>
+						<ol class="copa-trainer-team">{Array.from({ length: 6 }, (_, i) => {
+							const pokemon = parseCopaPartner(card?.dreamTeam[i]);
+							return <li key={i} class={pokemon ? '' : 'empty'}>{pokemon ? <>
+								<CopaPartnerSprite partner={pokemon} />
+								<strong>{Dex.species.get(pokemon.species).name}{pokemon.shiny ? ' ✦' : ''}</strong>
+							</> : <span aria-label="Espaço vazio">—</span>}</li>;
+						})}</ol>
 					</section>
-				</>}
-			</> : <p role="status">
-				{this.error || (trainer === null ? 'Perfil Copa Rinha indisponível.' : 'Carregando perfil…')}
-				{trainer === null && Config.routes.users && <> {}
-					<a href={`//${Config.routes.users}/${this.userid()}`} target="_blank" rel="noopener">Perfil no Showdown</a>
-				</>}
-			</p>)}
-		</article></PSPanelWrapper>;
+					{this.draft && ownsProfile ? this.renderEditor(this.draft) : <>
+						<nav class="copa-trainer-tabs" aria-label="Seções do perfil">
+							{COPA_TRAINER_TABS.map((tab, index) => <button
+								type="button" key={tab} aria-pressed={index === this.tab}
+								onClick={() => {
+									this.tab = index;
+									if (index === 2 && this.cursor === undefined) void this.loadReplays();
+									this.forceUpdate();
+								}}
+							>{tab}</button>)}
+						</nav>
+						<section class="copa-trainer-body" aria-label={COPA_TRAINER_TABS[this.tab]}>
+							{this.tab === 0 && <section class="copa-trainer-badges" aria-label="Insígnias regionais">
+								<h2>Insígnias <small>{trainer.badges.length}/10</small></h2>
+								<div>{COPA_REGIONS.map(region => {
+									const earned = trainer.badges.includes(region);
+									return <button
+										type="button" key={region} class={earned ? 'earned' : 'locked'}
+										aria-label={`${region} · ${earned ? 'Conquistada' : 'Bloqueada'}`}
+										title={region} onClick={() => {
+											this.badge = this.badge === region ? undefined : region;
+											this.forceUpdate();
+										}}
+									>
+										<img src={`/assets/copa-rinha/regional-badges/${region.toLowerCase()}.png`} alt="" />
+										<span>{region}</span>
+									</button>;
+								})}</div>
+								{this.badge && <p role="status">
+									{this.badge} · {trainer.badges.includes(this.badge) ? 'Conquistada' : 'Bloqueada'}
+								</p>}
+							</section>}
+							{this.tab === 1 && <>
+								<h2>Biografia</h2><p class="copa-trainer-bio">{card?.bio || 'Biografia não preenchida.'}</p>
+								<h2>Batalhas contra jogadores</h2>
+								{stats?.total ? <dl class="copa-trainer-stats">
+									{[['Batalhas', stats.total], ['Vitórias', stats.wins], ['Derrotas', stats.losses],
+										['Aproveitamento', `${Math.round(stats.wins / stats.total * 100)}%`]].map(([label, value]) =>
+										<div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
+								</dl> : <p>Ainda sem estatísticas registradas.</p>}
+								{!!stats?.total && <p><small>Dados registrados desde a ativação dos perfis.</small></p>}
+							</>}
+							{this.tab === 2 && <>
+								{this.replayError && <p role="alert">{this.replayError}</p>}
+								{!this.replays.length && this.cursor === null && <p>Nenhum replay público.</p>}
+								<ul class="copa-trainer-replays">{this.replays.map(replay => {
+									const opponent = replay.players.find(player => player.userid !== this.userid());
+									const result = !replay.winner ? 'Empate' : toID(replay.winner) === this.userid() ? 'Vitória' : 'Derrota';
+									return <li key={replay.id}><div><strong>{opponent?.name}</strong>
+										<small>{copaDate(replay.createdAt)} · {result}</small></div>
+									<a href={`/replay.html?id=${replay.id}`} target="_blank" rel="noopener">Assistir</a></li>;
+								})}</ul>
+								{this.cursor !== null && <button
+									class="button" disabled={this.replayLoading} onClick={() => { void this.loadReplays(); }}
+								>
+									{this.replayLoading ? 'Carregando…' : this.replayError ? 'Tentar novamente' : 'Carregar mais'}
+								</button>}
+							</>}
+						</section>
+					</>}
+				</> : <p role="status">
+					{this.error || (this.trainer === undefined ?
+						'Carregando perfil…' : 'A edição está disponível para o dono da conta.')}
+				</p>)}
+			</article></PSPanelWrapper>;
 	}
+}
+
+class CopaTrainerEditorPanel extends CopaTrainerPanel {
+	static override readonly id = 'copatraineredit';
+	static override readonly routes = ['copatraineredit-*'];
+	static override readonly location = 'left';
+	protected override readonly editing = true;
 }
 
 class CopaPartnerPanel extends PSRoomPanel {
@@ -1119,7 +1149,7 @@ class CopaOnlinePanel extends PSRoomPanel {
 						return <li key={id}>
 							<CopaAvatarLink name={user.name} avatar={user.avatar} />
 							<div class="copa-online-player">
-								<button class="button" data-href={`user-${id}`}>{user.name}</button>
+								<button class="button" data-href={`copatrainer-${id}`}>{user.name}</button>
 								<small>
 									{user.statusType === 'idle' ? 'Ausente' : user.statusType === 'busy' ? 'Ocupado' : 'Online'}
 									{user.inBattle ? ' · Em batalha' : ''}
@@ -3102,6 +3132,7 @@ PS.addRoomType(
 	UserPanel,
 	CopaProfilePanel,
 	CopaTrainerPanel,
+	CopaTrainerEditorPanel,
 	CopaPartnerPanel,
 	UserOptionsPanel,
 	UserListPanel,

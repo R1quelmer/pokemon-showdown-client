@@ -110,6 +110,7 @@ print(json.dumps({"gap": gap, "baseDelta": abs(a.getbbox()[3] - b.getbbox()[3])}
 						partner = data.partner;
 						return route.fulfill({json: {partner}});
 					}
+					if (url.endsWith('/trainer')) return route.fulfill({json:{trainer:null}});
 					if (url.endsWith('/profile')) {
 						const row = members.find(member => member.name.toLowerCase() === data.name.toLowerCase());
 						return route.fulfill({json: {member: row ? {...row, partner: row.name === 'Alice' ? partner : {species:'sylveon',shiny:false}} : null}});
@@ -146,9 +147,9 @@ print(json.dumps({"gap": gap, "baseDelta": abs(a.getbbox()[3] - b.getbbox()[3])}
 			await counter.click();
 			const list = page.locator('.copa-online');
 			await list.waitFor({state: 'visible'});
-			await list.locator('[data-href="user-bob"]').waitFor({state: 'visible'});
-			assert.equal(await list.locator('[data-href="user-alice"]').count(), 1);
-			assert.equal(await list.locator('[data-href="user-bob"]').count(), 1);
+			await list.locator('[data-href="copatrainer-bob"]').waitFor({state: 'visible'});
+			assert.equal(await list.locator('[data-href="copatrainer-alice"]').count(), 1);
+			assert.equal(await list.locator('[data-href="copatrainer-bob"]').count(), 1);
 			assert.equal(await list.locator('[data-href="challenge-bob"]').isEnabled(), true);
 			assert.equal(await list.locator('[data-href="challenge-alice"]').isDisabled(), true);
 			assert((await list.textContent()).includes('Preparando equipe'));
@@ -168,9 +169,8 @@ print(json.dumps({"gap": gap, "baseDelta": abs(a.getbbox()[3] - b.getbbox()[3])}
 
 			// Use the actual native profile and challenge actions, rather than
 			// constructing replacement UI or sending an unsolicited battle challenge.
-			await list.locator('[data-href="user-bob"]').click();
-			await page.waitForFunction(() => !!PS.rooms['user-bob']);
-			assert((await page.locator('.userdetails').last().textContent()).includes('Bob'));
+			await list.locator('[data-href="copatrainer-bob"]').click();
+			await page.locator('#room-copatrainer-bob.ps-popup').getByRole('heading',{name:'Bob',exact:true}).waitFor();
 			await page.evaluate(() => { PS.closePopupsAbove(null); PS.join('copaonline'); });
 			await list.locator('[data-href="challenge-bob"]').click();
 			await page.waitForFunction(() => !!PS.rooms['dm-bob']?.challengeMenuOpen);
@@ -179,14 +179,14 @@ print(json.dumps({"gap": gap, "baseDelta": abs(a.getbbox()[3] - b.getbbox()[3])}
 
 			fixture.snapshot = presence([alice, carla], 1);
 			await page.clock.fastForward(15050);
-			await list.locator('[data-href="user-carla"]').waitFor({state: 'visible'});
-			assert.equal(await list.locator('[data-href="user-bob"]').count(), 0, 'departed player disappears automatically');
+			await list.locator('[data-href="copatrainer-carla"]').waitFor({state: 'visible'});
+			assert.equal(await list.locator('[data-href="copatrainer-bob"]').count(), 0, 'departed player disappears automatically');
 			assert((await counter.textContent()).includes('3'), 'counter refreshes independently of stale rooms snapshot');
 			fixture.snapshot = {...presence([alice, bob], 2), ip: '198.51.100.28', connections: ['private-socket-id'],
 				users: [alice, {...bob, status: '<img src=x onerror=alert(1)>'}, {...bob, name: 'BOB'}]};
 			await page.clock.fastForward(15050);
-			await list.locator('[data-href="user-bob"]').waitFor({state: 'visible'});
-			assert.equal(await list.locator('[data-href="user-bob"]').count(), 1, 'duplicate identities render once');
+			await list.locator('[data-href="copatrainer-bob"]').waitFor({state: 'visible'});
+			assert.equal(await list.locator('[data-href="copatrainer-bob"]').count(), 1, 'duplicate identities render once');
 			assert.equal(await list.locator('img[src="x"]').count(), 0, 'status remains text');
 			assert(!(await list.innerHTML()).includes('198.51.100.28'));
 			assert(!(await list.innerHTML()).includes('private-socket-id'));
@@ -205,27 +205,27 @@ print(json.dumps({"gap": gap, "baseDelta": abs(a.getbbox()[3] - b.getbbox()[3])}
 				Object.defineProperty(document, 'visibilityState', {configurable: true, get: () => 'visible'});
 				document.dispatchEvent(new Event('visibilitychange'));
 			});
-			await list.locator('[data-href="user-carla"]').waitFor({state: 'visible'});
+			await list.locator('[data-href="copatrainer-carla"]').waitFor({state: 'visible'});
 
 			fixture.mode = 'null'; await page.clock.fastForward(15050);
-			await page.waitForFunction(() => !document.querySelector('.copa-online [data-href="user-carla"]'));
+			await page.waitForFunction(() => !document.querySelector('.copa-online [data-href="copatrainer-carla"]'));
 			assert((await list.textContent()).match(/indispon|compat|suport/i), 'unsupported query has an explicit unavailable state');
 			fixture.mode = 'normal'; await page.clock.fastForward(15050);
-			await list.locator('[data-href="user-carla"]').waitFor({state: 'visible'});
+			await list.locator('[data-href="copatrainer-carla"]').waitFor({state: 'visible'});
 			fixture.mode = 'hold'; await page.clock.fastForward(15050); await page.clock.fastForward(10050);
-			assert.equal(await list.locator('[data-href="user-carla"]').count(), 0, 'timed-out snapshot is not shown as currently online');
+			assert.equal(await list.locator('[data-href="copatrainer-carla"]').count(), 0, 'timed-out snapshot is not shown as currently online');
 			fixture.mode = 'normal'; await page.clock.fastForward(15050);
-			await list.locator('[data-href="user-carla"]').waitFor({state: 'visible'});
+			await list.locator('[data-href="copatrainer-carla"]').waitFor({state: 'visible'});
 
 			fixture.holdHandshake = true;
 			fixture.socket.close({code: 1012, reason: 'Synthetic restart'});
 			await page.waitForFunction(() => !PS.connection.connected);
-			assert.equal(await list.locator('[data-href="user-carla"]').count(), 0, 'disconnect invalidates stale online actions');
+			assert.equal(await list.locator('[data-href="copatrainer-carla"]').count(), 0, 'disconnect invalidates stale online actions');
 			fixture.holdHandshake = false; await page.clock.fastForward(1050);
 			if (fixture.connections >= 2) fixture.handshake();
 			await page.waitForFunction(() => PS.connection.connected && PS.user.name === 'Alice' && !PS.user.loggingIn);
 			await page.clock.fastForward(15050);
-			await list.locator('[data-href="user-carla"]').waitFor({state: 'visible'});
+			await list.locator('[data-href="copatrainer-carla"]').waitFor({state: 'visible'});
 			await page.evaluate(() => { PS.closePopupsAbove(null); PS.join('options'); });
 			await page.getByRole('button', {name: 'Pokémon parceiro'}).click();
 			const settings = page.locator('.copa-partner-picker');
@@ -394,7 +394,8 @@ print(json.dumps({"gap": gap, "baseDelta": abs(a.getbbox()[3] - b.getbbox()[3])}
 			await page.locator('#room-lobby .chat-log').waitFor();
 			fixture.socket.send(`>lobby\n|c:|${Math.floor(Date.now() / 1000)}| Bob|Olá`);
 			await page.locator('#room-lobby .chat-log .username').filter({hasText:'Bob'}).click();
-			await verifyBobPair(profile, 'chat');
+			await page.locator('#room-copatrainer-bob.ps-popup').getByRole('heading',{name:'Bob',exact:true}).waitFor();
+			assert.equal(await profile.count(),0);
 			await page.evaluate(() => { PS.closePopupsAbove(null); PS.join('copamembers'); });
 			await directory.getByRole('button', {name: 'Interagir com Bob', exact: true}).click();
 			await profile.locator('[data-href="challenge-bob"]').waitFor();
@@ -456,6 +457,22 @@ print(json.dumps({"gap": gap, "baseDelta": abs(a.getbbox()[3] - b.getbbox()[3])}
 						await page.screenshot({path:path.join(process.env.COPA_MEMBERS_SCREENSHOTS, `batalha-${phase}-${width}.png`)});
 					}
 				}
+
+				await page.evaluate(id => {
+					window.previousCopaBattle = PS.rooms[id].battle;
+					window.previousCopaConnection = PS.connection;
+				}, publicBattle);
+				await page.locator(`#room-${publicBattle} .copa-battle-nickname`).getByText('Bob',{exact:true}).click();
+				const trainerPopup = page.locator('#room-copatrainer-bob.ps-popup');
+				await trainerPopup.getByRole('heading',{name:'Bob',exact:true}).waitFor();
+				if (process.env.COPA_TRAINER_SCREENSHOTS) {
+					await fs.mkdir(process.env.COPA_TRAINER_SCREENSHOTS, {recursive:true});
+					await page.screenshot({path:path.join(process.env.COPA_TRAINER_SCREENSHOTS, `popup-na-batalha-${width}.png`)});
+				}
+				await page.keyboard.press('Escape');
+				await trainerPopup.waitFor({state:'hidden'});
+				assert(await page.evaluate(id => PS.rooms[id].battle === window.previousCopaBattle &&
+					PS.connection === window.previousCopaConnection && PS.room.id === id, publicBattle));
 
 				await page.getByRole('button', {name:'Ver perfil de Bob'}).click({timeout:8000});
 				await page.locator('.copa-profile').getByRole('heading', {name:'Bob'}).waitFor();

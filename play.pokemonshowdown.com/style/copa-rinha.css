@@ -667,3 +667,22 @@ html.copa-rinha .copa-trainer-fields li {display:grid;grid-template-columns:minm
   html.copa-rinha .copa-trainer-header {padding:12px 10px}
   html.copa-rinha .copa-trainer-badges > div {grid-template-columns:repeat(5,minmax(0,1fr))}
 }
+
+html.copa-rinha .ps-overlay:has(> .ps-popup[id^="room-copatrainer-"]) {
+  position:fixed;background:rgba(3,10,20,.7);overflow:hidden;
+  display:grid;place-items:center;
+}
+html.copa-rinha .ps-overlay > .ps-popup[id^="room-copatrainer-"] {
+  box-sizing:border-box;width:min(888px,calc(100% - 20px))!important;
+  max-height:calc(100% - 24px)!important;margin:0!important;padding:0;
+  overflow:auto;overscroll-behavior:contain;background:#0d1828;border-color:#30465f;
+}
+html.copa-rinha .copa-trainer-dismiss {
+  position:sticky;top:5px;float:right;z-index:1;margin:5px 5px -36px 0;
+  width:30px;height:30px;border:1px solid #36506b;border-radius:5px;
+  background:#132238;color:#dce9f8;font:22px/1 sans-serif;cursor:pointer;
+}
+html.copa-rinha .ps-popup[id^="room-copatrainer-"] .copa-trainer {margin-top:10px}
+html.copa-rinha .ps-popup[id^="room-copatrainer-"] :is(.copa-trainer-bio,.copa-trainer-body > p) {margin:1em 0}
+html.copa-rinha .copa-battle-nickname {color:inherit;text-decoration:none}
+html.copa-rinha .copa-battle-nickname:hover {text-decoration:underline}

@@ -444,6 +444,7 @@ export class MainMenuRoom extends PSRoom {
 			}
 			PS.rooms[`user-${userid}`]?.update(null);
 			PS.rooms[`viewuser-${userid}`]?.update(null);
+			if (Config.copaRinhaLocalNames) PS.rooms[`copatrainer-${userid}`]?.update(null);
 			PS.rooms[`users`]?.update(null);
 			break;
 		case 'rooms':

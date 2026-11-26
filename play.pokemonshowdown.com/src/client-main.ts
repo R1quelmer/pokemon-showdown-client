@@ -1527,7 +1527,9 @@ export class PSRoom extends PSStreamModel<Args | null> implements RoomOptions {
 			if (PS.user.userid) PS.send(`/cmd userdetails ${PS.user.userid}`);
 		},
 		'open,user'(target, cmd, elem) {
-			const roomid = (toID(target) ? `user-${toID(target)}` : `users`) as RoomID;
+			const userid = toID(target);
+			const route = Config.copaRinhaLocalNames ? 'copatrainer' : 'user';
+			const roomid = (userid ? `${route}-${userid}` : 'users') as RoomID;
 			PS.join(roomid, {
 				args: { username: target }, parentElem: elem,
 			});

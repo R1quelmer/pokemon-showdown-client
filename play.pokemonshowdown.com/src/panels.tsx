@@ -17,7 +17,7 @@ import { BattleTooltips } from "./battle-tooltips";
 import { Net } from "./client-connection";
 import type { PSModel, PSStreamModel, PSSubscription } from "./client-core";
 import {
-	NARROW_MODE_HEADER_WIDTH, PS, type PSRoom, type PSRoomFocusOptions, type RoomID, VERTICAL_HEADER_WIDTH,
+	Config, NARROW_MODE_HEADER_WIDTH, PS, type PSRoom, type PSRoomFocusOptions, type RoomID, VERTICAL_HEADER_WIDTH,
 } from "./client-main";
 import type { ChatRoom } from "./panel-chat";
 import { PSHeader, PSMiniHeader } from "./panel-topbar";
@@ -1062,7 +1062,9 @@ export class PSView extends preact.Component {
 				if (elem.classList.contains('username')) {
 					const name = elem.getAttribute('data-name') || elem.innerText;
 					const userid = toID(name);
-					const roomid = `${elem.classList.contains('no-interact') ? 'viewuser' : 'user'}-${userid}` as RoomID;
+					const route = Config.copaRinhaLocalNames ? 'copatrainer' :
+						elem.classList.contains('no-interact') ? 'viewuser' : 'user';
+					const roomid = `${route}-${userid}` as RoomID;
 					PS.join(roomid, {
 						parentElem: elem,
 						rightPopup: elem.className === 'userbutton username',

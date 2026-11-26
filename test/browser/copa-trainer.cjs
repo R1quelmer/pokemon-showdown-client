@@ -31,9 +31,10 @@ const team = [pokemon('sylveon'), pokemon('greninjamega'), pokemon('charizardmeg
 	const browser = await chromium.launch({executablePath:process.env.CHROMIUM_PATH || '/usr/bin/chromium', args:['--no-sandbox']});
 	try {
 		for (const width of [1440,390]) {
-			const context = await browser.newContext({viewport:{width,height:900}, hasTouch:width < 500});
+			const context = await browser.newContext({viewport:{width,height:width < 500 ? 640 : 900}, hasTouch:width < 500});
 			const page = await context.newPage();
 			const errors = [];
+			const messages = [];
 			page.on('pageerror', error => errors.push(error.message));
 			const initial = {region:'Unova', dreamTeam:team, banner:'', bio:'Treinadora de Unova. Minha dupla é Marnie e Sylveon.'};
 			let card = structuredClone(initial), socket;
@@ -48,6 +49,9 @@ const team = [pokemon('sylveon'), pokemon('greninjamega'), pokemon('charizardmeg
 				ws.send('|formats|,1|Copa Rinha|[Gen 9] Copa Rinha II,e\n|updateuser| Guest 1|0|167\n|challstr|4|fixture');
 				ws.onMessage(raw => {
 					const msg = String(raw);
+					messages.push(msg);
+					if (msg.endsWith('/cmd userdetails bob')) ws.send('|queryresponse|userdetails|' +
+						JSON.stringify({userid:'bob', name:'Bob', avatar:'ethan', rooms:{lobby:{}}}));
 					if (msg.includes('/trn Alice')) ws.send('|updateuser| Alice|1|marnie');
 					if (msg.includes('/join lobby')) ws.send('>lobby\n|init|chat\n|title|Lobby');
 					if (msg.includes('/cmd copapresence')) ws.send('|queryresponse|copapresence|' +
@@ -62,6 +66,9 @@ const team = [pokemon('sylveon'), pokemon('greninjamega'), pokemon('charizardmeg
 						assert.equal(route.request().headers().authorization, 'Bearer ' + 'a'.repeat(43));
 						card = route.request().postDataJSON().card;
 						return route.fulfill({json:{card}});
+					}
+					if (action === 'trainer' && route.request().postDataJSON().name !== 'alice') {
+						return route.fulfill({json:{trainer:null}});
 					}
 					if (action === 'trainer') return route.fulfill({json:{trainer:{
 						...member, registeredAt:'2026-11-19T20:00:00Z', badges:['Johto','Unova','Galar'], card,
@@ -88,6 +95,8 @@ const team = [pokemon('sylveon'), pokemon('greninjamega'), pokemon('charizardmeg
 			await page.waitForFunction(() => window.PS?.user?.named);
 			const home = page.locator('#room-');
 			const trainer = page.locator('#room-copatrainer-alice .copa-trainer');
+			const popup = page.locator('#room-copatrainer-alice.ps-popup');
+			const editor = page.locator('#room-copatraineredit-alice.ps-room .copa-trainer');
 			const heading = trainer.getByRole('heading', {name:'Alice',exact:true});
 			const capture = async (name, area = trainer) => {
 				if (!screenshots) return;
@@ -108,7 +117,19 @@ const team = [pokemon('sylveon'), pokemon('greninjamega'), pokemon('charizardmeg
 			assert.equal(await grid.evaluate(el => getComputedStyle(el).gridTemplateColumns.split(' ').length), width > 700 ? 6 : 3);
 			await assertSpriteElementsLoaded(page, '#room-copatrainer-alice img');
 			await trainer.locator('[data-profile-tight]').nth(1).waitFor();
-			await capture('dream-team');
+			await popup.waitFor();
+			assert.equal(await editor.count(),0);
+			if (width < 500) {
+				const scrolling = await popup.evaluate(el => {
+					const overflows = el.scrollHeight > el.clientHeight;
+					el.scrollTop = el.scrollHeight;
+					const scrolled = el.scrollTop > 0;
+					el.scrollTop = 0;
+					return overflows && scrolled;
+				});
+				assert(scrolling, 'mobile profile scrolls inside the popup');
+			}
+			await capture('popup', page.locator('body'));
 			const badges = trainer.getByRole('region',{name:'Insígnias regionais'});
 			assert.equal(await badges.getByRole('button').count(), 10);
 			assert.equal(await badges.locator('.earned').count(), 3);
@@ -148,30 +169,56 @@ const team = [pokemon('sylveon'), pokemon('greninjamega'), pokemon('charizardmeg
 			await badges.waitFor({state:'visible'});
 			await dream.waitFor({state:'visible'});
 			await trainer.getByRole('button',{name:'Editar perfil'}).click();
-			await trainer.getByLabel('Biografia').fill('Biografia atualizada.');
-			await trainer.getByRole('button',{name:'Mover para baixo'}).first().click();
-			await trainer.getByLabel('Fundo do cabeçalho').setInputFiles(path.join(root,'assets/copa-rinha/poliwhirl-wallpaper.jpg'));
+			await editor.getByLabel('Biografia').fill('Biografia atualizada.');
+			await editor.getByRole('button',{name:'Mover para baixo'}).first().click();
+			await editor.getByLabel('Fundo do cabeçalho').setInputFiles(path.join(root,'assets/copa-rinha/poliwhirl-wallpaper.jpg'));
 			await page.waitForFunction(() => document.querySelector('.copa-trainer-header').style.backgroundImage.includes('data:image/jpeg'));
-			await capture('editar');
-			await trainer.getByRole('button',{name:'Salvar perfil'}).click();
-			await trainer.getByRole('heading',{name:'Editar perfil'}).waitFor({state:'hidden'});
+			await popup.waitFor({state:'hidden'});
+			await capture('editar', editor);
+			await editor.getByRole('button',{name:'Salvar perfil'}).click();
+			await editor.getByRole('heading',{name:'Editar perfil'}).waitFor({state:'hidden'});
 			assert.equal(card.bio,'Biografia atualizada.');
 			assert.equal(card.dreamTeam[0].species,'greninjamega');
 			assert.match(card.banner,/^data:image\/jpeg;base64,/);
+			await popup.waitFor();
 			await capture('fundo-personalizado');
+			await popup.getByRole('button',{name:'Fechar perfil'}).click();
+			await popup.waitFor({state:'hidden'});
 			await page.evaluate(() => PS.join(''));
 			await home.locator('a[href="users"]').click();
 			const lookup = page.locator('#room-users input[name=username]');
 			await lookup.fill('Alice'); await lookup.press('Enter');
 			await page.locator('#room-users').getByRole('link',{name:'Alice',exact:true}).click();
 			await heading.waitFor();
+			await page.keyboard.press('Escape');
+			await popup.waitFor({state:'hidden'});
 			await page.evaluate(() => PS.join(''));
 			await home.locator('a[href="lobby"]').click();
 			await page.locator('#room-lobby .chat-log').waitFor();
-			socket.send('>lobby\n|c| Alice|Olá');
-			await page.locator('#room-lobby .chat-log .username').filter({hasText:'Alice'}).click();
-			await page.locator('#room-user-alice').getByRole('link',{name:'Alice',exact:true}).click();
+			await page.evaluate(() => {
+				window.copaPopupTest = {lobby:PS.rooms.lobby, connection:PS.connection};
+			});
+			socket.send('>lobby\n|c| Alice|Olá\n|c| Bob|Olá também');
+			const lobby = page.locator('#room-lobby');
+			await lobby.locator('.chat-log .username').filter({hasText:'Alice'}).click();
 			await heading.waitFor();
+			assert.equal(await page.locator('#room-user-alice').count(),0);
+			await capture('popup-no-lobby', page.locator('body'));
+			await page.mouse.click(3,3);
+			await popup.waitFor({state:'hidden'});
+			assert(await page.evaluate(() => PS.room === window.copaPopupTest.lobby && PS.connection === window.copaPopupTest.connection));
+			assert(!messages.includes('|/leave lobby'));
+			await lobby.locator('.chat-log .username').filter({hasText:'Bob'}).click();
+			const other = page.locator('#room-copatrainer-bob.ps-popup');
+			await other.getByRole('heading',{name:'Bob',exact:true}).waitFor();
+			assert.equal(await other.getByRole('button',{name:'Editar perfil'}).count(),0);
+			await other.getByRole('button',{name:'Desafiar'}).click();
+			await page.waitForFunction(() => PS.rooms['dm-bob']?.challengeMenuOpen);
+			await page.evaluate(() => PS.join('lobby'));
+			await lobby.locator('.chat-log .username').filter({hasText:'Bob'}).click();
+			await other.getByRole('button',{name:'Mensagem'}).click();
+			await other.waitFor({state:'hidden'});
+			await page.waitForFunction(() => !!PS.rooms['dm-bob']);
 			assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),true);
 			assert.deepEqual(errors,[]);
 			console.log(`Trainer card, members/search/Lobby, static sprites, badges, replays and editing passed at ${width}px`);

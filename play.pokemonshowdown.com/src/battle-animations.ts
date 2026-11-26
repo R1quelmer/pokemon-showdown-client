@@ -755,13 +755,16 @@ export class BattleScene implements BattleSceneStub {
 			}
 		}
 		const profileName = BattleLog.escapeHTML(side.name);
-		const profileLink = document.documentElement.classList.contains('copa-rinha') && !this.battle.isReplay ?
+		const copaProfile = document.documentElement.classList.contains('copa-rinha') && !this.battle.isReplay;
+		const profileLink = copaProfile ?
 			`<button type="button" class="copa-battle-avatar-link" aria-label="Ver perfil de ${profileName}" ` +
 			`data-href="copaprofile-${toID(side.name)}" data-profile-name="${profileName}" ` +
 			`data-profile-avatar="${BattleLog.escapeHTML(String(side.avatar))}"></button>` : '';
+		const nickname = copaProfile ?
+			`<a class="copa-battle-nickname" href="copatrainer-${toID(side.name)}">${profileName}</a>` : profileName;
 
 		return (
-			`<div class="trainer trainer-${posStr}"${faded}><strong>${BattleLog.escapeHTML(side.name)}</strong>` +
+			`<div class="trainer trainer-${posStr}"${faded}><strong>${nickname}</strong>` +
 			`<div class="trainersprite${noflip}"${ratinghtml} style="background-image:url(${avatar})">` +
 			`${profileLink}</div>${badgehtml}${pokemonhtml}</div>`
 		);
