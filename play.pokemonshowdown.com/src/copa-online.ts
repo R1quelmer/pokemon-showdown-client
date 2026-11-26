@@ -4,13 +4,20 @@ import type { CopaPartner, CopaRegion } from './copa-accounts';
 import { Config, PS } from './client-main';
 import { toID } from './battle-dex';
 
-export const COPA_NICKNAME_COLORS = [
-	{ id: 'cyan', label: 'Ciano', color: '#75e5fb' },
-	{ id: 'mint', label: 'Verde-menta', color: '#8cf0bd' },
-	{ id: 'pink', label: 'Rosa', color: '#ffaacf' },
-	{ id: 'lilac', label: 'Lilás', color: '#d0baff' },
-	{ id: 'peach', label: 'Pêssego', color: '#ffc4a5' },
-];
+const LEGACY_NICKNAME_COLORS: Record<string, string> = {
+	cyan: '#75e5fb', mint: '#8cf0bd', pink: '#ffaacf', lilac: '#d0baff', peach: '#ffc4a5',
+};
+export function copaNicknameHex(value: unknown) {
+	if (typeof value !== 'string') return undefined;
+	const hex = /^#[0-9a-f]{6}$/i.test(value) ? value.toLowerCase() : LEGACY_NICKNAME_COLORS[value];
+	if (typeof hex !== 'string') return undefined;
+	const linear = (offset: number) => {
+		const channel = parseInt(hex.slice(offset, offset + 2), 16) / 255;
+		return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+	};
+	const contrast = (0.2126 * linear(1) + 0.7152 * linear(3) + 0.0722 * linear(5) + 0.05) / 0.062022890370193165;
+	return contrast >= 4.5 ? hex : undefined;
+}
 interface CopaNickname { color?: string; gold: boolean; badges: CopaRegion[] }
 
 export interface CopaOnlineUser {
@@ -87,7 +94,7 @@ export const CopaRinhaPresence = new class {
 				id: unknown, color?: unknown, gold?: boolean, badges?: CopaRegion[],
 			}[]).slice(0, 1000).forEach(row => {
 				if (!row || typeof row.id !== 'string' || !/^[a-z0-9]{1,18}$/.test(row.id)) return;
-				const color = COPA_NICKNAME_COLORS.find(entry => entry.id === row.color)?.color;
+				const color = copaNicknameHex(row.color);
 				nicknames.set(row.id, { color, gold: row.gold === true, badges: Array.isArray(row.badges) ? row.badges : [] });
 			});
 			snapshot.nicknames = nicknames;
@@ -118,8 +125,11 @@ export const CopaRinhaPresence = new class {
 		const rules: string[] = [];
 		this.snapshot?.nicknames?.forEach(({ color, gold }, id) => {
 			const name = `[data-copa-name="${id}"]`;
-			if (color) rules.push(`html.copa-rinha ${name}{color:${color}!important}`);
-			if (gold) rules.push(`html.copa-rinha :is(#room-lobby,[id^="room-battle-"]) ${name}{color:#f3ce77!important}`);
+			if (color) rules.push(`html.copa-rinha ${name}{color:${color}!important;background-color:#101d30;border-radius:2px}`);
+			if (gold) rules.push(
+				`html.copa-rinha :is(#room-lobby,[id^="room-battle-"]) ${name}` +
+				'{color:#f3ce77!important;background-color:#101d30;border-radius:2px}'
+			);
 		});
 		const css = rules.join('\n');
 		if (!this.nicknameStyles && css) {

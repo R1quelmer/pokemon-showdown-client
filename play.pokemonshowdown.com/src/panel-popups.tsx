@@ -16,7 +16,7 @@ import { PSHeader } from "./panel-topbar";
 import {
 	COPA_REGIONS, type CopaPartner, type CopaProfile, type CopaRegion, type CopaTrainer, type CopaTrainerCard,
 } from "./copa-accounts";
-import { COPA_NICKNAME_COLORS, parseCopaPartner } from "./copa-online";
+import { copaNicknameHex, parseCopaPartner } from "./copa-online";
 
 const WARNING_SECONDS = 5;
 // a function because it's evaluated before translations have loaded
@@ -994,12 +994,58 @@ class CopaTrainerEditorPanel extends CopaTrainerPanel {
 	protected override readonly editing = true;
 }
 
+function copaHexToHsl(hex: string) {
+	const [r, g, b] = [1, 3, 5].map(offset => parseInt(hex.slice(offset, offset + 2), 16) / 255);
+	const max = Math.max(r, g, b), min = Math.min(r, g, b);
+	const delta = max - min, light = (max + min) / 2;
+	const hue = !delta ? 0 : max === r ? (g - b) / delta : max === g ? 2 + (b - r) / delta : 4 + (r - g) / delta;
+	return {
+		h: (Math.round(hue * 60) + 360) % 360,
+		s: delta ? Math.round(100 * delta / (1 - Math.abs(2 * light - 1))) : 0,
+		l: Math.round(light * 100),
+	};
+}
+function copaHslToHex(h: number, s: number, l: number) {
+	const light = l / 100;
+	const amplitude = s / 100 * Math.min(light, 1 - light);
+	return '#' + [0, 8, 4].map(offset => {
+		const k = (offset + h / 30) % 12;
+		const channel = light - amplitude * Math.max(-1, Math.min(k - 3, 9 - k, 1));
+		return ('0' + Math.round(255 * channel).toString(16)).slice(-2);
+	}).join('');
+}
+
 class CopaNicknameColorPanel extends PSRoomPanel {
 	static readonly id = 'copanicknamecolor';
 	static readonly routes = ['copanicknamecolor'];
 	static readonly location = 'modal-popup';
 	static readonly noURL = true;
-	private choice?: string;
+	private choice = '';
+	private hsl = copaHexToHsl('#75e5fb');
+
+	private setHex = (value: string) => {
+		this.choice = value;
+		if (/^#[0-9a-f]{6}$/i.test(value)) this.hsl = copaHexToHsl(value);
+		this.forceUpdate();
+	};
+
+	private setHsl(changes: Partial<typeof this.hsl>) {
+		this.hsl = { ...this.hsl, ...changes };
+		const { h, s, l } = this.hsl;
+		this.choice = copaHslToHex(h, s, l);
+		this.forceUpdate();
+	}
+
+	private chooseWheel = (ev: PointerEvent) => {
+		const wheel = ev.currentTarget as HTMLElement;
+		if (ev.type === 'pointerdown') wheel.setPointerCapture(ev.pointerId);
+		else if (!wheel.hasPointerCapture(ev.pointerId)) return;
+		const rect = wheel.getBoundingClientRect();
+		const x = ev.clientX - rect.left - rect.width / 2, y = ev.clientY - rect.top - rect.height / 2;
+		const h = (Math.round(Math.atan2(x, -y) * 180 / Math.PI) + 360) % 360;
+		const s = Math.min(100, Math.round(Math.sqrt(x * x + y * y) * 200 / rect.width));
+		this.setHsl({ h, s });
+	};
 	private busy = true;
 	private error = '';
 
@@ -1008,7 +1054,7 @@ class CopaNicknameColorPanel extends PSRoomPanel {
 		const accounts = window.CopaAccounts;
 		if (!Config.copaRinhaLocalNames || !accounts?.ownsProfile(PS.user.name)) return;
 		void accounts.profile(PS.user.name).then(profile => {
-			this.choice = profile?.nicknameColor || '';
+			this.setHex(copaNicknameHex(profile?.nicknameColor) || '');
 			this.busy = false;
 			this.forceUpdate();
 		}, () => {
@@ -1019,10 +1065,11 @@ class CopaNicknameColorPanel extends PSRoomPanel {
 
 	private save = (event: Event) => {
 		event.preventDefault();
-		if (this.busy || !window.CopaAccounts) return;
+		const color = copaNicknameHex(this.choice);
+		if (this.busy || !window.CopaAccounts || (this.choice && !color)) return;
 		this.busy = true;
 		this.forceUpdate();
-		void window.CopaAccounts.saveNicknameColor(this.choice || null).then(() => this.close(), () => {
+		void window.CopaAccounts.saveNicknameColor(color || null).then(() => this.close(), () => {
 			this.error = 'Não foi possível salvar a cor.';
 			this.busy = false;
 			this.forceUpdate();
@@ -1030,22 +1077,41 @@ class CopaNicknameColorPanel extends PSRoomPanel {
 	};
 
 	override render() {
-		const color = COPA_NICKNAME_COLORS.find(entry => entry.id === this.choice)?.color;
+		const color = copaNicknameHex(this.choice);
+		const validHex = /^#[0-9a-f]{6}$/i.test(this.choice);
+		const { h, s } = this.hsl;
+		const radians = h * Math.PI / 180;
+		const tip = this.choice && !color ?
+			(validHex ? 'Aumente a luminosidade para atingir contraste de 4,5:1.' : 'Use o formato #RRGGBB.') : '';
 		return <PSPanelWrapper room={this.props.room} width={340}><form class="pad" onSubmit={this.save}>
 			{Config.copaRinhaLocalNames && <>
 				<h3>Cor do nickname</h3>
-				<label>Cor <select
-					class="select" value={this.choice || ''} disabled={this.busy} onChange={ev => {
-						this.choice = (ev.currentTarget as HTMLSelectElement).value;
-						this.forceUpdate();
-					}}
-				>
-					<option value="">Padrão do Showdown</option>
-					{COPA_NICKNAME_COLORS.map(entry => <option key={entry.id} value={entry.id}>{entry.label}</option>)}
-				</select></label>
-				<p><strong style={{ color: color || BattleLog.usernameColor(PS.user.userid) }}>{PS.user.name}</strong></p>
+				<fieldset class="copa-color-picker" disabled={this.busy}>
+					<legend>Seletor de cor</legend>
+					<div class="copa-color-wheel" onPointerDown={this.chooseWheel} onPointerMove={this.chooseWheel} aria-hidden="true">
+						<span style={{ left: `${50 + s / 2 * Math.sin(radians)}%`, top: `${50 - s / 2 * Math.cos(radians)}%` }} />
+					</div>
+					{([['Matiz', 'h', 359], ['Saturação', 's', 100], ['Luminosidade', 'l', 100]] as const).map(([label, key, max]) =>
+						<label key={key}>{label} <input
+							type="range" min="0" max={max} value={this.hsl[key]} onInput={ev => {
+								this.setHsl({ [key]: Number((ev.currentTarget as HTMLInputElement).value) });
+							}}
+						/></label>)}
+					<label>HEX <input
+						class="textbox" maxLength={7} value={this.choice} placeholder="#75E5FB" onInput={ev => {
+							this.setHex((ev.currentTarget as HTMLInputElement).value.trim());
+						}}
+					/></label>
+					<p>Prévia <strong
+						class="copa-color-preview" style={{
+							color: validHex ? this.choice : BattleLog.usernameColor(PS.user.userid),
+						}}
+					>{PS.user.name}</strong></p>
+					{tip && <p role="status">{tip}</p>}
+					<button type="button" class="button" onClick={() => this.setHex('')}>Restaurar padrão do Showdown</button>
+				</fieldset>
 				{this.error && <p role="alert">{this.error}</p>}
-				<button type="submit" class="button" disabled={this.busy}>Salvar</button> {}
+				<button type="submit" class="button" disabled={this.busy || !!tip}>Salvar</button> {}
 				<button type="button" class="button" onClick={() => this.close()}>Fechar</button>
 			</>}
 		</form></PSPanelWrapper>;
